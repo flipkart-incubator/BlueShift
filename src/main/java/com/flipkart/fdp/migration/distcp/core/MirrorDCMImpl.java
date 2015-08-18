@@ -62,7 +62,7 @@ public class MirrorDCMImpl {
 
 	public static class FileTupleComparator implements Comparator<FileTuple> {
 
-	//	@Override
+		// @Override
 		public int compare(FileTuple f0, FileTuple f1) {
 
 			if (f1.size > f0.size)

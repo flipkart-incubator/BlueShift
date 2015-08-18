@@ -100,7 +100,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 			processPreviousMaps();
 
 			for (FileStatus fstat : fstats) {
-				
+
 				if (!ignoreFile(fstat)) {
 					locations.add(new OptimTuple(fstat.getPath().toString(),
 							fstat.getLen()));
@@ -141,14 +141,14 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
-		
+
 		System.out.println("Finished getSplits");
 		return splits;
 	}
 
 	private void sortSplits(List<InputSplit> splits) {
 		Collections.sort(splits, new Comparator<InputSplit>() {
-			//@Override
+			// @Override
 			public int compare(InputSplit f0, InputSplit f1) {
 				try {
 					if (f1.getLength() > f0.getLength())
