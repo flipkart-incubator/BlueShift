@@ -177,6 +177,21 @@ The tool can be downloaded from,
 https://github.com/flipkart-incubator/blueshift
 
 
+## **Build and Run**
+
+Step 1: Clone the project to your local,
+
+git clone https://github.com/flipkart-incubator/blueshift.git
+
+Step 2: Build the project, switch to the cloned project directory and execute
+
+mvn clean install -DskipTests
+
+Step 3: Copy the newly created jar to your gateways and run the below command, 
+
+hadoop jar blueshift.jar -Pdriver.json
+
+
 ## **Contact**
 
 Blueshift is owned and maintained by Flipkart Data Platform Infra Team,
