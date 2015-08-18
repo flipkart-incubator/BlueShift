@@ -330,6 +330,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 						.toString();
 				System.out.println("Transfering file: " + current.fileName
 						+ ", with size: " + current.size);
+				digest = "FAILED";
 				try {
 
 					analyzeStrategy();
@@ -434,8 +435,18 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		}
 
 		private void closeStreams() {
+
 			IOUtils.closeStream(in);
 			IOUtils.closeStream(out);
+
+			if (!failed && dcmConfig.getSourceConfig().isDeleteSource()) {
+				try {
+					inCodec.deleteSoureFile(srcPath);
+				} catch (Exception e) {
+					System.out.println("Failed Deleting file: " + srcPath
+							+ ", Exception: " + e.getMessage());
+				}
+			}
 		}
 
 		private void updateStatus() throws IOException {
