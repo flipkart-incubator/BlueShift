@@ -1,2 +1,2 @@
-# blueshift
+# Flipkart Blueshift
 Hadoop Data Mover Project
