@@ -10,7 +10,7 @@ Flipkart Blueshift is a reliable data migration tool for Hadoop ecosystem, Comes
 - Optimized task scheduling. Largest file first strategy
 - Multiplexing large filesets to manageable worker count.
 - Configuration driven, the tool can be tuned to a fine level using configurations.
-- Support different protocols, HDFS, WEBHDFS, HFTP, FTP, Custom etcÃ¢ÂÂ¦
+- Support different protocols, HDFS, WEBHDFS, HFTP, FTP, Custom etc...
 - Fault-Tolerant, Reliable, restores from point of failure.
 - DB based state management, easy report generation and state management.
 - Initiate the transfers from source or destination or any third cluster
@@ -28,10 +28,12 @@ Upcoming Features,
 - On the fly compression irrespective of job execution location.
 - Support for multiple sinks, simultaneously copy data over to kafka and hdfs from any source.
 
+
 ## **Prerequisites**
 
 - Hadoop cluster running version 1.0 or higher
 - Statestore, Relational database like mysql, derby etc...
+
 
 ## **BlueShift Configuration**
 
@@ -156,6 +158,7 @@ Sample Configuration defined Below
 
 }
 
+
 ## **Use-Cases**
 
 Following are some of the usecases and the configs to be used.
@@ -166,11 +169,13 @@ Following are some of the usecases and the configs to be used.
 - Timestamp based snapshots - Usually the directories being transferred are actively used by teams as well. With Blueshift, we can mention a start time and end time so files modified within that limit is transferred. This will help ensure a consistent copy of data is migrated similar to HBase Export/Copytable.
 - Throttle transfer - We can set the number of parallel transfers at start so that only that many mappers are launched.
 
+
 ## **Download**
 
 The tool can be downloaded from,
 
 https://github.com/flipkart-incubator/blueshift
+
 
 ## **Contact**
 
