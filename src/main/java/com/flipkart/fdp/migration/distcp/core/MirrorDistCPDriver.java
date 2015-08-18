@@ -32,6 +32,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
@@ -45,6 +46,7 @@ import com.flipkart.fdp.migration.db.models.Batch;
 import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.db.utils.EBase;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.BLUESHIFT_COUNTER;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorMapper;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorReducer;
 import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
@@ -123,11 +125,14 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 			Job job = createJob(configuration);
 
-			System.out.println("Launching Job - Mirror DistCP v6.0...");
+			System.out.println("Launching Job - Blueshift v 0.1 - "
+					+ dcmConfig.getBatchName());
 
 			jobReturnValue = job.waitForCompletion(true) ? 0 : 1;
 			jobID = job.getJobID().toString();
 			System.out.println("Job Complete...");
+
+			processJobCounters(job);
 		} catch (Throwable t) {
 			jobReturnValue = 1;
 			System.out.println("Job Failed...");
@@ -137,6 +142,28 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 		return jobReturnValue;
 
+	}
+
+	private void processJobCounters(Job job) {
+		try {
+			Counters counters = job.getCounters();
+
+			long failedCount = counters.findCounter(
+					BLUESHIFT_COUNTER.FAILED_COUNT).getValue();
+
+			long successCount = counters.findCounter(
+					BLUESHIFT_COUNTER.SUCCESS_COUNT).getValue();
+
+			System.out.println("Total Success Transfers: " + successCount
+					+ ", Total Failed Transfers: " + failedCount);
+			if (failedCount > 0) {
+				System.err.println("There are " + failedCount
+						+ " transfers, Please re-run the job...");
+			}
+		} catch (Exception e) {
+			System.out.println("Error processing job counters: "
+					+ e.getMessage());
+		}
 	}
 
 	private void updateBatch(Batch batch, int jobReturnValue) throws EBase {
@@ -155,10 +182,11 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 	private Job createJob(Configuration configuration) throws Exception {
 
-		System.out.println("Initializing Mirror DistCP v6.0...");
+		System.out.println("Initializing Blueshift v 0.1...");
 		System.out.println("Configuration: " + dcmConfig.toString());
 		@SuppressWarnings("deprecation")
-		Job job = new Job(configuration, "Mirror DistCP v6.0");
+		Job job = new Job(configuration, "Blueshift v 0.1 - "
+				+ dcmConfig.getBatchName());
 
 		job.setJarByClass(MirrorDistCPDriver.class);
 
@@ -226,10 +254,10 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 	private static void printUsageAndExit() {
 
-		System.out.println("Snapshot : Usage: hadoop jar mirror-distcp.jar "
-				+ "-P<config file Name>");
 		System.out
-				.println("Example : hadoop jar mirror-distcp.jar -Pdriver.conf");
+				.println("Snapshot : Usage: hadoop jar blushift.jar -P<config.json> "
+						+ "-P<config file Name>");
+		System.out.println("Example : hadoop jar blushift.jar -Pdriver.json");
 		System.exit(1);
 	}
 

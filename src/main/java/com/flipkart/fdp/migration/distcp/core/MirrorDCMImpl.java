@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants;
 
 public class MirrorDCMImpl {
+
 	public static class MirrorMapper extends Mapper<Text, Text, Text, Text> {
 
 		@Override
@@ -59,6 +60,10 @@ public class MirrorDCMImpl {
 		}
 
 	}
+
+	public static enum BLUESHIFT_COUNTER {
+		SUCCESS_COUNT, FAILED_COUNT
+	};
 
 	public static class FileTupleComparator implements Comparator<FileTuple> {
 

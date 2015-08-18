@@ -47,6 +47,7 @@ import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.BLUESHIFT_COUNTER;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
 import com.flipkart.fdp.optimizer.OptimTuple;
@@ -438,6 +439,12 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 			IOUtils.closeStream(in);
 			IOUtils.closeStream(out);
+			if (failed) {
+				context.getCounter(BLUESHIFT_COUNTER.FAILED_COUNT).increment(1);
+			} else {
+				context.getCounter(BLUESHIFT_COUNTER.SUCCESS_COUNT)
+						.increment(1);
+			}
 
 			if (!failed && dcmConfig.getSourceConfig().isDeleteSource()) {
 				try {
