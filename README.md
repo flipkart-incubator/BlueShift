@@ -191,6 +191,30 @@ Step 3: Copy the newly created jar to your gateways and run the below command,
 
 hadoop jar blueshift.jar -Pdriver.json
 
+## **Contributors**
+
+Kurian Cheeramelil - Lead Contributor
+
+Vishal Rajan
+
+Prathyush Babu
+
+Rahul Agarwal
+
+Kasinath
+
+Chetna Chaudhari
+
+Chackaravarthy E
+
+Sushil Kumar S
+
+Guruprasad GV
+
+Dhiraj Kumar
+
+Raj Velu - Architect
+
 
 ## **Contact**
 
