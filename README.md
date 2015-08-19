@@ -195,6 +195,8 @@ hadoop jar blueshift.jar -Pdriver.json
 
 Kurian Cheeramelil - Lead Contributor
 
+Mukund Thakur
+
 Vishal Rajan
 
 Prathyush Babu
