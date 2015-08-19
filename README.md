@@ -1,6 +1,5 @@
 ![Alt text](blueshift.jpg?raw=true "Flipkart Blueshift")
-
-# **Flipkart Blueshift** - A Hadoop Data Mover Project!
+- A Hadoop Data Mover Project!
 
 # Overview
 Flipkart Blueshift is a reliable data migration tool for Hadoop ecosystem, Comes packed with some elegant features missing in traditional migration tools like DistCP,
