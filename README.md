@@ -1,5 +1,3 @@
-# **Flipkart Blueshift** - A Hadoop Data Mover Project!
-
 ![Alt text](blueshift.jpg?raw=true "Flipkart Blueshift")
 
 # Overview
@@ -195,8 +193,6 @@ hadoop jar blueshift.jar -Pdriver.json
 
 ## **Contributors**
 
-Kurian Cheeramelil - Lead Contributor
-
 Mukund Thakur
 
 Vishal Rajan
@@ -219,6 +215,7 @@ Dhiraj Kumar
 
 Raj Velu - Architect
 
+Kurian Cheeramelil
 
 ## **Contact**
 
