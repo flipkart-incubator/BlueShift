@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 
@@ -49,9 +48,9 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 		int size = in.readInt();
 		splits = new ArrayList<FileTuple>(size);
 		for (int i = 0; i < size; i++) {
-			String path = Text.readString(in);
-			long len = in.readLong();
-			splits.add(new FileTuple(path, len));
+			FileTuple ft = new FileTuple();
+			ft.readFields(in);
+			splits.add(ft);
 		}
 		length = in.readLong();
 	}
@@ -60,8 +59,7 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 		int size = splits.size();
 		out.writeInt(size);
 		for (FileTuple split : splits) {
-			Text.writeString(out, split.fileName);
-			out.writeLong(split.size);
+			split.write(out);
 		}
 		out.writeLong(length);
 	}

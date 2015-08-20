@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +70,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 	private Set<String> includeList = null;
 	private CMapperDetailsApi mapDetails = null;
 	private DBInitializer dbHelper = null;
+	private HashMap<String, MapperDetails> previousState = null;
 
 	@Override
 	public List<InputSplit> getSplits(JobContext context) throws IOException,
@@ -83,8 +85,10 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		dbHelper = new DBInitializer(dcmConfig.getDbConfig());
 		mapDetails = new CMapperDetailsApi(dbHelper);
 
+		previousState = new HashMap<String, MapperDetails>();
 		excludeList = MirrorUtils.getStringAsLists(conf.get(EXCLUDE_FILES));
 		includeList = MirrorUtils.getStringAsLists(conf.get(INCLUDE_FILES));
+		HashMap<String, FileStatus> inputFileMap = new HashMap<String, FileStatus>();
 
 		List<InputSplit> splits = new ArrayList<InputSplit>();
 		Set<OptimTuple> locations = new HashSet<OptimTuple>();
@@ -103,13 +107,15 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 			for (FileStatus fstat : fstats) {
 
 				if (!ignoreFile(fstat)) {
-					locations.add(new OptimTuple(fstat.getPath().toString(),
-							fstat.getLen()));
+					String file = fstat.getPath().toString();
+					locations.add(new OptimTuple(file, fstat.getLen()));
+					inputFileMap.put(file, fstat);
 				}
 			}
 			int numWorkers = locations.size();
 			if (dcmConfig.getNumWorkers() > 0
 					&& dcmConfig.getNumWorkers() < numWorkers) {
+
 				numWorkers = dcmConfig.getNumWorkers();
 				List<Set<IInputJob>> splitTasks = optimizeWorkload(locations,
 						numWorkers);
@@ -118,7 +124,8 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 					long size = 0;
 					for (IInputJob stat : stats) {
 						tuple.add(new FileTuple(stat.getJobKey(), stat
-								.getJobSize()));
+								.getJobSize(), inputFileMap.get(
+								stat.getJobKey()).getModificationTime()));
 						size += stat.getJobSize();
 					}
 					totalBatchSize += size;
@@ -127,13 +134,16 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 			} else {
 				for (OptimTuple stat : locations) {
 					List<FileTuple> tuple = new ArrayList<FileTuple>();
-					tuple.add(new FileTuple(stat.jobKey, stat.size));
+					tuple.add(new FileTuple(stat.jobKey, stat.size,
+							inputFileMap.get(stat.getJobKey())
+									.getModificationTime()));
 					splits.add(new MirrorInputSplit(tuple, stat.getJobSize()));
 					totalBatchSize += stat.getJobSize();
 				}
 			}
 			if (splits.size() <= 0)
 				throw new Exception("No Inputs Identified for Processing.. ");
+
 			sortSplits(splits);
 			System.out.println("Total input paths to process: "
 					+ locations.size() + ", Total input splits: "
@@ -170,8 +180,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		if (maps == null || maps.size() <= 0)
 			return;
 		for (MapperDetails map : maps) {
-			if (map.getStatus() == Status.COMPLETED)
-				excludeList.add(map.getFilePath());
+			previousState.put(map.getFilePath(), map);
 		}
 	}
 
@@ -182,29 +191,35 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		// File Size Based Rules
 		long fileSize = fileStat.getLen();
 		if (fileSize <= 0 && dcmConfig.getSourceConfig().isIgnoreEmptyFiles())
-			ignoreFile |= true;
+			return true;
 
 		if (fileSize < dcmConfig.getSourceConfig().getMinFilesize())
-			ignoreFile |= true;
+			return true;
 
 		if (dcmConfig.getSourceConfig().getMaxFilesize() != -1
 				&& fileSize > dcmConfig.getSourceConfig().getMaxFilesize())
-			ignoreFile |= true;
+			return true;
 
 		// File Time Based rules
 		long ts = dcmConfig.getSourceConfig().getStartTS();
 		if (ts > 0 && fileStat.getModificationTime() < ts)
-			ignoreFile |= true;
+			return true;
 
 		ts = dcmConfig.getSourceConfig().getEndTS();
 		if (ts > 0 && fileStat.getModificationTime() > ts)
-			ignoreFile |= true;
+			return true;
 
 		// File Name based rules
 		String path = MirrorUtils.getSimplePath(fileStat.getPath());
 		if (excludeList.contains(path))
-			ignoreFile |= true;
+			return true;
 
+		if (previousState.containsKey(path)) {
+			MapperDetails details = previousState.get(path);
+			if (details.getStatus() == Status.COMPLETED
+					&& details.getTs() == fileStat.getModificationTime())
+				return true;
+		}
 		return ignoreFile;
 	}
 
@@ -327,35 +342,42 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 				failed = false;
 				current = inputs.get(index);
-				srcPath = new Path(current.fileName).toUri().getPath()
-						.toString();
+				srcPath = MirrorUtils.getSimplePath(new Path(current.fileName));
+
 				System.out.println("Transfering file: " + current.fileName
 						+ ", with size: " + current.size);
-				digest = "FAILED";
-				try {
+				digest = null;
+				if (!checkTransferStatus()) {
+					try {
 
-					analyzeStrategy();
+						analyzeStrategy();
 
-					initializeStreams();
+						initializeStreams();
 
-					key.set(srcPath.toString());
+						key.set(srcPath.toString());
 
-					digest = MirrorUtils.copy(in, out, context);
+						digest = MirrorUtils.copy(in, out, context);
 
-					value.set("Success: " + digest);
-				} catch (Exception e) {
-					e.printStackTrace();
-					failed = true;
-					if (!dcmConfig.isIgnoreException()) {
-						throw new IOException(e);
-					} else {
-						value.set("Failed: " + e.getMessage());
+						value.set("Success: " + digest);
+					} catch (Exception e) {
+
+						System.err.println("Error processing input: "
+								+ e.getMessage());
+						e.printStackTrace();
+						failed = true;
+						if (!dcmConfig.isIgnoreException()) {
+							throw new IOException(e);
+						} else {
+							value.set("Failed: " + e.getMessage());
+						}
 					}
+					closeStreams();
+
+					updateStatus();
+				} else {
+					context.getCounter(BLUESHIFT_COUNTER.SUCCESS_COUNT)
+							.increment(1);
 				}
-
-				closeStreams();
-
-				updateStatus();
 
 				index++;
 				if (index == inputs.size()) {
@@ -366,6 +388,36 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 			} else {
 				return false;
 			}
+		}
+
+		private boolean checkTransferStatus() {
+
+			String id = taskID + "_" + index;
+			MapperDetails details = null;
+			try {
+				details = mapDetails.getMapperDetails(dcmConfig.getBatchID(),
+						srcPath);
+			} catch (Exception e) {
+				System.err.println("Error getting state from DB: "
+						+ e.getMessage());
+			}
+			if (details != null) {
+				if (details.getStatus() == Status.COMPLETED
+						&& current.ts != details.getTs())
+					return true;
+				else
+					return false;
+			} else {
+				try {
+					mapDetails.createMapperDetails(dcmConfig.getBatchID(), id,
+							srcPath, digest, Status.NEW, current.ts);
+				} catch (Exception e) {
+					System.err.println("Error persisting state to DB: "
+							+ e.getMessage());
+				}
+			}
+
+			return false;
 		}
 
 		private void analyzeStrategy() {
@@ -402,7 +454,8 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 					useCompression = false;
 				}
 			} catch (Exception e) {
-				// ignore exception
+				System.err.println("Error Analyzing Transfer strategy: "
+						+ e.getMessage());
 			}
 		}
 
@@ -450,7 +503,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 				try {
 					inCodec.deleteSoureFile(srcPath);
 				} catch (Exception e) {
-					System.out.println("Failed Deleting file: " + srcPath
+					System.err.println("Failed Deleting file: " + srcPath
 							+ ", Exception: " + e.getMessage());
 				}
 			}
@@ -460,26 +513,12 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 			String id = taskID + "_" + index;
 			try {
-				mapDetails.createMapperDetails(dcmConfig.getBatchID(), id,
+				mapDetails.updateMapperDetails(dcmConfig.getBatchID(), id,
 						srcPath, digest, failed ? Status.FAILED
-								: Status.COMPLETED);
+								: Status.COMPLETED, current.ts);
 			} catch (Exception e) {
-				System.out.println("Caught exception persisting state to DB..."
+				System.err.println("Caught exception persisting state to DB..."
 						+ e.getMessage());
-				try {
-					mapDetails = new CMapperDetailsApi(dbHelper);
-					mapDetails.createMapperDetails(dcmConfig.getBatchID(), id,
-							srcPath, digest, failed ? Status.FAILED
-									: Status.COMPLETED);
-				} catch (Exception ei) {
-					System.out
-							.println("Caught exception re-persisting state to DB..."
-									+ e.getMessage());
-					e.printStackTrace();
-					if (failed && !dcmConfig.isIgnoreException()) {
-						throw new IOException(ei);
-					}
-				}
 			}
 		}
 

@@ -44,16 +44,16 @@ public class CMapperDetailsDao extends CServiceDao<MapperDetails> implements
 	}
 
 	@Override
-	public MapperDetails getMapperDetails(long batchId, String taskId)
+	public MapperDetails getMapperDetails(long batchId, String filePath)
 			throws EBase {
 		Session session = getSessionFactory().openSession();
 		Transaction tx = session.beginTransaction();
 		try {
 			Query query = session
 					.createQuery(
-							"FROM MapperDetails where batchId = :batchId AND taskId = :taskId")
+							"FROM MapperDetails where batchId = :batchId AND file_path = :filePath")
 					.setParameter("batchId", batchId)
-					.setParameter("taskId", taskId);
+					.setParameter("filePath", filePath);
 			MapperDetails mapperDetails = (MapperDetails) query.uniqueResult();
 			tx.commit();
 			return mapperDetails;

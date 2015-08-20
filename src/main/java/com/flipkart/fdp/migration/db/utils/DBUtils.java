@@ -34,4 +34,5 @@ public final class DBUtils {
 	public static final String COL_TASK_ID = "task_id";
 	public static final String COL_DIGEST = "digest";
 	public static final String COL_ID = "id";
+	public static final String COL_TS = "ts";
 }

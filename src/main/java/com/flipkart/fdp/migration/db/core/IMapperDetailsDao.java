@@ -26,7 +26,7 @@ import com.flipkart.fdp.migration.db.utils.EBase;
 
 public interface IMapperDetailsDao extends IServiceDao<MapperDetails> {
 
-	MapperDetails getMapperDetails(long batchId, String taskId) throws EBase;
+	MapperDetails getMapperDetails(long batchId, String filePath) throws EBase;
 
 	List<MapperDetails> getByBatchId(long batchId) throws EBase;
 }

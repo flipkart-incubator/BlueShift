@@ -18,12 +18,15 @@
 
 package com.flipkart.fdp.migration.distcp.core;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Comparator;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -50,13 +53,33 @@ public class MirrorDCMImpl {
 		}
 	}
 
-	public static class FileTuple {
+	public static class FileTuple implements Writable {
 		String fileName;
 		long size;
+		long ts;
 
-		public FileTuple(String path, long len) {
+		public FileTuple() {
+
+		}
+
+		public FileTuple(String path, long len, long ts) {
 			this.fileName = path;
 			this.size = len;
+			this.ts = ts;
+		}
+
+		@Override
+		public void write(DataOutput out) throws IOException {
+			Text.writeString(out, fileName);
+			out.writeLong(size);
+			out.writeLong(ts);
+		}
+
+		@Override
+		public void readFields(DataInput in) throws IOException {
+			fileName = Text.readString(in);
+			size = in.readLong();
+			ts = in.readLong();
 		}
 
 	}

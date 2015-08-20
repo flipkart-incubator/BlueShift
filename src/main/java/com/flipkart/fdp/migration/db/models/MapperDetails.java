@@ -49,30 +49,34 @@ public class MapperDetails implements Serializable {
 	private long batchId;
 
 	@Id
-	@Column(name = COL_TASK_ID, updatable = false, nullable = false)
-	private String taskId;
-
-	@Column(name = COL_FILE_PATH, nullable = false, length = 1024)
+	@Column(name = COL_FILE_PATH, updatable = false, nullable = false, length = 1024)
 	private String filePath;
-
-	@Column(name = COL_DIGEST, nullable = false)
-	private String digest;
 
 	@Column(name = COL_STATUS, nullable = false)
 	@Enumerated(STRING)
 	private Status status;
+
+	@Column(name = COL_DIGEST)
+	private String digest;
+
+	@Column(name = COL_TASK_ID, nullable = false)
+	private String taskId;
+
+	@Column(name = DBUtils.COL_TS, nullable = false)
+	private long ts;
 
 	public MapperDetails() {
 
 	}
 
 	public MapperDetails(long batchId, String filePath, Status status,
-			String digest, String taskId) {
+			String digest, String taskId, long ts) {
 		this.batchId = batchId;
 		this.filePath = filePath;
 		this.status = status;
 		this.digest = digest;
 		this.taskId = taskId;
+		this.ts = ts;
 	}
 
 }

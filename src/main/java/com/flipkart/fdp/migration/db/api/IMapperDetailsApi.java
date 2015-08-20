@@ -27,12 +27,14 @@ import com.flipkart.fdp.migration.db.utils.EBase;
 public interface IMapperDetailsApi {
 
 	public MapperDetails createMapperDetails(long batchId, String taskId,
-			String filePath, String digest, Status status) throws EBase;
+			String filePath, String digest, Status status, long ts)
+			throws EBase;
 
 	public MapperDetails updateMapperDetails(long batchId, String taskId,
-			String filePath, String digest, Status status) throws EBase;
+			String filePath, String digest, Status status, long ts)
+			throws EBase;
 
-	public MapperDetails getMapperDetails(long batchId, String taskId)
+	public MapperDetails getMapperDetails(long batchId, String filePath)
 			throws EBase;
 
 	public List<MapperDetails> getAllMapperDetails(long batchId) throws EBase;

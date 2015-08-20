@@ -37,26 +37,28 @@ public class CMapperDetailsApi implements IMapperDetailsApi {
 
 	@Override
 	public MapperDetails createMapperDetails(long batchId, String taskId,
-			String filePath, String digest, Status status) throws EBase {
+			String filePath, String digest, Status status, long ts)
+			throws EBase {
 		MapperDetails mapperDetails = new MapperDetails(batchId, filePath,
-				status, digest, taskId);
+				status, digest, taskId, ts);
 		mapperDetailsDao.save(mapperDetails);
 		return mapperDetails;
 	}
 
 	@Override
 	public MapperDetails updateMapperDetails(long batchId, String taskId,
-			String filePath, String digest, Status status) throws EBase {
+			String filePath, String digest, Status status, long ts)
+			throws EBase {
 		MapperDetails mapperDetails = new MapperDetails(batchId, filePath,
-				status, digest, taskId);
+				status, digest, taskId, ts);
 		mapperDetailsDao.update(mapperDetails);
 		return mapperDetails;
 	}
 
 	@Override
-	public MapperDetails getMapperDetails(long batchId, String taskId)
+	public MapperDetails getMapperDetails(long batchId, String filePath)
 			throws EBase {
-		return mapperDetailsDao.getMapperDetails(batchId, taskId);
+		return mapperDetailsDao.getMapperDetails(batchId, filePath);
 	}
 
 	@Override
