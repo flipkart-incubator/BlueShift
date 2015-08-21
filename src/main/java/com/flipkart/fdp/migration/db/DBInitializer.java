@@ -98,13 +98,25 @@ public class DBInitializer {
 		properties.put(URL, config.getDbConnectionURL());
 		properties.put(DIALECT, config.getDbDialect());
 		// "org.hibernate.dialect.MySQL5Dialect"
-		properties.put(SHOW_SQL, "true");
+		properties.put(SHOW_SQL, "false");
 		properties.put(HBM2DDL_AUTO, "update");
 		properties.put(CURRENT_SESSION_CONTEXT_CLASS, "thread");
 		// properties.put("current_session_context_class", "thread");
 		properties.put(RELEASE_CONNECTIONS, "after_transaction");
-		properties.put(POOL_SIZE, 2000);
-		// javax.persistence.transactionType: RESOURCE_LOCAL
+
+		properties.put(POOL_SIZE, 10);
+		properties.put(org.hibernate.cfg.AvailableSettings.CONNECTION_PROVIDER,
+				"org.hibernate.connection.C3P0ConnectionProvider");
+		properties.put(org.hibernate.cfg.AvailableSettings.C3P0_MAX_SIZE, 100);
+		properties.put(org.hibernate.cfg.AvailableSettings.C3P0_MIN_SIZE, 5);
+		properties.put(org.hibernate.cfg.AvailableSettings.C3P0_MAX_STATEMENTS,
+				0);
+		properties.put(
+				org.hibernate.cfg.AvailableSettings.C3P0_ACQUIRE_INCREMENT, 1);
+		properties.put(
+				org.hibernate.cfg.AvailableSettings.C3P0_IDLE_TEST_PERIOD, 100);
+		properties.put(org.hibernate.cfg.AvailableSettings.C3P0_TIMEOUT, 100);
+
 		return properties;
 	}
 
