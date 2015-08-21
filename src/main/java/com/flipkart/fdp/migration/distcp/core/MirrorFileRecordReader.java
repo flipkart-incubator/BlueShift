@@ -123,33 +123,27 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	public boolean nextKeyValue() throws IOException, InterruptedException {
 
 		if (!read) {
-
-			status = new TransferStatus();
-			status.setStatus(Status.NEW);
-
+			digest = null;
 			current = inputs.get(index);
 			srcPath = MirrorUtils.getSimplePath(new Path(current.fileName));
+			status = checkTransferStatus();
 
-			status.setInputSize(current.size);
-			status.setTs(current.ts);
-			status.setTaskID(taskId);
+			if (status == null) {
 
-			System.out.println("Transfering file: " + current.fileName
-					+ ", with size: " + current.size);
-			digest = null;
+				status = new TransferStatus();
+				status.setStatus(Status.NEW);
 
-			if (!checkTransferStatus()) {
+				status.setInputSize(current.size);
+				status.setTs(current.ts);
+				status.setTaskID(taskId);
+				System.out.println("Transfering file: " + current.fileName
+						+ ", with size: " + current.size);
+
 				try {
-
 					analyzeStrategy();
-
 					initializeStreams();
 
-					key.set(srcPath.toString());
-
 					digest = MirrorUtils.copy(in, out, context);
-
-					value.set("Success: " + digest);
 
 					status.setStatus(Status.COMPLETED);
 					status.setMd5Digest(digest.getDigest());
@@ -162,18 +156,12 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 					status.setStatus(Status.FAILED);
 					if (!dcmConfig.isIgnoreException()) {
 						throw new IOException(e);
-					} else {
-						value.set("Failed: " + e.getMessage());
 					}
 				}
 				closeStreams();
 
-				updateStatus();
-			} else {
-				context.getCounter(BLUESHIFT_COUNTER.SUCCESS_COUNT)
-						.increment(1);
 			}
-
+			updateStatus();
 			index++;
 			if (index == inputs.size()) {
 				context.setStatus("SUCCESS");
@@ -185,14 +173,14 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		}
 	}
 
-	private boolean checkTransferStatus() {
+	private TransferStatus checkTransferStatus() {
 
 		TransferStatus stat = transferStatus.get(srcPath);
 		if (stat != null && stat.getStatus() == Status.COMPLETED) {
-			return true;
+			return stat;
 		}
 
-		return false;
+		return null;
 	}
 
 	private void analyzeStrategy() {
@@ -276,12 +264,6 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		IOUtils.closeStream(in);
 		IOUtils.closeStream(out);
 
-		if (status.getStatus() == Status.COMPLETED) {
-			context.getCounter(BLUESHIFT_COUNTER.SUCCESS_COUNT).increment(1);
-		} else {
-			context.getCounter(BLUESHIFT_COUNTER.FAILED_COUNT).increment(1);
-		}
-
 		if (status.getStatus() == Status.COMPLETED
 				&& dcmConfig.getSourceConfig().isDeleteSource()) {
 			try {
@@ -295,6 +277,14 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	private void updateStatus() throws IOException {
 
+		key.set(srcPath.toString());
+		value.set(status.toString());
+
+		if (status.getStatus() == Status.COMPLETED) {
+			context.getCounter(BLUESHIFT_COUNTER.SUCCESS_COUNT).increment(1);
+		} else {
+			context.getCounter(BLUESHIFT_COUNTER.FAILED_COUNT).increment(1);
+		}
 		try {
 			stateManager.updateTransferStatus(status);
 		} catch (Exception e) {

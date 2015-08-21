@@ -131,14 +131,10 @@ public class HDFSStateManager implements StateManager {
 
 		if (statusWriter == null) {
 			Path statPath = new Path(statusPath, status.getTaskID());
-			if (fs.exists(statPath)) {
-				statusWriter = new BufferedWriter(new OutputStreamWriter(
-						fs.append(statPath)));
-				statusWriter.newLine();
-			} else {
-				statusWriter = new BufferedWriter(new OutputStreamWriter(
-						fs.create(statPath)));
-			}
+
+			statusWriter = new BufferedWriter(new OutputStreamWriter(
+					fs.create(statPath)));
+
 		}
 		statusWriter.write(status.toString());
 		statusWriter.newLine();
