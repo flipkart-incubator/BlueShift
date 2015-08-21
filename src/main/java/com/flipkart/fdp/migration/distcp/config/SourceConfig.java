@@ -39,6 +39,7 @@ public class SourceConfig {
 
 	private boolean deleteSource = false;
 	private boolean ignoreEmptyFiles = false;
+	private boolean transformSource = false;
 	private long compressionThreshold = 0;
 
 	private ConnectionConfig connectionConfig = null;
@@ -153,6 +154,14 @@ public class SourceConfig {
 
 	public void setConnectionConfig(ConnectionConfig connectionConfig) {
 		this.connectionConfig = connectionConfig;
+	}
+
+	public boolean isTransformSource() {
+		return transformSource;
+	}
+
+	public void setTransformSource(boolean transformSource) {
+		this.transformSource = transformSource;
 	}
 
 	@Override

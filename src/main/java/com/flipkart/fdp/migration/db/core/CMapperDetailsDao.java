@@ -104,7 +104,31 @@ public class CMapperDetailsDao extends CServiceDao<MapperDetails> implements
 			return mapperDetails;
 		} catch (Exception e) {
 			tx.rollback();
-			log.error("Exception while processing getByRunId : ", e);
+			log.error("Exception while processing batchId : ", e);
+			throw new EFailure(e);
+		} finally {
+			session.close();
+		}
+	}
+
+	public List<MapperDetails> getMapperDetailsByTaskID(long batchId,
+			String taskId) throws EBase {
+		Session session = getSessionFactory().openSession();
+		Transaction tx = session.beginTransaction();
+		try {
+			Query query = session
+					.createQuery(
+							"FROM MapperDetails where batchId = :batchId AND taskId = :taskId")
+					.setParameter("batchId", batchId)
+					.setParameter("taskId", taskId);
+
+			List<MapperDetails> mapperDetails = (List<MapperDetails>) query
+					.list();
+			tx.commit();
+			return mapperDetails;
+		} catch (Exception e) {
+			tx.rollback();
+			log.error("Exception while processing batchId, taskId : ", e);
 			throw new EFailure(e);
 		} finally {
 			session.close();

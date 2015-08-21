@@ -96,7 +96,7 @@ public class MirrorUtils {
 		return in;
 	}
 
-	public static String copy(InputStream input, OutputStream result,
+	public static MD5Digester copy(InputStream input, OutputStream result,
 			TaskAttemptContext context) throws IOException {
 
 		byte[] buffer = new byte[65536]; // 8K=8192 12K=12288 64K=65536
@@ -124,7 +124,7 @@ public class MirrorUtils {
 		}
 		System.out.println("Transfer Complete Total: " + count
 				+ ", Time Taken(ms): " + (System.currentTimeMillis() - sts));
-		return digester.getDigest();
+		return digester;
 	}
 
 	public static Set<String> getFileAsLists(String fileName) {

@@ -27,10 +27,16 @@ public final class DBUtils {
 	public static final String COL_STATUS = "status";
 	public static final String COL_LAST_RUN_ID = "last_run_id";
 	public static final String COL_BATCH_CONFIG = "batch_config";
+	public static final String COL_BATCH_DESC = "batch_desc";
+	public static final String COL_BATCH_LOCK = "batch_lock";
 	public static final String COL_START_TIME = "start_time";
 	public static final String COL_END_TIME = "end_time";
 	public static final String COL_JOB_ID = "job_id";
 	public static final String COL_FILE_PATH = "file_path";
+	public static final String COL_SRC_PATH = "src_path";
+	public static final String COL_DEST_PATH = "dest_path";
+	public static final String COL_SRC_SIZE = "src_size";
+	public static final String COL_DEST_SIZE = "dest_size";
 	public static final String COL_TASK_ID = "task_id";
 	public static final String COL_DIGEST = "digest";
 	public static final String COL_ID = "id";

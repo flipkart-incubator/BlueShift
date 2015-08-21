@@ -19,8 +19,6 @@
 package com.flipkart.fdp.migration.distcp.core;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,12 +26,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -41,15 +38,14 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.flipkart.fdp.migration.db.DBInitializer;
-import com.flipkart.fdp.migration.db.api.CMapperDetailsApi;
-import com.flipkart.fdp.migration.db.models.MapperDetails;
 import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.BLUESHIFT_COUNTER;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
+import com.flipkart.fdp.migration.distcp.state.StateManager;
+import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
+import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
 import com.flipkart.fdp.optimizer.OptimTuple;
 import com.flipkart.fdp.optimizer.api.IInputJob;
@@ -68,9 +64,8 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 	private DCMConfig dcmConfig = null;
 	private Set<String> excludeList = null;
 	private Set<String> includeList = null;
-	private CMapperDetailsApi mapDetails = null;
-	private DBInitializer dbHelper = null;
-	private HashMap<String, MapperDetails> previousState = null;
+	private Map<String, TransferStatus> previousState = null;
+	private StateManager stateManager = null;
 
 	@Override
 	public List<InputSplit> getSplits(JobContext context) throws IOException,
@@ -82,10 +77,6 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		dcmCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSourceConfig()
 				.getConnectionConfig());
 
-		dbHelper = new DBInitializer(dcmConfig.getDbConfig());
-		mapDetails = new CMapperDetailsApi(dbHelper);
-
-		previousState = new HashMap<String, MapperDetails>();
 		excludeList = MirrorUtils.getStringAsLists(conf.get(EXCLUDE_FILES));
 		includeList = MirrorUtils.getStringAsLists(conf.get(INCLUDE_FILES));
 		HashMap<String, FileStatus> inputFileMap = new HashMap<String, FileStatus>();
@@ -97,12 +88,13 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		try {
 			List<FileStatus> fstats = null;
 			if (includeList != null && includeList.size() > 0)
-				fstats = dcmCodec.getInputPaths(includeList);
+				fstats = dcmCodec.getInputPaths(includeList, excludeList);
 			else
 				fstats = dcmCodec.getInputPaths(dcmConfig.getSourceConfig()
-						.getPath());
+						.getPath(), excludeList);
 
-			processPreviousMaps();
+			stateManager = StateManagerFactory.getStateManager(conf, dcmConfig);
+			previousState = stateManager.getPreiviousTransferStatus();
 
 			for (FileStatus fstat : fstats) {
 
@@ -149,6 +141,8 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 					+ locations.size() + ", Total input splits: "
 					+ splits.size());
 			System.out.println("Total Data to Transfer: " + totalBatchSize);
+
+			stateManager.savePreiviousTransferStatus(previousState);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -172,16 +166,6 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 				}
 			}
 		});
-	}
-
-	private void processPreviousMaps() throws Exception {
-		List<MapperDetails> maps = mapDetails.getAllMapperDetails(dcmConfig
-				.getBatchID());
-		if (maps == null || maps.size() <= 0)
-			return;
-		for (MapperDetails map : maps) {
-			previousState.put(map.getFilePath(), map);
-		}
 	}
 
 	private boolean ignoreFile(FileStatus fileStat) {
@@ -215,7 +199,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 			return true;
 
 		if (previousState.containsKey(path)) {
-			MapperDetails details = previousState.get(path);
+			TransferStatus details = previousState.get(path);
 			if (details.getStatus() == Status.COMPLETED
 					&& details.getTs() == fileStat.getModificationTime())
 				return true;
@@ -257,277 +241,4 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		return optimizedLoadSets;
 	}
 
-	public static class MirrorFileRecordReader extends RecordReader<Text, Text> {
-
-		private boolean read = false;
-
-		private String srcPath = null;
-
-		private Text key = new Text();
-		private Text value = new Text();
-
-		private MirrorInputSplit fSplit = null;
-
-		private DCMConfig dcmConfig = null;
-		private Configuration conf = null;
-
-		private DBInitializer dbHelper = null;
-		private CMapperDetailsApi mapDetails = null;
-		private String taskID = null;
-		private List<FileTuple> inputs = null;
-		private int index = 0;
-		private FileTuple current = null;
-
-		private InputStream in = null;
-		private OutputStream out = null;
-
-		private DCMCodec inCodec = null;
-		private DCMCodec outCodec = null;
-
-		private boolean failed = false;
-
-		boolean useCompression = false;
-		boolean transform = false;
-
-		private String digest = null;
-
-		private TaskAttemptContext context = null;
-
-		@Override
-		public Text getCurrentKey() throws IOException, InterruptedException {
-			return key;
-		}
-
-		@Override
-		public Text getCurrentValue() throws IOException, InterruptedException {
-			return value;
-		}
-
-		@Override
-		public float getProgress() throws IOException, InterruptedException {
-			return read ? 1 : (((float) index) / inputs.size());
-		}
-
-		@Override
-		public void initialize(InputSplit split, TaskAttemptContext context)
-				throws IOException, InterruptedException {
-
-			this.context = context;
-			this.conf = context.getConfiguration();
-			dcmConfig = MirrorUtils.getConfigFromConf(conf);
-
-			dbHelper = new DBInitializer(dcmConfig.getDbConfig());
-			mapDetails = new CMapperDetailsApi(dbHelper);
-
-			read = false;
-
-			fSplit = (MirrorInputSplit) split;
-			inputs = fSplit.getSplits();
-			System.out.println("Initializing transfer of : " + inputs.size()
-					+ " files, with a total Size of : " + fSplit.getLength());
-
-			taskID = context.getTaskAttemptID().toString();
-
-			inCodec = DCMCodecFactory.getCodec(conf, dcmConfig
-					.getSourceConfig().getConnectionConfig());
-
-			outCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSinkConfig()
-					.getConnectionConfig());
-		}
-
-		@Override
-		public boolean nextKeyValue() throws IOException, InterruptedException {
-
-			if (!read) {
-
-				failed = false;
-				current = inputs.get(index);
-				srcPath = MirrorUtils.getSimplePath(new Path(current.fileName));
-
-				System.out.println("Transfering file: " + current.fileName
-						+ ", with size: " + current.size);
-				digest = null;
-				if (!checkTransferStatus()) {
-					try {
-
-						analyzeStrategy();
-
-						initializeStreams();
-
-						key.set(srcPath.toString());
-
-						digest = MirrorUtils.copy(in, out, context);
-
-						value.set("Success: " + digest);
-					} catch (Exception e) {
-
-						System.err.println("Error processing input: "
-								+ e.getMessage());
-						e.printStackTrace();
-						failed = true;
-						if (!dcmConfig.isIgnoreException()) {
-							throw new IOException(e);
-						} else {
-							value.set("Failed: " + e.getMessage());
-						}
-					}
-					closeStreams();
-
-					updateStatus();
-				} else {
-					context.getCounter(BLUESHIFT_COUNTER.SUCCESS_COUNT)
-							.increment(1);
-				}
-
-				index++;
-				if (index == inputs.size()) {
-					context.setStatus("SUCCESS");
-					read = true;
-				}
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		private boolean checkTransferStatus() {
-
-			String id = taskID + "_" + index;
-			MapperDetails details = null;
-			try {
-				details = mapDetails.getMapperDetails(dcmConfig.getBatchID(),
-						srcPath);
-			} catch (Exception e) {
-				System.err.println("Error getting state from DB: "
-						+ e.getMessage());
-			}
-			if (details != null) {
-				if (details.getStatus() == Status.COMPLETED
-						&& current.ts != details.getTs())
-					return true;
-				else
-					return false;
-			} else {
-				try {
-					mapDetails.createMapperDetails(dcmConfig.getBatchID(), id,
-							srcPath, digest, Status.NEW, current.ts);
-				} catch (Exception e) {
-					System.err.println("Error persisting state to DB: "
-							+ e.getMessage());
-				}
-			}
-
-			return false;
-		}
-
-		private void analyzeStrategy() {
-
-			String srcCodec = MirrorUtils.getCodecNameFromPath(conf, srcPath);
-
-			if (srcCodec != null) {
-				if (dcmConfig.getSinkConfig().isUseCompression()) {
-					if (srcCodec.equalsIgnoreCase(dcmConfig.getSinkConfig()
-							.getCompressionCodec())) {
-						transform = false;
-						useCompression = false;
-					} else {
-						transform = true;
-						useCompression = true;
-					}
-				} else {
-					transform = true;
-					useCompression = false;
-				}
-			} else {
-				if (dcmConfig.getSinkConfig().isUseCompression()) {
-					transform = false;
-					useCompression = true;
-				} else {
-					transform = false;
-					useCompression = false;
-				}
-			}
-			try {
-				if (fSplit.getLength() < dcmConfig.getSourceConfig()
-						.getCompressionThreshold()) {
-					transform = false;
-					useCompression = false;
-				}
-			} catch (Exception e) {
-				System.err.println("Error Analyzing Transfer strategy: "
-						+ e.getMessage());
-			}
-		}
-
-		private void initializeStreams() throws IOException {
-
-			String destPath = dcmConfig.getSinkConfig().getPath() + srcPath;
-
-			if (transform) {
-				in = inCodec.createInputStream(conf, srcPath);
-				in = MirrorUtils.getCodecInputStream(conf, dcmConfig, srcPath,
-						in);
-				destPath = MirrorUtils.stripExtension(destPath);
-			} else {
-				in = inCodec.createInputStream(conf, srcPath);
-			}
-
-			if (useCompression) {
-				destPath = destPath + "."
-						+ dcmConfig.getSinkConfig().getCompressionCodec();
-				out = outCodec.createOutputStream(conf, destPath, dcmConfig
-						.getSinkConfig().isAppend());
-				out = MirrorUtils.getCodecOutputStream(conf, dcmConfig,
-						destPath, out);
-			} else {
-				out = outCodec.createOutputStream(conf, destPath, dcmConfig
-						.getSinkConfig().isAppend());
-			}
-			String status = "Processing: " + srcPath + " -> " + destPath;
-			context.setStatus(status);
-			System.out.println("Status: " + status);
-		}
-
-		private void closeStreams() {
-
-			IOUtils.closeStream(in);
-			IOUtils.closeStream(out);
-			if (failed) {
-				context.getCounter(BLUESHIFT_COUNTER.FAILED_COUNT).increment(1);
-			} else {
-				context.getCounter(BLUESHIFT_COUNTER.SUCCESS_COUNT)
-						.increment(1);
-			}
-
-			if (!failed && dcmConfig.getSourceConfig().isDeleteSource()) {
-				try {
-					inCodec.deleteSoureFile(srcPath);
-				} catch (Exception e) {
-					System.err.println("Failed Deleting file: " + srcPath
-							+ ", Exception: " + e.getMessage());
-				}
-			}
-		}
-
-		private void updateStatus() throws IOException {
-
-			String id = taskID + "_" + index;
-			try {
-				mapDetails.updateMapperDetails(dcmConfig.getBatchID(), id,
-						srcPath, digest, failed ? Status.FAILED
-								: Status.COMPLETED, current.ts);
-			} catch (Exception e) {
-				System.err.println("Caught exception persisting state to DB..."
-						+ e.getMessage());
-			}
-		}
-
-		@Override
-		public void close() throws IOException {
-
-			System.out.println("Transfer Complete...");
-			IOUtils.closeStream(inCodec);
-			IOUtils.closeStream(outCodec);
-		}
-	}
 }

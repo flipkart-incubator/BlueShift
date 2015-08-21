@@ -35,16 +35,20 @@ public class CBatchApi implements IBatchApi {
 
 	@Override
 	public Batch createBatch(long batchId, String batchName,
-			String lastRunJobId, String desc, Status status) throws EBase {
-		Batch batch = new Batch(batchId, batchName, lastRunJobId, desc, status);
+			String lastRunJobId, String desc, Status status, boolean lock)
+			throws EBase {
+		Batch batch = new Batch(batchId, batchName, lastRunJobId, desc, status,
+				lock);
 		batchDao.save(batch);
 		return batch;
 	}
 
 	@Override
 	public Batch updateBatch(long batchId, String batchName,
-			String lastRunJobId, String desc, Status status) throws EBase {
-		Batch batch = new Batch(batchId, batchName, lastRunJobId, desc, status);
+			String lastRunJobId, String desc, Status status, boolean lock)
+			throws EBase {
+		Batch batch = new Batch(batchId, batchName, lastRunJobId, desc, status,
+				lock);
 		batchDao.update(batch);
 		return batch;
 	}

@@ -18,10 +18,9 @@
 
 package com.flipkart.fdp.migration.db.models;
 
-import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_FILE_PATH;
+import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_DIGEST;
 import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_STATUS;
 import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_TASK_ID;
-import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_DIGEST;
 import static com.flipkart.fdp.migration.db.utils.DBUtils.TAB_MAPPER_DETAILS;
 import static javax.persistence.EnumType.STRING;
 
@@ -36,6 +35,7 @@ import javax.persistence.Table;
 import lombok.Getter;
 
 import com.flipkart.fdp.migration.db.utils.DBUtils;
+import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 
 @Entity
 @Table(name = TAB_MAPPER_DETAILS)
@@ -49,8 +49,21 @@ public class MapperDetails implements Serializable {
 	private long batchId;
 
 	@Id
-	@Column(name = COL_FILE_PATH, updatable = false, nullable = false, length = 1024)
-	private String filePath;
+	@Column(name = DBUtils.COL_SRC_PATH, updatable = false, nullable = false, length = 1024)
+	private String srcPath;
+
+	@Id
+	@Column(name = COL_TASK_ID, updatable = false, nullable = false)
+	private String taskId;
+
+	@Column(name = DBUtils.COL_DEST_PATH, updatable = false, length = 1024)
+	private String destPath;
+
+	@Column(name = DBUtils.COL_SRC_SIZE, nullable = false)
+	private long srcSize = 0;
+
+	@Column(name = DBUtils.COL_DEST_SIZE, nullable = false)
+	private long destSize = 0;
 
 	@Column(name = COL_STATUS, nullable = false)
 	@Enumerated(STRING)
@@ -59,9 +72,6 @@ public class MapperDetails implements Serializable {
 	@Column(name = COL_DIGEST)
 	private String digest;
 
-	@Column(name = COL_TASK_ID, nullable = false)
-	private String taskId;
-
 	@Column(name = DBUtils.COL_TS, nullable = false)
 	private long ts;
 
@@ -69,14 +79,16 @@ public class MapperDetails implements Serializable {
 
 	}
 
-	public MapperDetails(long batchId, String filePath, Status status,
-			String digest, String taskId, long ts) {
+	public MapperDetails(long batchId, TransferStatus tstat) {
 		this.batchId = batchId;
-		this.filePath = filePath;
-		this.status = status;
-		this.digest = digest;
-		this.taskId = taskId;
-		this.ts = ts;
+		this.srcPath = tstat.getInputPath();
+		this.destPath = tstat.getOutputPath();
+		this.srcSize = tstat.getInputSize();
+		this.destSize = tstat.getOutputSize();
+		this.status = tstat.getStatus();
+		this.digest = tstat.getMd5Digest();
+		this.taskId = tstat.getTaskID();
+		this.ts = tstat.getTs();
 	}
 
 }

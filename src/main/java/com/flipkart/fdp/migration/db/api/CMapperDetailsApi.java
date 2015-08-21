@@ -24,8 +24,8 @@ import com.flipkart.fdp.migration.db.DBInitializer;
 import com.flipkart.fdp.migration.db.core.CMapperDetailsDao;
 import com.flipkart.fdp.migration.db.core.IMapperDetailsDao;
 import com.flipkart.fdp.migration.db.models.MapperDetails;
-import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.db.utils.EBase;
+import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 
 public class CMapperDetailsApi implements IMapperDetailsApi {
 
@@ -36,21 +36,17 @@ public class CMapperDetailsApi implements IMapperDetailsApi {
 	}
 
 	@Override
-	public MapperDetails createMapperDetails(long batchId, String taskId,
-			String filePath, String digest, Status status, long ts)
+	public MapperDetails createMapperDetails(long batchId, TransferStatus tstat)
 			throws EBase {
-		MapperDetails mapperDetails = new MapperDetails(batchId, filePath,
-				status, digest, taskId, ts);
+		MapperDetails mapperDetails = new MapperDetails(batchId, tstat);
 		mapperDetailsDao.save(mapperDetails);
 		return mapperDetails;
 	}
 
 	@Override
-	public MapperDetails updateMapperDetails(long batchId, String taskId,
-			String filePath, String digest, Status status, long ts)
+	public MapperDetails updateMapperDetails(long batchId, TransferStatus tstat)
 			throws EBase {
-		MapperDetails mapperDetails = new MapperDetails(batchId, filePath,
-				status, digest, taskId, ts);
+		MapperDetails mapperDetails = new MapperDetails(batchId, tstat);
 		mapperDetailsDao.update(mapperDetails);
 		return mapperDetails;
 	}
@@ -66,6 +62,13 @@ public class CMapperDetailsApi implements IMapperDetailsApi {
 		// return mapperDetailsDao.getByBatchId(batchId);
 		return ((CMapperDetailsDao) mapperDetailsDao)
 				.getMapperDetailsByBatchID(batchId);
+	}
+
+	@Override
+	public List<MapperDetails> getAllMapperDetailsForTask(long batchId,
+			String taskId) throws EBase {
+		return ((CMapperDetailsDao) mapperDetailsDao).getMapperDetailsByTaskID(
+				batchId, taskId);
 	}
 
 }

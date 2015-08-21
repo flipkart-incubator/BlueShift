@@ -47,10 +47,10 @@ public class IBatchApiTest {
 		String batchConfig = mirrorDCMConfig.toString();
 		Status status = Status.STARTED;
 		Batch batch = new Batch(batchId, batchName, lastRunJobId, batchConfig,
-				status);
+				status, false);
 		Batch createdBatch = batchApi.createBatch(batchId, batchName,
-				lastRunJobId, "test", status);
-		assertEquals(batch.getBatchConfig(), createdBatch.getBatchConfig());
+				lastRunJobId, "test", status, true);
+		assertEquals(batch.getDesc(), createdBatch.getDesc());
 		assertEquals(batch.getBatchId(), createdBatch.getBatchId());
 		assertEquals(batch.getBatchName(), createdBatch.getBatchName());
 		assertEquals(batch.getLastRunJobId(), createdBatch.getLastRunJobId());

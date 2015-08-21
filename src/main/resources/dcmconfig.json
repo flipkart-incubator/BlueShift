@@ -3,6 +3,7 @@
   "numWorkers": 10,
   "ignoreException": true,
   "statusPath": "/tmp/mdcp",
+  "stateManagerType": "HDFS",
   
   "sourceConfig": {
     "path": "/tmp/raj",
@@ -16,6 +17,7 @@
     "maxFilesize": -1,
     "deleteSource": false,
     "ignoreEmptyFiles": false,
+    "transformSource": false,
     "compressionThreshold": 0,
     "customSourceImplClass": "",
     

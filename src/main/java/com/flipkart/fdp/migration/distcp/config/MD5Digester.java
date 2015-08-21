@@ -26,6 +26,7 @@ import org.apache.hadoop.io.MD5Hash;
 public class MD5Digester {
 
 	private MessageDigest digester = null;
+	private long byteCount = 0;
 
 	public MD5Digester() {
 		digester = MD5Hash.getDigester();
@@ -33,10 +34,12 @@ public class MD5Digester {
 
 	public void updateMd5digester(byte[] bytes) {
 		digester.update(bytes);
+		byteCount += bytes.length;
 	}
 
 	public void updateMd5digester(byte[] bytes, int offset, int len) {
 		digester.update(bytes, offset, len);
+		byteCount += len;
 	}
 
 	public String getDigest() {
@@ -47,4 +50,9 @@ public class MD5Digester {
 		}
 		return md5;
 	}
+
+	public long getByteCount() {
+		return byteCount;
+	}
+
 }

@@ -18,7 +18,7 @@
 
 package com.flipkart.fdp.migration.db.models;
 
-import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_BATCH_CONFIG;
+import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_BATCH_DESC;
 import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_BATCH_NAME;
 import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_LAST_RUN_ID;
 import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_STATUS;
@@ -54,24 +54,28 @@ public class Batch implements Serializable {
 	@Column(name = COL_LAST_RUN_ID, nullable = false)
 	private String lastRunJobId;
 
-	@Column(name = COL_BATCH_CONFIG, nullable = false)
-	private String batchConfig;
+	@Column(name = COL_BATCH_DESC, nullable = false)
+	private String desc;
 
 	@Column(name = COL_STATUS)
 	@Enumerated(STRING)
 	private Status status;
+
+	@Column(name = COL_BATCH_DESC, nullable = false)
+	private boolean lock;
 
 	public Batch() {
 
 	}
 
 	public Batch(long batchId, String batchName, String lastRunJobId,
-			String batchConfig, Status status) {
+			String desc, Status status, boolean lock) {
 		this.batchId = batchId;
 		this.batchName = batchName;
 		this.lastRunJobId = lastRunJobId;
-		this.batchConfig = batchConfig;
+		this.desc = desc;
 		this.status = status;
+		this.lock = lock;
 	}
 
 }

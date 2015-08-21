@@ -39,16 +39,13 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-import com.flipkart.fdp.migration.db.DBInitializer;
-import com.flipkart.fdp.migration.db.api.CBatchApi;
-import com.flipkart.fdp.migration.db.api.CBatchRunsApi;
-import com.flipkart.fdp.migration.db.models.Batch;
 import com.flipkart.fdp.migration.db.models.Status;
-import com.flipkart.fdp.migration.db.utils.EBase;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.BLUESHIFT_COUNTER;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorMapper;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorReducer;
+import com.flipkart.fdp.migration.distcp.state.StateManager;
+import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
 import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
 import com.google.gson.Gson;
 
@@ -63,23 +60,12 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 	private Set<String> includeList = null;
 	private Set<String> excludeList = null;
 
-	private DBInitializer dbHelper = null;
-	private CBatchApi batchAPI = null;
-	private CBatchRunsApi batchRunsAPI = null;
-
-	private long ts = System.currentTimeMillis();
-	private String jobID = "UNKNOWN_" + ts;
-
-	private long startTime = 0, endTime = 0;
+	private StateManager stateManager = null;
 
 	public MirrorDistCPDriver(DCMConfig config) throws IOException {
 
 		this.dcmConfig = config;
 		formatSourceConfig();
-
-		dbHelper = new DBInitializer(dcmConfig.getDbConfig());
-		batchAPI = new CBatchApi(dbHelper);
-		batchRunsAPI = new CBatchRunsApi(dbHelper);
 	}
 
 	private void formatSourceConfig() {
@@ -87,26 +73,6 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 				.getIncludeListFile());
 		excludeList = MirrorUtils.getFileAsLists(dcmConfig.getSourceConfig()
 				.getExcludeListFile());
-	}
-
-	private Batch initializeBatch() throws EBase {
-
-		Batch batch = null;
-
-		try {
-			batch = batchAPI.getBatch(dcmConfig.getBatchID());
-		} catch (Exception e) {
-			System.out.println("Error getting batch Details from DB: "
-					+ e.getMessage());
-			batch = null;
-		}
-
-		if (batch == null) {
-			batchAPI.createBatch(dcmConfig.getBatchID(),
-					dcmConfig.getBatchName(), "0", ts + "", Status.NEW);
-		}
-		batch = batchAPI.getBatch(dcmConfig.getBatchID());
-		return batch;
 	}
 
 	public int run(String[] args) throws Exception {
@@ -119,7 +85,15 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		populateConfFromDCMConfig();
 
 		int jobReturnValue = 0;
-		Batch batch = initializeBatch();
+		stateManager = StateManagerFactory.getStateManager(configuration, dcmConfig);
+
+		try {
+			stateManager.beginBatch();
+		} catch (Exception e) {
+			System.out.println("Exception starting batch: " + e.getMessage());
+			e.printStackTrace();
+			return 1;
+		}
 
 		try {
 
@@ -127,9 +101,8 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 			System.out.println("Launching Job - Blueshift v 0.1 - "
 					+ dcmConfig.getBatchName());
-
 			jobReturnValue = job.waitForCompletion(true) ? 0 : 1;
-			jobID = job.getJobID().toString();
+
 			System.out.println("Job Complete...");
 
 			processJobCounters(job);
@@ -138,7 +111,8 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 			System.out.println("Job Failed...");
 			t.printStackTrace();
 		}
-		updateBatch(batch, jobReturnValue);
+		stateManager.completeBatch(jobReturnValue != 0 ? Status.FAILED
+				: Status.COMPLETED);
 
 		return jobReturnValue;
 
@@ -164,20 +138,6 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 			System.out.println("Error processing job counters: "
 					+ e.getMessage());
 		}
-	}
-
-	private void updateBatch(Batch batch, int jobReturnValue) throws EBase {
-		Status status = Status.COMPLETED;
-		if (jobReturnValue == 0)
-			status = Status.COMPLETED;
-		else
-			status = Status.FAILED;
-
-		batchAPI.updateBatch(dcmConfig.getBatchID(), dcmConfig.getBatchName(),
-				jobID, ts + "", status);
-
-		batchRunsAPI.createBatchRun(dcmConfig.getBatchID(), jobID, dcmConfig,
-				startTime, endTime, status);
 	}
 
 	private Job createJob(Configuration configuration) throws Exception {

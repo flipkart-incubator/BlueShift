@@ -18,6 +18,7 @@
 
 package com.flipkart.fdp.migration.distcp.config;
 
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.StateManagerImpl;
 import com.google.gson.Gson;
 
 public class DCMConfig {
@@ -29,6 +30,8 @@ public class DCMConfig {
 	private boolean ignoreException = false;
 
 	private String statusPath = null;
+
+	private StateManagerImpl stateManagerType = null;
 
 	private SourceConfig sourceConfig = null;
 
@@ -96,6 +99,14 @@ public class DCMConfig {
 
 	public void setNumWorkers(int numWorkers) {
 		this.numWorkers = numWorkers;
+	}
+
+	public StateManagerImpl getStateManagerType() {
+		return stateManagerType;
+	}
+
+	public void setStateManagerType(StateManagerImpl stateManagerType) {
+		this.stateManagerType = stateManagerType;
 	}
 
 	@Override

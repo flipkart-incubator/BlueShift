@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,6 +33,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
+
+import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
 
 public class GenericHadoopCodec implements DCMCodec {
 
@@ -66,35 +69,22 @@ public class GenericHadoopCodec implements DCMCodec {
 		return false;
 	}
 
-	public List<FileStatus> getInputPaths(String path) throws Exception {
-		List<FileStatus> fstats = new ArrayList<FileStatus>();
+	public List<FileStatus> getInputPaths(String path,
+			Collection<String> excludeList) throws Exception {
 
 		String paths[] = path.split(",");
-		for (String file : paths) {
-			try {
-				List<FileStatus> fstat = getFileStatusRecursive(new Path(file));
-				fstats.addAll(fstat);
-			} catch (Exception e) {
-				e.printStackTrace();
-				// Ignore Exception
-			}
-		}
-		return fstats;
+		return getInputPaths(Arrays.asList(paths), excludeList);
 	}
 
-	public List<FileStatus> getInputPaths(Collection<String> paths)
-			throws Exception {
+	public List<FileStatus> getInputPaths(Collection<String> paths,
+			Collection<String> excludeList) throws Exception {
 		List<FileStatus> fileList = new ArrayList<FileStatus>();
 
 		for (String path : paths) {
-			try {
-				FileStatus stat = fs.getFileStatus(new Path(path));
-				if (stat != null)
-					fileList.add(stat);
-			} catch (Exception e) {
-				e.printStackTrace();
-				// Ignore Exception
-			}
+
+			List<FileStatus> fstat = getFileStatusRecursive(new Path(path),
+					excludeList);
+			fileList.addAll(fstat);
 		}
 		return fileList;
 	}
@@ -104,20 +94,30 @@ public class GenericHadoopCodec implements DCMCodec {
 
 	}
 
-	public List<FileStatus> getFileStatusRecursive(Path path)
-			throws MalformedURLException, IOException, AuthenticationException {
+	public List<FileStatus> getFileStatusRecursive(Path path,
+			Collection<String> excludeList) throws MalformedURLException,
+			IOException, AuthenticationException {
 
 		List<FileStatus> response = new ArrayList<FileStatus>();
 
+		if (fs.isFile(path)) {
+			FileStatus fstat = fs.getFileStatus(path);
+			if (fstat != null)
+				response.add(fstat);
+			return response;
+		}
 		FileStatus[] fstats = fs.listStatus(path);
 
 		if (fstats != null && fstats.length > 0) {
 
 			for (FileStatus fstat : fstats) {
 
-				if (fstat.isDirectory()) {
+				if (fstat.isDirectory()
+						&& !excludeList.contains(MirrorUtils
+								.getSimplePath(fstat.getPath()))) {
 
-					response.addAll(getFileStatusRecursive(fstat.getPath()));
+					response.addAll(getFileStatusRecursive(fstat.getPath(),
+							excludeList));
 				} else {
 
 					response.add(fstat);

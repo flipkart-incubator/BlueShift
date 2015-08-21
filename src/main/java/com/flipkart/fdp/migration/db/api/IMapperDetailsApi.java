@@ -21,21 +21,22 @@ package com.flipkart.fdp.migration.db.api;
 import java.util.List;
 
 import com.flipkart.fdp.migration.db.models.MapperDetails;
-import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.db.utils.EBase;
+import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 
 public interface IMapperDetailsApi {
 
-	public MapperDetails createMapperDetails(long batchId, String taskId,
-			String filePath, String digest, Status status, long ts)
+	public MapperDetails createMapperDetails(long batchId, TransferStatus tstat)
 			throws EBase;
 
-	public MapperDetails updateMapperDetails(long batchId, String taskId,
-			String filePath, String digest, Status status, long ts)
+	public MapperDetails updateMapperDetails(long batchId, TransferStatus tstat)
 			throws EBase;
 
 	public MapperDetails getMapperDetails(long batchId, String filePath)
 			throws EBase;
+
+	public List<MapperDetails> getAllMapperDetailsForTask(long batchId,
+			String taskId) throws EBase;
 
 	public List<MapperDetails> getAllMapperDetails(long batchId) throws EBase;
 

@@ -27,10 +27,12 @@ import com.flipkart.fdp.migration.db.utils.EBase;
 public interface IBatchApi {
 
 	public Batch createBatch(long batchId, String batchName,
-			String lastRunJobId, String desc, Status status) throws EBase;
+			String lastRunJobId, String desc, Status status, boolean lock)
+			throws EBase;
 
 	public Batch updateBatch(long batchId, String batchName,
-			String lastRunJobId, String desc, Status status) throws EBase;
+			String lastRunJobId, String desc, Status status, boolean lock)
+			throws EBase;
 
 	public Batch getBatch(long batchId) throws EBase;
 

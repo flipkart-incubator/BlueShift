@@ -40,8 +40,9 @@ public interface DCMCodec extends Closeable {
 
 	public boolean isSplitable();
 
-	public List<FileStatus> getInputPaths(String path) throws Exception;
+	public List<FileStatus> getInputPaths(String path,
+			Collection<String> excludeList) throws Exception;
 
-	public List<FileStatus> getInputPaths(Collection<String> paths)
-			throws Exception;
+	public List<FileStatus> getInputPaths(Collection<String> paths,
+			Collection<String> excludeList) throws Exception;
 }

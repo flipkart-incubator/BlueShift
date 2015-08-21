@@ -86,4 +86,8 @@ public class DCMConstants {
 	public static enum SecurityType {
 		PSEUDO, KERBEROS, SIMPLE, NONE
 	}
+
+	public static enum StateManagerImpl {
+		HDFS, MYSQL
+	}
 }
