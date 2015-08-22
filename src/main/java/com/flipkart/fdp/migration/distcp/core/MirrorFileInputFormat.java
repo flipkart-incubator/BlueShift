@@ -96,9 +96,13 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 						.getPath(), excludeList);
 
 			stateManager = StateManagerFactory.getStateManager(conf, dcmConfig);
-			previousState = stateManager.getPreiviousTransferStatus();
 
-			System.out.println("Filtering Input File Set based on User defined filters.");
+			System.out
+					.println("Fetching previous transfer states from StateManager...");
+			previousState = stateManager.getPreviousTransferStatus();
+
+			System.out
+					.println("Filtering Input File Set based on User defined filters.");
 			for (FileStatus fstat : fstats) {
 
 				if (!ignoreFile(fstat)) {

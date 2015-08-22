@@ -119,7 +119,7 @@ public class MySqlStateManager implements StateManager {
 	}
 
 	@Override
-	public Map<String, TransferStatus> getPreiviousTransferStatus()
+	public Map<String, TransferStatus> getPreviousTransferStatus()
 			throws IOException {
 
 		Map<String, TransferStatus> status = new HashMap<String, TransferStatus>();

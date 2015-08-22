@@ -161,7 +161,7 @@ public class HDFSStateManager implements StateManager {
 		out.close();
 	}
 
-	public Map<String, TransferStatus> getPreiviousTransferStatus()
+	public Map<String, TransferStatus> getPreviousTransferStatus()
 			throws IOException {
 
 		Map<String, TransferStatus> status = new HashMap<String, TransferStatus>();
@@ -189,7 +189,7 @@ public class HDFSStateManager implements StateManager {
 				mergeStates(status, stats);
 				break;
 			}
-
+			index++;
 		}
 		return status;
 	}
