@@ -4,9 +4,10 @@
 Flipkart Blueshift is a reliable data migration tool for Hadoop ecosystem, Comes packed with some elegant features missing in traditional migration tools like DistCP,
 
 - Migration across clusters (secured and unsecured)
-- On the fly compression, where source data is compressed over the wire, (this can be achieved only when the job is run from the source cluster)
+- On the fly compression, where source data is compressed over the wire, (this can benefit only when the job is run from the source cluster)
 - Inplace inflate/deflate.On successful migration data on the destination cluster can be seamlessly inflated to original state.
-- Bulk migration. 
+- Bulk migration with batches of over 10Million files. 
+- Multiple Statemanager options, either HDFS or MYSQL based statemanagers. choose the one that scales for you.
 - Optimized task scheduling. Largest file first strategy
 - Multiplexing large filesets to manageable worker count.
 - Configuration driven, the tool can be tuned to a fine level using configurations.
@@ -44,119 +45,9 @@ Blueshift is configured via a configuration json file, There are 4 main sections
 - Sink Config - This defines the destination Sink configuration with connection properties to access the destination.
 - Statestore DB Config - This defines the database details that will be used as a statestore.
 
-Sample Configuration defined Below
+Refer to the configuration page for details on the different config options available.
 
-{
-
- "batchName": "H3\_Test\_01",
-
- "numWorkers": 10,
-
- "ignoreException": true,
-
- "statusPath": "/tmp/mdcp",
-
- "sourceConfig": {
-
-   "path": "/tmp/raj",
-
-   "includeListFile": "/home/soundararajan.velu/includes.list",
-
-   "excludeListFile": "/home/soundararajan.velu/excludes.list",
-
-   "includeRegEx": "",
-
-   "excludeRegEx": "",
-
-   "startTS": 0,
-
-   "endTS": 0,
-
-   "minFilesize": 0,
-
-   "maxFilesize": -1,
-
-   "deleteSource": false,
-
-   "ignoreEmptyFiles": false,
-
-   "compressionThreshold": 0,
-
-   "customSourceImplClass": "",
-
-   "connectionConfig": {
-
-     "type": "HDFS",
-
-     "securityType": "SIMPLE",
-
-     "host": "test.flipkart.com",
-
-     "port": 8020,
-
-     "connectionParams": "",
-
-     "userName": "test-user",
-
-     "userPassword": "test-user",
-
-     "keyFile": ""
-
-   }
-
- },
-
- "sinkConfig": {
-
-   "path": "/tmp/raja",
-
-   "compressionCodec": "snappy",
-
-   "useCompression": false,
-
-   "overwriteFiles": true,
-
-   "append": false,
-
-   "customSinkImplClass": "",
-
-   "connectionConfig": {
-
-     "type": "WEBHDFS",
-
-     "securityType": "SIMPLE",
-
-     "host": "test2.flipkart.com",
-
-     "port": 50070,
-
-     "connectionParams": "",
-
-     "userName": "test-user",
-
-     "userPassword": "test-user",
-
-     "keyFile": ""
-
-   }
-
- },
-
- "dbConfig": {
-
-   "dbConnectionURL": "jdbc:mysql://testdb.flipkart.com:3306/dcm?autoReconnect=true",
-
-   "dbDriver": "com.mysql.jdbc.Driver",
-
-   "dbUserName": "dcm",
-
-   "dbUserPassword": "dcm",
-
-   "dbDialect": "org.hibernate.dialect.MySQL5Dialect"
-
- }
-
-}
+https://github.com/flipkart-incubator/blueshift/wiki/Configuration
 
 
 ## **Use-Cases**
@@ -174,7 +65,7 @@ Following are some of the usecases and the configs to be used.
 
 The tool can be downloaded from,
 
-https://github.com/flipkart-incubator/blueshift
+http://github.com/flipkart-incubator/blueshift
 
 
 ## **Build and Run**
@@ -220,3 +111,9 @@ Kurian Cheeramelil
 ## **Contact**
 
 Blueshift is owned and maintained by Flipkart Data Platform Infra Team,
+
+## **FAQ**
+
+Refer to the FAQ page below,
+
+https://github.com/flipkart-incubator/blueshift/wiki/FAQ
