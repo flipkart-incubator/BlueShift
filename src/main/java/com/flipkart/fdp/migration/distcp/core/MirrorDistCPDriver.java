@@ -191,7 +191,9 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 		options.addOption("p", true, "properties filename from the classpath");
 		options.addOption("P", true, "external properties filename");
-
+		options.addOption("D", true, "JVM and Hadoop Configuration Override");
+		options.addOption("libjars", true, "JVM and Hadoop Configuration Override");
+		
 		options.addOption(OptionBuilder.withArgName("property=value")
 				.hasArgs(2).withValueSeparator()
 				.withDescription("use value for given property").create("D"));
