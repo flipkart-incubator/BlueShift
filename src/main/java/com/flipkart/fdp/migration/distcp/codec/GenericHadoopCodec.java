@@ -80,7 +80,7 @@ public class GenericHadoopCodec implements DCMCodec {
 			Collection<String> excludeList) throws Exception {
 
 		List<FileStatus> fileList = new ArrayList<FileStatus>();
-		System.out.println("A total of " + paths.size() + " to scan...");
+		System.out.println("A total of " + paths.size() + " paths to scan...");
 		for (String path : paths) {
 
 			List<FileStatus> fstat = getFileStatusRecursive(new Path(path),

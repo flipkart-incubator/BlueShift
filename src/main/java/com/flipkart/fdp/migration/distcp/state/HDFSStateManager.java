@@ -189,7 +189,7 @@ public class HDFSStateManager implements StateManager {
 				mergeStates(status, stats);
 				break;
 			}
-			index++;
+			index--;
 		}
 		return status;
 	}
