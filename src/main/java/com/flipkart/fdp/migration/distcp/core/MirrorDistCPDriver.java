@@ -85,7 +85,8 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		populateConfFromDCMConfig();
 
 		int jobReturnValue = 0;
-		stateManager = StateManagerFactory.getStateManager(configuration, dcmConfig);
+		stateManager = StateManagerFactory.getStateManager(configuration,
+				dcmConfig);
 
 		try {
 			stateManager.beginBatch();
@@ -226,6 +227,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		if (args.length < 1) {
 			printUsageAndExit();
 		}
+		System.out.println("Starting Blueshift...");
 		int exitCode = ToolRunner.run(new MirrorDistCPDriver(getParams(args)),
 				args);
 		System.exit(exitCode);

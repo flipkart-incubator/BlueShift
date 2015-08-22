@@ -71,6 +71,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 	public List<InputSplit> getSplits(JobContext context) throws IOException,
 			InterruptedException {
 
+		System.out.println("Calculating Job Splits...");
 		conf = context.getConfiguration();
 		dcmConfig = MirrorUtils.getConfigFromConf(conf);
 
@@ -86,6 +87,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 		long totalBatchSize = 0;
 		try {
+			System.out.println("Scanning source location...");
 			List<FileStatus> fstats = null;
 			if (includeList != null && includeList.size() > 0)
 				fstats = dcmCodec.getInputPaths(includeList, excludeList);
@@ -96,6 +98,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 			stateManager = StateManagerFactory.getStateManager(conf, dcmConfig);
 			previousState = stateManager.getPreiviousTransferStatus();
 
+			System.out.println("Filtering Input File Set based on User defined filters.");
 			for (FileStatus fstat : fstats) {
 
 				if (!ignoreFile(fstat)) {
@@ -104,6 +107,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 					inputFileMap.put(file, fstat);
 				}
 			}
+			System.out.println("Optimizing Splits...");
 			int numWorkers = locations.size();
 			if (dcmConfig.getNumWorkers() > 0
 					&& dcmConfig.getNumWorkers() < numWorkers) {
