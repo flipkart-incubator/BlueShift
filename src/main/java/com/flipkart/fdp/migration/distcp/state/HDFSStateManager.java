@@ -180,14 +180,17 @@ public class HDFSStateManager implements StateManager {
 
 		int index = fstats.length - 1;
 		while (index >= 0) {
-			Path spath = new Path(fstats[index].getPath(),
-					PREVIOUS_STATE_FILE_NAME);
-			List<TransferStatus> stats = getAllStats(fstats[index].getPath());
-			mergeStates(status, stats);
-			if (fs.exists(spath)) {
-				stats = getAllStats(spath);
+			if (fs.isDirectory(fstats[index].getPath())) {
+				Path spath = new Path(fstats[index].getPath(),
+						PREVIOUS_STATE_FILE_NAME);
+				List<TransferStatus> stats = getAllStats(fstats[index]
+						.getPath());
 				mergeStates(status, stats);
-				break;
+				if (fs.exists(spath)) {
+					stats = getAllStats(spath);
+					mergeStates(status, stats);
+					break;
+				}
 			}
 			index--;
 		}
