@@ -231,6 +231,9 @@ public class HDFSStateManager implements StateManager {
 
 	private List<TransferStatus> getAllStats(Path path) throws IOException {
 
+		Gson gson = new Gson();
+		List<TransferStatus> status = new ArrayList<TransferStatus>();
+
 		FileStatus fstats[] = null;
 		if (fs.isDirectory(path)) {
 
@@ -240,14 +243,11 @@ public class HDFSStateManager implements StateManager {
 				fstats = new FileStatus[1];
 				fstats[0] = fs.getFileStatus(path);
 			} catch (Exception e) {
-
+				return status;
 			}
 		}
 		if (fstats == null || fstats.length <= 0)
 			return null;
-
-		Gson gson = new Gson();
-		List<TransferStatus> status = new ArrayList<TransferStatus>();
 
 		for (FileStatus fstat : fstats) {
 

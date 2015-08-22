@@ -155,7 +155,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 			throw new IOException(e);
 		}
 
-		System.out.println("Finished getSplits");
+		System.out.println("Done Calculating splits...");
 		return splits;
 	}
 
