@@ -70,6 +70,7 @@ public class HDFSStateManager implements StateManager {
 		this.runId = String.valueOf(System.currentTimeMillis());
 		batchBasePath = new Path(dcmConfig.getStatusPath() + "/"
 				+ dcmConfig.getBatchName());
+		fs = FileSystem.get(configuration);
 
 		String spath = configuration.get(STATUS_PATH_KEY);
 
@@ -87,7 +88,7 @@ public class HDFSStateManager implements StateManager {
 			statusPath = new Path(spath);
 		}
 		lockFilePath = new Path(batchBasePath, LOCK_FILE_NAME);
-		fs = FileSystem.get(configuration);
+
 	}
 
 	public void lockBatch() throws IOException {
