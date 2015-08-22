@@ -182,11 +182,15 @@ public class HDFSStateManager implements StateManager {
 
 		int index = fstats.length - 1;
 		while (index >= 0) {
+			System.out.println("Processing State History: "
+					+ fstats[index].getPath());
 			if (fs.isDirectory(fstats[index].getPath())) {
+				System.out.println("Processing State History: "
+						+ fstats[index].getPath());
 				Path spath = new Path(fstats[index].getPath(),
 						PREVIOUS_STATE_FILE_NAME);
-				List<TransferStatus> stats = getAllStats(fstats[index]
-						.getPath());
+				List<TransferStatus> stats = getAllStats(new Path(
+						fstats[index].getPath(), STATUS_PATH));
 				mergeStates(status, stats);
 				if (fs.exists(spath)) {
 					stats = getAllStats(spath);
