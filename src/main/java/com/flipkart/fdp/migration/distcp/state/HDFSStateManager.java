@@ -236,8 +236,12 @@ public class HDFSStateManager implements StateManager {
 
 			fstats = fs.listStatus(path);
 		} else {
-			fstats = new FileStatus[1];
-			fstats[0] = fs.getFileStatus(path);
+			try {
+				fstats = new FileStatus[1];
+				fstats[0] = fs.getFileStatus(path);
+			} catch (Exception e) {
+
+			}
 		}
 		if (fstats == null || fstats.length <= 0)
 			return null;
