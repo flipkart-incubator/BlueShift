@@ -88,6 +88,6 @@ public class DCMConstants {
 	}
 
 	public static enum StateManagerImpl {
-		HDFS, MYSQL
+		HDFS, DB
 	}
 }

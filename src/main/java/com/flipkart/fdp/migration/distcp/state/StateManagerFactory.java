@@ -36,7 +36,7 @@ public class StateManagerFactory {
 			case HDFS:
 				stateManager = new HDFSStateManager(conf, config);
 				break;
-			case MYSQL:
+			case DB:
 				stateManager = new MySqlStateManager(conf, config);
 				break;
 			default:

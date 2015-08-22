@@ -7,7 +7,7 @@ Flipkart Blueshift is a reliable data migration tool for Hadoop ecosystem, Comes
 - On the fly compression, where source data is compressed over the wire, (this can benefit only when the job is run from the source cluster)
 - Inplace inflate/deflate.On successful migration data on the destination cluster can be seamlessly inflated to original state.
 - Bulk migration with batches of over 10Million files. 
-- Multiple Statemanager options, either HDFS or MYSQL based statemanagers. choose the one that scales for you.
+- Multiple Statemanager options, either HDFS or DB based statemanagers. choose the one that scales for you.
 - Optimized task scheduling. Largest file first strategy
 - Multiplexing large filesets to manageable worker count.
 - Configuration driven, the tool can be tuned to a fine level using configurations.
@@ -33,7 +33,7 @@ Upcoming Features,
 ## **Prerequisites**
 
 - Hadoop cluster running version 1.0 or higher
-- Statestore, Relational database like mysql, derby etc...
+- Statestore, Relational database like mysql or derby etc... if Statestore is DB. for HDFS Statestore no db is required.
 
 
 ## **BlueShift Configuration**
