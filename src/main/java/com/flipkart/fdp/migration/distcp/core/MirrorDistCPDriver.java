@@ -30,7 +30,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
@@ -88,6 +87,9 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		stateManager = StateManagerFactory.getStateManager(configuration,
 				dcmConfig);
 
+		System.out.println("Instantiated " + dcmConfig.getStateManagerType()
+				+ " StateManger, Starting Batch Execution with RunID: "
+				+ stateManager.getRunId());
 		try {
 			stateManager.beginBatch();
 		} catch (Exception e) {
@@ -166,16 +168,13 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		MirrorFileInputFormat.setExclusionsFileList(configuration, excludeList);
 		MirrorFileInputFormat.setInclusionFileList(configuration, includeList);
 
-		String statusPath = dcmConfig.getStatusPath() + "/"
-				+ dcmConfig.getBatchName() + "_" + System.currentTimeMillis();
-
-		FileOutputFormat.setOutputPath(job, new Path(statusPath));
+		FileOutputFormat.setOutputPath(job, stateManager.getReportPath());
 
 		job.setNumReduceTasks(1);
 
 		System.out
 				.println("Job Initialization Complete, The status of the Mirror job will be written to: "
-						+ statusPath);
+						+ stateManager.getReportPath());
 		return job;
 	}
 

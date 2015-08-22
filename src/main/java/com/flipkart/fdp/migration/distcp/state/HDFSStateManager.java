@@ -49,6 +49,7 @@ public class HDFSStateManager implements StateManager {
 	public static final String CONFIG_FILE_NAME = "config.json";
 	public static final String LOCK_FILE_NAME = ".lock";
 	public static final String PREVIOUS_STATE_FILE_NAME = "prev.state";
+	public static final String RUN_ID = "run_id";
 
 	private Configuration configuration = null;
 	private DCMConfig dcmConfig = null;
@@ -67,25 +68,26 @@ public class HDFSStateManager implements StateManager {
 
 		this.configuration = conf;
 		this.dcmConfig = config;
-		this.runId = String.valueOf(System.currentTimeMillis());
+
 		batchBasePath = new Path(dcmConfig.getStatusPath() + "/"
 				+ dcmConfig.getBatchName());
 		fs = FileSystem.get(configuration);
 
-		String spath = configuration.get(STATUS_PATH_KEY);
+		runId = configuration.get(RUN_ID);
 
-		if (statusPath == null) {
-
+		if (runId == null) {
+			runId = String.valueOf(System.currentTimeMillis());
 			runPath = new Path(batchBasePath, runId);
 			statusPath = new Path(runPath, STATUS_PATH);
 
+			configuration.set(RUN_ID, runId);
 			configuration.set(STATUS_PATH_KEY, statusPath.toString());
 			configuration.set(RUN_PATH_KEY, runPath.toString());
 			saveConfig();
 			System.out.println("New HDFS Run Location: " + runPath.toString());
 		} else {
 			runPath = new Path(configuration.get(RUN_PATH_KEY));
-			statusPath = new Path(spath);
+			statusPath = new Path(configuration.get(STATUS_PATH_KEY));
 		}
 		lockFilePath = new Path(batchBasePath, LOCK_FILE_NAME);
 

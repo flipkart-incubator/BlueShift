@@ -39,6 +39,7 @@ public class MySqlStateManager implements StateManager {
 
 	private Configuration configuration = null;
 	private DCMConfig dcmConfig = null;
+	private Path reportPath = null;
 
 	private DBInitializer dbHelper = null;
 	private CBatchApi batchAPI = null;
@@ -56,11 +57,22 @@ public class MySqlStateManager implements StateManager {
 
 		this.configuration = conf;
 		this.dcmConfig = config;
-		runId = String.valueOf(System.currentTimeMillis());
+		runId = configuration.get(HDFSStateManager.RUN_ID);
+
+		if (runId == null) {
+			runId = String.valueOf(System.currentTimeMillis());
+			configuration.set(HDFSStateManager.RUN_ID, runId);
+		}
 		dbHelper = new DBInitializer(dcmConfig.getDbConfig());
 		batchAPI = new CBatchApi(dbHelper);
 		batchRunsAPI = new CBatchRunsApi(dbHelper);
 		mapDetails = new CMapperDetailsApi(dbHelper);
+
+		Path batchBasePath = new Path(dcmConfig.getStatusPath() + "/"
+				+ dcmConfig.getBatchName());
+
+		Path runPath = new Path(batchBasePath, runId);
+		reportPath = new Path(runPath, HDFSStateManager.REPORT_PATH);
 	}
 
 	@Override
@@ -191,11 +203,7 @@ public class MySqlStateManager implements StateManager {
 
 	@Override
 	public Path getReportPath() {
-		Path batchBasePath = new Path(dcmConfig.getStatusPath() + "/"
-				+ dcmConfig.getBatchName());
-
-		Path runPath = new Path(batchBasePath, runId);
-		return new Path(runPath, HDFSStateManager.REPORT_PATH);
+		return reportPath;
 	}
 
 	@Override
