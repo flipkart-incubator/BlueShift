@@ -78,8 +78,8 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		dcmCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSourceConfig()
 				.getConnectionConfig());
 
-		excludeList = MirrorUtils.getStringAsLists(conf.get(EXCLUDE_FILES));
-		includeList = MirrorUtils.getStringAsLists(conf.get(INCLUDE_FILES));
+		excludeList = getExclusionsFileList(conf);
+		includeList = getInclusionFileList(conf);
 		HashMap<String, FileStatus> inputFileMap = new HashMap<String, FileStatus>();
 
 		List<InputSplit> splits = new ArrayList<InputSplit>();
@@ -232,6 +232,16 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 			Collection<String> files) {
 		conf.set(MirrorFileInputFormat.INCLUDE_FILES,
 				MirrorUtils.getListAsString(files));
+	}
+
+	public static Set<String> getExclusionsFileList(Configuration conf) {
+
+		return MirrorUtils.getStringAsLists(conf.get(EXCLUDE_FILES));
+
+	}
+
+	public static Set<String> getInclusionFileList(Configuration conf) {
+		return MirrorUtils.getStringAsLists(conf.get(INCLUDE_FILES));
 	}
 
 	public List<Set<IInputJob>> optimizeWorkload(Set<OptimTuple> tasks,

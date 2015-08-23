@@ -72,12 +72,18 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 				.getIncludeListFile());
 		excludeList = MirrorUtils.getFileAsLists(dcmConfig.getSourceConfig()
 				.getExcludeListFile());
+
 	}
 
 	public int run(String[] args) throws Exception {
 
 		configuration = getConf();
 
+		MirrorFileInputFormat.setExclusionsFileList(configuration, excludeList);
+		MirrorFileInputFormat.setInclusionFileList(configuration, includeList);
+
+		System.out.println("Inclusion File List: "
+				+ MirrorFileInputFormat.getInclusionFileList(configuration));
 		// Setting task timeout to 2 hrs
 		configuration.setLong("mapred.task.timeout", 1000 * 60 * 60 * 2);
 
@@ -147,6 +153,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 		System.out.println("Initializing Blueshift v 0.1...");
 		System.out.println("Configuration: " + dcmConfig.toString());
+
 		@SuppressWarnings("deprecation")
 		Job job = new Job(configuration, "Blueshift v 0.1 - "
 				+ dcmConfig.getBatchName());
@@ -164,9 +171,6 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 		job.setInputFormatClass(MirrorFileInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
-
-		MirrorFileInputFormat.setExclusionsFileList(configuration, excludeList);
-		MirrorFileInputFormat.setInclusionFileList(configuration, includeList);
 
 		FileOutputFormat.setOutputPath(job, stateManager.getReportPath());
 
@@ -192,8 +196,9 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		options.addOption("p", true, "properties filename from the classpath");
 		options.addOption("P", true, "external properties filename");
 		options.addOption("D", true, "JVM and Hadoop Configuration Override");
-		options.addOption("libjars", true, "JVM and Hadoop Configuration Override");
-		
+		options.addOption("libjars", true,
+				"JVM and Hadoop Configuration Override");
+
 		options.addOption(OptionBuilder.withArgName("property=value")
 				.hasArgs(2).withValueSeparator()
 				.withDescription("use value for given property").create("D"));
