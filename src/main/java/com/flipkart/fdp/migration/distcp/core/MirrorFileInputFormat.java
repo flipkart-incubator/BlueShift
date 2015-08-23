@@ -62,14 +62,15 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 	private DCMCodec dcmCodec = null;
 	private Configuration conf = null;
 	private DCMConfig dcmConfig = null;
-	private Set<String> excludeList = null;
-	private Set<String> includeList = null;
-	private Map<String, TransferStatus> previousState = null;
 	private StateManager stateManager = null;
 
 	@Override
 	public List<InputSplit> getSplits(JobContext context) throws IOException,
 			InterruptedException {
+
+		Set<String> excludeList = null;
+		Set<String> includeList = null;
+		Map<String, TransferStatus> previousState = null;
 
 		System.out.println("Calculating Job Splits...");
 		conf = context.getConfiguration();
@@ -105,7 +106,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 					.println("Filtering Input File Set based on User defined filters.");
 			for (FileStatus fstat : fstats) {
 
-				if (!ignoreFile(fstat)) {
+				if (!ignoreFile(fstat, excludeList, previousState)) {
 					String file = fstat.getPath().toString();
 					locations.add(new OptimTuple(file, fstat.getLen()));
 					inputFileMap.put(file, fstat);
@@ -176,7 +177,8 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		});
 	}
 
-	private boolean ignoreFile(FileStatus fileStat) {
+	private boolean ignoreFile(FileStatus fileStat, Set<String> excludeList,
+			Map<String, TransferStatus> previousState) {
 
 		boolean ignoreFile = false;
 
