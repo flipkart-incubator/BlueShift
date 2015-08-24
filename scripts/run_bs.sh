@@ -14,19 +14,18 @@ ts=`date +%s`
 export HADOOP_USER_NAME=admin
 batch_name=FDP_GA1_TO_BHEEMA_01
 
-echo "Starting batch ${batch_name}"
-
-cp dcmconfig.json driver.json
+echo "Starting batch - ${batch_name}, Instance TimeStamp - ${ts}"
 
 for line in $filelines ; do
 
-    ts=`date +%s`
-    echo "Start copy - ${ts}"
-
-    sed -i.bak "s/${batch_name}/${ts}/g" driver.json
-    batch_name=${ts}
-
+    cp dcmconfig.json driver.json
+    hash="$(echo -n "${line}" | md5sum )"
+    
+    sed -i.bak "s/${batch_name}/${hash}/g" driver.json
     echo "${line}" > include.list
+    
+    echo "Start copy of path - ${line}, hash id - ${hash}"
+
     echo "Running : hadoop blueshift ${line} "
     hadoop jar blueshift.jar -Dmapreduce.job.queuename=admin -libjars /usr/share/fk-bigfoot-4mc/lib/hadoop-4mc-1.1.0.jar -Pdriver.json &
 
@@ -35,10 +34,10 @@ for line in $filelines ; do
     NPROC=$(($NPROC+1))
     if [ "$NPROC" -ge 20 ]; then
 #        wait
-        sleep 300
+        sleep 150
         NPROC=0
     fi
 
 done
 
-echo "Done Batch - ${ts}"
+echo "Done Batch batch - ${batch_name}, Instance TimeStamp - ${ts}"
