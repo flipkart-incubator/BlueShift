@@ -249,7 +249,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 	public List<Set<IInputJob>> optimizeWorkload(Set<OptimTuple> tasks,
 			int numMappers) {
 
-		System.out.println("Total Tasks: " + tasks.size() + " Total Reducers: "
+		System.out.println("Total Tasks: " + tasks.size() + " Total Mappers: "
 				+ numMappers);
 		Optimizer optimizer = Optimizer.PRIORITY_QUEUE_BASED;
 
