@@ -151,11 +151,10 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 	private Job createJob(Configuration configuration) throws Exception {
 
-		System.out.println("Initializing Blueshift v 0.1...");
+		System.out.println("Initializing BlueShift v 0.1...");
 		System.out.println("Configuration: " + dcmConfig.toString());
 
-		@SuppressWarnings("deprecation")
-		Job job = new Job(configuration, "Blueshift v 0.1 - "
+		Job job = Job.getInstance(configuration, "BlueShift v 0.1 - "
 				+ dcmConfig.getBatchName());
 
 		job.setJarByClass(MirrorDistCPDriver.class);
