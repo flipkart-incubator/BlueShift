@@ -233,10 +233,15 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 		String destPath = dcmConfig.getSinkConfig().getPath() + srcPath;
 
+		status.setInputPath(srcPath);
+		status.setOutputPath(destPath);
+
 		if (status.isInputTransformed()) {
+			destPath = MirrorUtils.stripExtension(destPath);
+			status.setOutputPath(destPath);
+			
 			in = inCodec.createInputStream(conf, srcPath);
 			in = MirrorUtils.getCodecInputStream(conf, dcmConfig, srcPath, in);
-			destPath = MirrorUtils.stripExtension(destPath);
 		} else {
 			in = inCodec.createInputStream(conf, srcPath);
 		}
@@ -244,11 +249,14 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		if (status.isOutputCompressed()) {
 			destPath = destPath + "."
 					+ dcmConfig.getSinkConfig().getCompressionCodec();
+			status.setOutputPath(destPath);
+			
 			if (!dcmConfig.getSinkConfig().isOverwriteFiles()) {
 				if (outCodec.isExistsPath(destPath)) {
 					throw new FileAlreadyExistsException(destPath);
 				}
 			}
+			
 			out = outCodec.createOutputStream(conf, destPath, dcmConfig
 					.getSinkConfig().isAppend());
 			out = MirrorUtils.getCodecOutputStream(conf, dcmConfig, destPath,
@@ -257,9 +265,6 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 			out = outCodec.createOutputStream(conf, destPath, dcmConfig
 					.getSinkConfig().isAppend());
 		}
-
-		status.setInputPath(srcPath);
-		status.setOutputPath(destPath);
 
 		String statusMesg = "Processing: " + srcPath + " -> " + destPath;
 		context.setStatus(statusMesg);
