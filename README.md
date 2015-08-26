@@ -67,6 +67,7 @@ The tool can be downloaded from,
 
 http://github.com/flipkart-incubator/blueshift
 
+git checkout Stable-Version-1.0
 
 ## **Build and Run**
 
