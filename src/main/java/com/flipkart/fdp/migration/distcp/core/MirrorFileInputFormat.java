@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -81,7 +80,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 		excludeList = getExclusionsFileList(conf);
 		includeList = getInclusionFileList(conf);
-		HashMap<String, FileStatus> inputFileMap = new HashMap<String, FileStatus>();
+		HashMap<String, FileTuple> inputFileMap = new HashMap<String, FileTuple>();
 
 		List<InputSplit> splits = new ArrayList<InputSplit>();
 		Set<OptimTuple> locations = new HashSet<OptimTuple>();
@@ -89,7 +88,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		long totalBatchSize = 0;
 		try {
 			System.out.println("Scanning source location...");
-			List<FileStatus> fstats = null;
+			List<FileTuple> fstats = null;
 			if (includeList != null && includeList.size() > 0)
 				fstats = dcmCodec.getInputPaths(includeList, excludeList);
 			else
@@ -104,12 +103,12 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 			System.out
 					.println("Filtering Input File Set based on User defined filters.");
-			for (FileStatus fstat : fstats) {
+			for (FileTuple fstat : fstats) {
 
 				if (!ignoreFile(fstat, excludeList, previousState)) {
-					String file = fstat.getPath().toString();
-					locations.add(new OptimTuple(file, fstat.getLen()));
-					inputFileMap.put(file, fstat);
+
+					locations.add(new OptimTuple(fstat.fileName, fstat.size));
+					inputFileMap.put(fstat.fileName, fstat);
 				}
 			}
 			System.out.println("Optimizing Splits...");
@@ -124,9 +123,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 					List<FileTuple> tuple = new ArrayList<FileTuple>();
 					long size = 0;
 					for (IInputJob stat : stats) {
-						tuple.add(new FileTuple(stat.getJobKey(), stat
-								.getJobSize(), inputFileMap.get(
-								stat.getJobKey()).getModificationTime()));
+						tuple.add(inputFileMap.get(stat.getJobKey()));
 						size += stat.getJobSize();
 					}
 					totalBatchSize += size;
@@ -135,9 +132,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 			} else {
 				for (OptimTuple stat : locations) {
 					List<FileTuple> tuple = new ArrayList<FileTuple>();
-					tuple.add(new FileTuple(stat.jobKey, stat.size,
-							inputFileMap.get(stat.getJobKey())
-									.getModificationTime()));
+					tuple.add(inputFileMap.get(stat.getJobKey()));
 					splits.add(new MirrorInputSplit(tuple, stat.getJobSize()));
 					totalBatchSize += stat.getJobSize();
 				}
@@ -177,13 +172,13 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		});
 	}
 
-	private boolean ignoreFile(FileStatus fileStat, Set<String> excludeList,
+	private boolean ignoreFile(FileTuple fileStat, Set<String> excludeList,
 			Map<String, TransferStatus> previousState) {
 
 		boolean ignoreFile = false;
 
 		// File Size Based Rules
-		long fileSize = fileStat.getLen();
+		long fileSize = fileStat.size;
 		if (fileSize <= 0 && dcmConfig.getSourceConfig().isIgnoreEmptyFiles())
 			return true;
 
@@ -196,22 +191,22 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 		// File Time Based rules
 		long ts = dcmConfig.getSourceConfig().getStartTS();
-		if (ts > 0 && fileStat.getModificationTime() < ts)
+		if (ts > 0 && fileStat.ts < ts)
 			return true;
 
 		ts = dcmConfig.getSourceConfig().getEndTS();
-		if (ts > 0 && fileStat.getModificationTime() > ts)
+		if (ts > 0 && fileStat.ts > ts)
 			return true;
 
 		// File Name based rules
-		String path = MirrorUtils.getSimplePath(fileStat.getPath());
+		String path = fileStat.fileName;
 		if (excludeList.contains(path))
 			return true;
 
 		if (previousState.containsKey(path)) {
 			TransferStatus details = previousState.get(path);
 			if (details.getStatus() == Status.COMPLETED
-					&& details.getTs() == fileStat.getModificationTime())
+					&& details.getTs() == fileStat.ts)
 				return true;
 		}
 		return ignoreFile;

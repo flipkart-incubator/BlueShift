@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileAlreadyExistsException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.Text;
@@ -141,6 +142,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 				try {
 					analyzeStrategy();
+
 					initializeStreams();
 
 					digest = MirrorUtils.copy(in, out, context);
@@ -179,7 +181,6 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		if (stat != null && stat.getStatus() == Status.COMPLETED) {
 			return stat;
 		}
-
 		return null;
 	}
 
@@ -227,7 +228,8 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		}
 	}
 
-	private void initializeStreams() throws IOException {
+	private void initializeStreams() throws IOException,
+			FileAlreadyExistsException {
 
 		String destPath = dcmConfig.getSinkConfig().getPath() + srcPath;
 
@@ -242,6 +244,11 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		if (status.isOutputCompressed()) {
 			destPath = destPath + "."
 					+ dcmConfig.getSinkConfig().getCompressionCodec();
+			if (!dcmConfig.getSinkConfig().isOverwriteFiles()) {
+				if (outCodec.isExistsPath(destPath)) {
+					throw new FileAlreadyExistsException(destPath);
+				}
+			}
 			out = outCodec.createOutputStream(conf, destPath, dcmConfig
 					.getSinkConfig().isAppend());
 			out = MirrorUtils.getCodecOutputStream(conf, dcmConfig, destPath,

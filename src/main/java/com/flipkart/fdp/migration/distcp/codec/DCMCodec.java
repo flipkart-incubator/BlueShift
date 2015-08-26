@@ -26,7 +26,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
+
+import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 
 public interface DCMCodec extends Closeable {
 
@@ -40,9 +41,11 @@ public interface DCMCodec extends Closeable {
 
 	public boolean isSplitable();
 
-	public List<FileStatus> getInputPaths(String path,
+	public boolean isExistsPath(String path) throws IOException;
+
+	public List<FileTuple> getInputPaths(String path,
 			Collection<String> excludeList) throws Exception;
 
-	public List<FileStatus> getInputPaths(Collection<String> paths,
+	public List<FileTuple> getInputPaths(Collection<String> paths,
 			Collection<String> excludeList) throws Exception;
 }
