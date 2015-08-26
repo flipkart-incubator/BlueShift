@@ -67,21 +67,22 @@ The tool can be downloaded from,
 
 http://github.com/flipkart-incubator/blueshift
 
-git checkout Stable-Version-1.0
 
 ## **Build and Run**
 
 Step 1: Clone the project to your local,
 
-git clone https://github.com/flipkart-incubator/blueshift.git
+        git clone https://github.com/flipkart-incubator/blueshift.git
+
+        git checkout Stable-Version-1.0
 
 Step 2: Build the project, switch to the cloned project directory and execute
 
-mvn clean install -DskipTests
+        mvn clean install -DskipTests
 
 Step 3: Copy the newly created jar to your gateways and run the below command, 
 
-hadoop jar blueshift.jar -Pdriver.json
+        hadoop jar blueshift.jar -Pdriver.json
 
 ## **Contributors**
 
