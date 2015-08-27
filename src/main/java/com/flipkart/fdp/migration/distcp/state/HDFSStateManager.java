@@ -224,11 +224,10 @@ public class HDFSStateManager implements StateManager {
 				TransferStatus ostat = status.get(stat.getInputPath());
 				if (ostat == null) {
 					status.put(stat.getInputPath(), stat);
-				} else {
-					if (stat.getTs() >= ostat.getTs()) {
-						status.put(stat.getInputPath(), stat);
-					}
 				}
+				// else {
+				// status.put(stat.getInputPath(), stat);
+				// }
 			}
 		}
 	}
