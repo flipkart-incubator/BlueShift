@@ -135,6 +135,9 @@ public class MirrorUtils {
 						fileName));
 				String line = null;
 				while ((line = reader.readLine()) != null) {
+					if (line.trim().length() <= 1 || line.startsWith("#"))
+						continue;
+
 					files.add(line);
 				}
 				reader.close();
