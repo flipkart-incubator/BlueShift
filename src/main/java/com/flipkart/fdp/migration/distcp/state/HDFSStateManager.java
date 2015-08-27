@@ -190,7 +190,7 @@ public class HDFSStateManager implements StateManager {
 
 			@Override
 			public int compare(FileStatus o1, FileStatus o2) {
-				return (int) (o1.getModificationTime() - o2
+				return (int) (o2.getModificationTime() - o1
 						.getModificationTime());
 				// decending order sort by timestamp
 			}
