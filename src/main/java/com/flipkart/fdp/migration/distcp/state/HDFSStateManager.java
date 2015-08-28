@@ -25,7 +25,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -178,19 +179,32 @@ public class HDFSStateManager implements StateManager {
 		if (fstats == null || fstats.length <= 0)
 			return status;
 
-		Arrays.sort(fstats);
+		List<FileStatus> fstatList = new ArrayList<FileStatus>();
+
+		for (FileStatus fstat : fstats) {
+			if (fstat.isDirectory())
+				fstatList.add(fstat);
+		}
+
+		Collections.sort(fstatList, new Comparator<FileStatus>() {
+
+			@Override
+			public int compare(FileStatus o1, FileStatus o2) {
+				return (int) (o2.getModificationTime() - o1
+						.getModificationTime());
+				// decending order sort by timestamp
+			}
+		});
 
 		// ignore the current state folder as well.
-		int index = fstats.length - 2;
+		fstatList.remove(0);
 
-		while (index >= 0) {
-			System.out.println("Processing State History: "
-					+ fstats[index].getPath());
-			if (fs.isDirectory(fstats[index].getPath())) {
-				Path spath = new Path(fstats[index].getPath(),
-						PREVIOUS_STATE_FILE_NAME);
+		for (FileStatus fstat : fstatList) {
+			System.out.println("Processing State History: " + fstat.getPath());
+			if (fs.isDirectory(fstat.getPath())) {
+				Path spath = new Path(fstat.getPath(), PREVIOUS_STATE_FILE_NAME);
 				List<TransferStatus> stats = getAllStats(new Path(
-						fstats[index].getPath(), STATUS_PATH));
+						fstat.getPath(), STATUS_PATH));
 				mergeStates(status, stats);
 				if (fs.exists(spath)) {
 					stats = getAllStats(spath);
@@ -198,7 +212,6 @@ public class HDFSStateManager implements StateManager {
 					break;
 				}
 			}
-			index--;
 		}
 		return status;
 	}
@@ -211,11 +224,10 @@ public class HDFSStateManager implements StateManager {
 				TransferStatus ostat = status.get(stat.getInputPath());
 				if (ostat == null) {
 					status.put(stat.getInputPath(), stat);
-				} else {
-					if (stat.getTs() >= ostat.getTs()) {
-						status.put(stat.getInputPath(), stat);
-					}
 				}
+				// else {
+				// status.put(stat.getInputPath(), stat);
+				// }
 			}
 		}
 	}

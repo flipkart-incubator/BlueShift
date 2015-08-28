@@ -26,6 +26,7 @@ import org.apache.hadoop.fs.FileSystem;
 
 import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.SecurityType;
 
 public class DCMCodecFactory {
 
@@ -72,8 +73,11 @@ public class DCMCodecFactory {
 
 		String httpfsUrl = scheme + config.getHost() + ":" + config.getPort();
 
-		return FileSystem.newInstance(new URI(httpfsUrl), conf,
-				config.getUserName());
+		if (config.getSecurityType() == SecurityType.KERBEROS)
+			return FileSystem.newInstance(new URI(httpfsUrl), conf);
+		else
+			return FileSystem.newInstance(new URI(httpfsUrl), conf,
+					config.getUserName());
 	}
 
 }

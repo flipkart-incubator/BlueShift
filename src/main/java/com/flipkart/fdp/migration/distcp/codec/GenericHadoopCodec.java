@@ -34,6 +34,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
 
+import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
 
 public class GenericHadoopCodec implements DCMCodec {
@@ -69,21 +70,21 @@ public class GenericHadoopCodec implements DCMCodec {
 		return false;
 	}
 
-	public List<FileStatus> getInputPaths(String path,
+	public List<FileTuple> getInputPaths(String path,
 			Collection<String> excludeList) throws Exception {
 
 		String paths[] = path.split(",");
 		return getInputPaths(Arrays.asList(paths), excludeList);
 	}
 
-	public List<FileStatus> getInputPaths(Collection<String> paths,
+	public List<FileTuple> getInputPaths(Collection<String> paths,
 			Collection<String> excludeList) throws Exception {
 
-		List<FileStatus> fileList = new ArrayList<FileStatus>();
+		List<FileTuple> fileList = new ArrayList<FileTuple>();
 		System.out.println("A total of " + paths.size() + " paths to scan...");
 		for (String path : paths) {
 			System.out.println("Processing path: " + path);
-			List<FileStatus> fstat = getFileStatusRecursive(new Path(path),
+			List<FileTuple> fstat = getFileStatusRecursive(new Path(path),
 					excludeList);
 			fileList.addAll(fstat);
 		}
@@ -95,15 +96,17 @@ public class GenericHadoopCodec implements DCMCodec {
 
 	}
 
-	public List<FileStatus> getFileStatusRecursive(Path path,
+	public List<FileTuple> getFileStatusRecursive(Path path,
 			Collection<String> excludeList) throws MalformedURLException,
 			IOException, AuthenticationException {
 
-		List<FileStatus> response = new ArrayList<FileStatus>();
+		List<FileTuple> response = new ArrayList<FileTuple>();
 
 		FileStatus file = fs.getFileStatus(path);
 		if (file != null && file.isFile()) {
-			response.add(file);
+			response.add(new FileTuple(
+					MirrorUtils.getSimplePath(file.getPath()), file.getLen(),
+					file.getModificationTime()));
 			return response;
 		}
 
@@ -121,10 +124,17 @@ public class GenericHadoopCodec implements DCMCodec {
 							excludeList));
 				} else {
 
-					response.add(fstat);
+					response.add(new FileTuple(MirrorUtils.getSimplePath(fstat
+							.getPath()), fstat.getLen(), fstat
+							.getModificationTime()));
 				}
 			}
 		}
 		return response;
+	}
+
+	@Override
+	public boolean isExistsPath(String path) throws IOException {
+		return fs.exists(new Path(path));
 	}
 }
