@@ -36,6 +36,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
 
 import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
@@ -313,7 +314,10 @@ public class HDFSStateManager implements StateManager {
 
 	@Override
 	public void close() throws IOException {
-		statusWriter.close();
+		if (statusWriter != null) {
+			IOUtils.closeStream(statusWriter);
+			statusWriter = null;
+		}
 	}
 
 }
