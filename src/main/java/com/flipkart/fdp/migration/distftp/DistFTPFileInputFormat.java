@@ -127,7 +127,7 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
                         if( requiredSize > availableSize )
                             throw new Exception("Total Files size is more than available space on disk! ");
                         else
-                            splits.add(new DistFTPInputSplit(tuple,requiredSize, new HostConfig(hostConfigList.get(index++))));
+                            splits.add(new DistFTPInputSplit(tuple,requiredSize, new HostConfig(reverseSortedHostConfgList.get(index++))));
 
                     }
 

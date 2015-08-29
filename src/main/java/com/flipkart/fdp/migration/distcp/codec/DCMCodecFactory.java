@@ -71,13 +71,13 @@ public class DCMCodecFactory {
 	public static FileSystem getHadoopFilesystem(String scheme,
 			Configuration conf, ConnectionConfig config) throws Exception {
 
-		String httpfsUrl = scheme + config.getHost() + ":" + config.getPort();
+		String httpfsUrl = scheme + config.getHostConfig().getHost() + ":" + config.getHostConfig().getPort();
 
-		if (config.getSecurityType() == SecurityType.KERBEROS)
+		if (config.getHostConfig().getSecurityType() == SecurityType.KERBEROS)
 			return FileSystem.newInstance(new URI(httpfsUrl), conf);
 		else
 			return FileSystem.newInstance(new URI(httpfsUrl), conf,
-					config.getUserName());
+					config.getHostConfig().getUserName());
 	}
 
 }

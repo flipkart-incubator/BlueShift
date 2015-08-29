@@ -119,6 +119,8 @@ public class DistFTPMirrorFileRecordReader extends RecordReader<Text, Text> {
 
                     initializeStreams(destPath);
 
+                    ftpClient.connect(fSplit.getHostConfig());
+
                     digest = MirrorUtils.copy(destPath,in,context,ftpClient);
 
                     status.setStatus(Status.COMPLETED);

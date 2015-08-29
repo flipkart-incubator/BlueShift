@@ -71,4 +71,15 @@ public class DistFTPInputSplit extends InputSplit implements Writable {
         return new String[] {};
     }
 
+    public void setLength(long length) {
+        this.length = length;
+    }
+
+    public List<MirrorDCMImpl.FileTuple> getSplits() {
+        return splits;
+    }
+
+    public void setSplits(List<MirrorDCMImpl.FileTuple> splits) {
+        this.splits = splits;
+    }
 }
