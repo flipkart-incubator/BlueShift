@@ -73,27 +73,44 @@ public class GenericHadoopCodec implements DCMCodec {
 	public List<FileTuple> getInputPaths(String path,
 			Collection<String> excludeList) throws Exception {
 
-		String paths[] = path.split(",");
-		return getInputPaths(Arrays.asList(paths), excludeList);
+		return getInputPaths(Arrays.asList(new String[] { path }), excludeList);
 	}
 
 	public List<FileTuple> getInputPaths(Collection<String> paths,
 			Collection<String> excludeList) throws Exception {
 
-		List<FileTuple> fileList = new ArrayList<FileTuple>();
 		System.out.println("A total of " + paths.size() + " paths to scan...");
+
+		List<FileTuple> fileList = new ArrayList<FileTuple>();
+		List<String> inputPaths = new ArrayList<String>();
+
+		// Process regular expression based paths
 		for (String path : paths) {
+
 			System.out.println("Processing path: " + path);
-			List<FileTuple> fstat = getFileStatusRecursive(new Path(path),
-					excludeList);
-			fileList.addAll(fstat);
+			FileStatus[] stats = fs.globStatus(new Path(path));
+
+			for (FileStatus fstat : stats) {
+				if (fstat.isFile()) {
+					fileList.add(new FileTuple(MirrorUtils.getSimplePath(fstat
+							.getPath()), fstat.getLen(), fstat
+							.getModificationTime()));
+				} else {
+					inputPaths.add(MirrorUtils.getSimplePath(fstat.getPath()));
+				}
+			}
+		}
+
+		if (inputPaths.size() > 0) {
+
+			for (String path : inputPaths) {
+
+				List<FileTuple> fstat = getFileStatusRecursive(new Path(path),
+						excludeList);
+				fileList.addAll(fstat);
+			}
 		}
 		return fileList;
-	}
-
-	public void close() throws IOException {
-		IOUtils.closeStream(fs);
-
 	}
 
 	public List<FileTuple> getFileStatusRecursive(Path path,
@@ -136,5 +153,10 @@ public class GenericHadoopCodec implements DCMCodec {
 	@Override
 	public boolean isExistsPath(String path) throws IOException {
 		return fs.exists(new Path(path));
+	}
+
+	public void close() throws IOException {
+		IOUtils.closeStream(fs);
+
 	}
 }

@@ -36,6 +36,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
 
 import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
@@ -201,16 +202,15 @@ public class HDFSStateManager implements StateManager {
 
 		for (FileStatus fstat : fstatList) {
 			System.out.println("Processing State History: " + fstat.getPath());
-			if (fs.isDirectory(fstat.getPath())) {
-				Path spath = new Path(fstat.getPath(), PREVIOUS_STATE_FILE_NAME);
-				List<TransferStatus> stats = getAllStats(new Path(
-						fstat.getPath(), STATUS_PATH));
+
+			Path spath = new Path(fstat.getPath(), PREVIOUS_STATE_FILE_NAME);
+			List<TransferStatus> stats = getAllStats(new Path(fstat.getPath(),
+					STATUS_PATH));
+			mergeStates(status, stats);
+			if (fs.exists(spath)) {
+				stats = getAllStats(spath);
 				mergeStates(status, stats);
-				if (fs.exists(spath)) {
-					stats = getAllStats(spath);
-					mergeStates(status, stats);
-					break;
-				}
+				break;
 			}
 		}
 		return status;
@@ -265,7 +265,7 @@ public class HDFSStateManager implements StateManager {
 			}
 		}
 		if (fstats == null || fstats.length <= 0)
-			return null;
+			return status;
 
 		for (FileStatus fstat : fstats) {
 
@@ -284,7 +284,11 @@ public class HDFSStateManager implements StateManager {
 							if (tstat != null)
 								status.add(tstat);
 						} catch (Exception ein) {
-							// ignore faulty records
+							System.out
+									.println("Exception Reading from location: "
+											+ fstat.getPath()
+											+ ", Message: "
+											+ ein.getMessage());
 						}
 					}
 					reader.close();
@@ -310,7 +314,10 @@ public class HDFSStateManager implements StateManager {
 
 	@Override
 	public void close() throws IOException {
-		statusWriter.close();
+		if (statusWriter != null) {
+			IOUtils.closeStream(statusWriter);
+			statusWriter = null;
+		}
 	}
 
 }

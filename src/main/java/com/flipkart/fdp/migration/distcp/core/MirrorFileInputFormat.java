@@ -205,9 +205,13 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 		if (previousState.containsKey(path)) {
 			TransferStatus details = previousState.get(path);
-			if (details.getStatus() == Status.COMPLETED
-					&& details.getTs() == fileStat.ts)
+			if (details.getStatus() == Status.COMPLETED) {
+				if (dcmConfig.getSourceConfig().isIncludeUpdatedFiles()
+						&& details.getTs() < fileStat.ts)
+					return false;
+
 				return true;
+			}
 		}
 		return ignoreFile;
 	}

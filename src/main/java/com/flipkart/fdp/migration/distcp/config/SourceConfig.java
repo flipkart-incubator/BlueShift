@@ -40,6 +40,7 @@ public class SourceConfig {
 	private boolean deleteSource = false;
 	private boolean ignoreEmptyFiles = false;
 	private boolean transformSource = false;
+	private boolean includeUpdatedFiles = false;
 	private long compressionThreshold = 0;
 
 	private ConnectionConfig connectionConfig = null;
@@ -162,6 +163,14 @@ public class SourceConfig {
 
 	public void setTransformSource(boolean transformSource) {
 		this.transformSource = transformSource;
+	}
+
+	public boolean isIncludeUpdatedFiles() {
+		return includeUpdatedFiles;
+	}
+
+	public void setIncludeUpdatedFiles(boolean includeUpdatedFiles) {
+		this.includeUpdatedFiles = includeUpdatedFiles;
 	}
 
 	@Override

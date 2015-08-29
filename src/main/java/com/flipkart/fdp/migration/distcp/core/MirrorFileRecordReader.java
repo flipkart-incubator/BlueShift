@@ -239,7 +239,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		if (status.isInputTransformed()) {
 			destPath = MirrorUtils.stripExtension(destPath);
 			status.setOutputPath(destPath);
-			
+
 			in = inCodec.createInputStream(conf, srcPath);
 			in = MirrorUtils.getCodecInputStream(conf, dcmConfig, srcPath, in);
 		} else {
@@ -250,13 +250,13 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 			destPath = destPath + "."
 					+ dcmConfig.getSinkConfig().getCompressionCodec();
 			status.setOutputPath(destPath);
-			
+
 			if (!dcmConfig.getSinkConfig().isOverwriteFiles()) {
 				if (outCodec.isExistsPath(destPath)) {
 					throw new FileAlreadyExistsException(destPath);
 				}
 			}
-			
+
 			out = outCodec.createOutputStream(conf, destPath, dcmConfig
 					.getSinkConfig().isAppend());
 			out = MirrorUtils.getCodecOutputStream(conf, dcmConfig, destPath,
@@ -311,5 +311,6 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		System.out.println("Transfer Complete...");
 		IOUtils.closeStream(inCodec);
 		IOUtils.closeStream(outCodec);
+		IOUtils.closeStream(stateManager);
 	}
 }

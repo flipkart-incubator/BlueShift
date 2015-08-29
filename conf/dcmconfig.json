@@ -18,6 +18,7 @@
     "deleteSource": false,
     "ignoreEmptyFiles": false,
     "transformSource": false,
+    "includeUpdatedFiles": false,
     "compressionThreshold": 0,
     "customSourceImplClass": "",
     
