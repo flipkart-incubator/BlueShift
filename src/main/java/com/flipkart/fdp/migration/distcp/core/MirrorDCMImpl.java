@@ -53,10 +53,11 @@ public class MirrorDCMImpl {
 		}
 	}
 
+    //Todo://Make a separate calss with private fields
 	public static class FileTuple implements Writable {
-		String fileName;
-		long size;
-		long ts;
+		public String fileName;
+		public long size;
+		public long ts;
 
 		public FileTuple() {
 

@@ -48,6 +48,7 @@ public class DCMConstants {
 	public static final String END_TIMESTAMP = "end_ts";
 	public static final String COMPRESSION_THRESHOLD = "compression_threshold";
 	public static final String INPLACE_TRANSFORM = "inplace_transform";
+    public static final String DIST_FTP_CONN_PARAM = "DistFTP";
 
 	public static final String MAX_FILESIZE = "max_filesize";
 	public static final String MIN_FILESIZE = "min_filesize";
@@ -84,8 +85,16 @@ public class DCMConstants {
 	}
 
 	public static enum SecurityType {
-		PSEUDO, KERBEROS, SIMPLE, NONE
-	}
+		PSEUDO, KERBEROS, SIMPLE, NONE;
+
+        SecurityType(String s) {
+
+        }
+
+        SecurityType() {
+
+        }
+    }
 
 	public static enum StateManagerImpl {
 		HDFS, DB

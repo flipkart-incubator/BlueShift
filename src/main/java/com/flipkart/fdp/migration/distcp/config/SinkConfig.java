@@ -20,6 +20,8 @@ package com.flipkart.fdp.migration.distcp.config;
 
 import com.google.gson.Gson;
 
+import java.util.List;
+
 public class SinkConfig {
 
 	private String path = null;
@@ -48,7 +50,15 @@ public class SinkConfig {
 		return customSinkImplClass;
 	}
 
-	public void setCustomSinkImplClass(String customSinkImplClass) {
+    public ConnectionConfig getConnectionConfig() {
+        return connectionConfig;
+    }
+
+    public void setConnectionConfig(ConnectionConfig connectionConfig) {
+        this.connectionConfig = connectionConfig;
+    }
+
+    public void setCustomSinkImplClass(String customSinkImplClass) {
 		this.customSinkImplClass = customSinkImplClass;
 	}
 
@@ -84,13 +94,6 @@ public class SinkConfig {
 		this.append = append;
 	}
 
-	public ConnectionConfig getConnectionConfig() {
-		return connectionConfig;
-	}
-
-	public void setConnectionConfig(ConnectionConfig connectionConfig) {
-		this.connectionConfig = connectionConfig;
-	}
 
 	@Override
 	public String toString() {

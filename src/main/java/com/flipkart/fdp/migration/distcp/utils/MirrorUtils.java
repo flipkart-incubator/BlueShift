@@ -23,10 +23,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.flipkart.fdp.migration.distftp.DistFTPClient;
+import com.google.common.primitives.Longs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.compress.CompressionCodec;
@@ -126,6 +129,26 @@ public class MirrorUtils {
 				+ ", Time Taken(ms): " + (System.currentTimeMillis() - sts));
 		return digester;
 	}
+
+    public static MD5Digester copy(String destPath,InputStream input,
+                                   TaskAttemptContext context,DistFTPClient ftpClient) throws Exception {
+        long size;
+        long sts = System.currentTimeMillis();
+        MD5Digester digester = new MD5Digester();
+
+        if ( ftpClient.transferFile(destPath, input)) {
+            size = ftpClient.getFileSize(destPath);
+            System.out.println("Transfer Complete Total: " + size + "Host : " + ftpClient.getHostName()
+                    + ", Time Taken(ms): " + (System.currentTimeMillis() - sts));
+        }else
+               throw new Exception("Transfer of "+ destPath +" ---> "+ftpClient.getHostName()+" was Un Sucessfull!!!");
+
+        context.progress();
+
+        digester.updateMd5digester(Longs.toByteArray(size));
+
+        return digester;
+    }
 
 	public static Set<String> getFileAsLists(String fileName) {
 		Set<String> files = new HashSet<String>();

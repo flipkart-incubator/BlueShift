@@ -18,83 +18,56 @@
 
 package com.flipkart.fdp.migration.distcp.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants.FileSystemType;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants.SecurityType;
 import com.google.gson.Gson;
 
+import java.util.List;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ConnectionConfig {
 
 	private FileSystemType type = null;
-	private SecurityType securityType = null;
-	private String host = null;
-	private int port = 0;
-	private String connectionParams = null;
-	private String userName = null;
-	private String userPassword = null;
-	private String keyFile = null;
 
-	public String getHost() {
-		return host;
-	}
 
-	public void setHost(String host) {
-		this.host = host;
-	}
+	private HostConfig hostConfig = null;
 
-	public int getPort() {
-		return port;
-	}
+    private List<HostConfig> hostConfigList = null;
+    private String connectionParams = null;
 
-	public void setPort(int port) {
-		this.port = port;
-	}
+    public String getConnectionParams() {
+        return connectionParams;
+    }
 
-	public String getConnectionParams() {
-		return connectionParams;
-	}
+    public void setConnectionParams(String connectionParams) {
+        this.connectionParams = connectionParams;
+    }
 
-	public void setConnectionParams(String connectionParams) {
-		this.connectionParams = connectionParams;
-	}
 
-	public String getUserName() {
-		return userName;
-	}
+    public HostConfig getHostConfig() {
+        return hostConfig;
+    }
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+    public void setHostConfig(HostConfig hostConfig) {
+        this.hostConfig = hostConfig;
+    }
 
-	public String getUserPassword() {
-		return userPassword;
-	}
+    public List<HostConfig> getHostConfigList() {
+        return hostConfigList;
+    }
 
-	public void setUserPassword(String userPassword) {
-		this.userPassword = userPassword;
-	}
+    public void setHostConfigList(List<HostConfig> hostConfigList) {
+        this.hostConfigList = hostConfigList;
+    }
 
-	public String getKeyFile() {
-		return keyFile;
-	}
-
-	public void setKeyFile(String keyFile) {
-		this.keyFile = keyFile;
-	}
-
-	public FileSystemType getType() {
+    public FileSystemType getType() {
 		return type;
 	}
 
 	public void setType(FileSystemType type) {
 		this.type = type;
-	}
-
-	public SecurityType getSecurityType() {
-		return securityType;
-	}
-
-	public void setSecurityType(SecurityType securityType) {
-		this.securityType = securityType;
 	}
 
 	@Override
