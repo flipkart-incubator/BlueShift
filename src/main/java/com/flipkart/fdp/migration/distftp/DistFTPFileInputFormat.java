@@ -13,6 +13,7 @@ import com.flipkart.fdp.migration.distcp.state.StateManager;
 import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
 import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
+import com.flipkart.fdp.optimizer.Driver;
 import com.flipkart.fdp.optimizer.OptimTuple;
 import com.flipkart.fdp.optimizer.api.IInputJob;
 import com.flipkart.fdp.optimizer.api.IJobLoadOptimizer;
@@ -23,6 +24,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.*;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -38,13 +40,15 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
     private Configuration conf = null;
     private DCMConfig dcmConfig = null;
     private StateManager stateManager = null;
-    private List<DCMCodec> outCodecList = null;
 
     @Override
     public List<InputSplit> getSplits(JobContext context) throws IOException, InterruptedException {
-        Set<String> excludeList = null;
-        Set<String> includeList = null;
-        Map<String, TransferStatus> previousState = null;
+        Set<String> excludeList;
+        Set<String> includeList;
+        Map<String, TransferStatus> previousState;
+        long availableSize;
+        long requiredSize;
+        int index = 0;
 
 
         System.out.println("Calculating Job Splits...");
@@ -98,18 +102,16 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
                     return o1.compareTo(o2);
                 }
             });
-           List<HostConfig> reverseSortedHostConfgList = Lists.reverse(hostConfigList);
 
-            long availableSize = 0l;
-            long requiredSize;
-            int index = 0;
-            for( HostConfig hostConfig : hostConfigList )
-                availableSize += hostConfig.getFreeSpaceInBytes();
-
+           List<HostConfig> reverseSortedHostConfgList = Lists.reverse(hostConfigList); //For giving highest priority to max space available disk
 
             if ( sinkConfig.getConnectionParams().equals(DCMConstants.DIST_FTP_CONN_PARAM)) {
 
-                int numWorkers = sinkConfig.getHostConfigList().size();
+                int numWorkers = reverseSortedHostConfgList.size();
+
+                if( numWorkers > locations.size() )
+                       numWorkers  = locations.size();
+
                 if (numWorkers > 0) {
 
                     List<Set<IInputJob>> splitTasks = optimizeWorkload(locations,
@@ -117,28 +119,34 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
 
                     for( Set<IInputJob> stats : splitTasks ) {
                         requiredSize = 0l;
-                        availableSize = reverseSortedHostConfgList.get(index).getFreeSpaceInBytes();
+                        availableSize = reverseSortedHostConfgList
+                                            .get(index)
+                                                .getFreeSpaceInBytes();
                         List<MirrorDCMImpl.FileTuple> tuple = new ArrayList<MirrorDCMImpl.FileTuple>();
-                        for (IInputJob stat : stats) {
-                            tuple.add(inputFileMap.get(stat.getJobKey()));
-                            requiredSize += stat.getJobSize();
-                        }
-                        totalBatchSize += requiredSize;
-                        if( requiredSize > availableSize )
-                            throw new Exception("Total Files size is more than available space on disk! ");
-                        else
-                            splits.add(new DistFTPInputSplit(tuple,requiredSize, new HostConfig(reverseSortedHostConfgList.get(index++))));
 
+                        if ( stats.size() > 0 ) {
+                            for (IInputJob stat : stats) {
+                                tuple.add(inputFileMap.get(stat.getJobKey()));
+                                requiredSize += stat.getJobSize();
+                            }
+                            totalBatchSize += requiredSize;
+
+                            if (requiredSize > availableSize)
+                                throw new Exception("Total Files size is more than available space on disk! ");
+                            else
+                                splits.add(new DistFTPInputSplit(tuple, requiredSize, new HostConfig(reverseSortedHostConfgList.get(index++))));
+                        }
                     }
 
                 }else
-                    throw  new Exception("No Host Config available for Sink Connection config");
+                    throw  new Exception("No Host Config defined under Sink Connection config!");
             }
 
             if (splits.size() <= 0)
                 throw new Exception("No Inputs Identified for Processing.. ");
 
             sortSplits(splits);
+
             System.out.println("Total input paths to process: "
                     + locations.size() + ", Total input splits: "
                     + splits.size());
@@ -219,7 +227,7 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
                     && details.getTs() == fileStat.ts)
                 return true;
         }
-        return ignoreFile;
+        return false;
     }
 
     public List<Set<IInputJob>> optimizeWorkload(Set<OptimTuple> tasks,
@@ -227,15 +235,16 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
 
         System.out.println("Total Tasks: " + tasks.size() + " Total Mappers: "
                 + numMappers);
-        JobLoadOptimizerFactory.Optimizer optimizer = JobLoadOptimizerFactory.Optimizer.PRIORITY_QUEUE_BASED;
+        JobLoadOptimizerFactory.Optimizer optimizer = JobLoadOptimizerFactory.Optimizer.PTASOPTMIZER;
 
         System.out.println("Using Optimizer: " + optimizer.toString());
         IJobLoadOptimizer iJobLoadOptimizer = JobLoadOptimizerFactory
                 .getJobLoadOptimizerFactory(optimizer);
-        List<Set<IInputJob>> optimizedLoadSets = iJobLoadOptimizer
+
+        return iJobLoadOptimizer
                 .getOptimizedLoadSets(tasks, numMappers);
-        return optimizedLoadSets;
     }
+
 
     @Override
     public RecordReader<Text, Text> createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {

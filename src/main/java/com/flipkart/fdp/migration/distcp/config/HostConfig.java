@@ -1,6 +1,7 @@
 package com.flipkart.fdp.migration.distcp.config;
 
 import com.flipkart.fdp.optimizer.api.IInputJob;
+import com.google.gson.Gson;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -71,5 +72,11 @@ public class HostConfig implements Writable {
         securityType = DCMConstants.SecurityType.SIMPLE;
         freeSpaceInBytes = in.readLong();
         destPath = Text.readString(in);
+    }
+
+    @Override
+    public String toString() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
     }
 }

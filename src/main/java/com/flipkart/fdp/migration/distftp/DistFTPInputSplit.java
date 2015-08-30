@@ -2,9 +2,7 @@ package com.flipkart.fdp.migration.distftp;
 
 import com.flipkart.fdp.migration.distcp.config.HostConfig;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl;
-import lombok.Setter;
-import lombok.Getter;
-import org.apache.hadoop.io.Text;
+
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 
@@ -17,8 +15,6 @@ import java.util.List;
 /**
  * Created by sushil.s on 28/08/15.
  */
-@Getter
-@Setter
 public class DistFTPInputSplit extends InputSplit implements Writable {
 
     private List<MirrorDCMImpl.FileTuple> splits = null;
@@ -81,5 +77,13 @@ public class DistFTPInputSplit extends InputSplit implements Writable {
 
     public void setSplits(List<MirrorDCMImpl.FileTuple> splits) {
         this.splits = splits;
+    }
+
+    public HostConfig getHostConfig() {
+        return hostConfig;
+    }
+
+    public void setHostConfig(HostConfig hostConfig) {
+        this.hostConfig = hostConfig;
     }
 }

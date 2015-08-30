@@ -23,6 +23,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Set;
 
+import com.flipkart.fdp.migration.distftp.DistFTPFileInputFormat;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.OptionBuilder;
@@ -79,11 +80,11 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 		configuration = getConf();
 
-		MirrorFileInputFormat.setExclusionsFileList(configuration, excludeList);
-		MirrorFileInputFormat.setInclusionFileList(configuration, includeList);
+		DistFTPFileInputFormat.setExclusionsFileList(configuration, excludeList);
+        DistFTPFileInputFormat.setInclusionFileList(configuration, includeList);
 
 		System.out.println("Inclusion File List: "
-				+ MirrorFileInputFormat.getInclusionFileList(configuration));
+				+ DistFTPFileInputFormat.getInclusionFileList(configuration));
 		// Setting task timeout to 2 hrs
 		configuration.setLong("mapred.task.timeout", 1000 * 60 * 60 * 2);
 
@@ -168,7 +169,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		job.setMapperClass(MirrorMapper.class);
 		job.setReducerClass(MirrorReducer.class);
 
-		job.setInputFormatClass(MirrorFileInputFormat.class);
+		job.setInputFormatClass(DistFTPFileInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
 
 		FileOutputFormat.setOutputPath(job, stateManager.getReportPath());
@@ -183,7 +184,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 	private void populateConfFromDCMConfig() {
 
-		configuration.set(MirrorFileInputFormat.DCM_CONFIG,
+		configuration.set(DistFTPFileInputFormat.DCM_CONFIG,
 				dcmConfig.toString());
 	}
 

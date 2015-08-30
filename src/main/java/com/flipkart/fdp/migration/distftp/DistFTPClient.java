@@ -4,7 +4,6 @@ import com.flipkart.fdp.migration.distcp.config.HostConfig;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,16 +45,7 @@ public class DistFTPClient {
 
 
     public long getFileSize(String destPath) throws IOException {
-        String[] pathTree = destPath.split("/");
-        String dirPath = null;
-        for(int i = 0 ; i < (destPath.length()-1); i++)
-            dirPath += pathTree[i]+"/";
-
-        FTPFile[] ftpFiles = ftpClient.listFiles(dirPath);
-        for( FTPFile ftpFile : ftpFiles )
-            if ( ftpFile.getName().equals(pathTree[pathTree.length-1]) )
-                ftpFile.getSize();
-        return -1l;
+        return ftpClient.mlistFile(destPath).getSize();
     }
 
     public String getHostName() {
