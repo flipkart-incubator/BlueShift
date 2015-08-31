@@ -3,28 +3,24 @@ package com.flipkart.fdp.migration.distftp;
 import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
-import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants;
-import com.flipkart.fdp.migration.distcp.config.HostConfig;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl;
 import com.flipkart.fdp.migration.distcp.core.MirrorInputSplit;
 import com.flipkart.fdp.migration.distcp.state.StateManager;
 import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
 import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
-import com.flipkart.fdp.optimizer.Driver;
 import com.flipkart.fdp.optimizer.OptimTuple;
 import com.flipkart.fdp.optimizer.api.IInputJob;
 import com.flipkart.fdp.optimizer.api.IJobLoadOptimizer;
 import com.flipkart.fdp.optimizer.api.JobLoadOptimizerFactory;
-import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.*;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -46,16 +42,12 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
         Set<String> excludeList;
         Set<String> includeList;
         Map<String, TransferStatus> previousState;
-        long availableSize;
-        long requiredSize;
-        int index = 0;
-
 
         System.out.println("Calculating Job Splits...");
         conf = context.getConfiguration();
         dcmConfig = MirrorUtils.getConfigFromConf(conf);
 
-        dcmCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSourceConfig()
+        dcmCodec = DCMCodecFactory.getSourceCodec(conf, dcmConfig.getSourceConfig()
                 .getConnectionConfig());
 
         excludeList = getExclusionsFileList(conf);
@@ -92,61 +84,27 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
                 }
             }
             System.out.println("Optimizing Splits...");
+            int numWorkers = MirrorUtils.getNumOfWorkers(dcmConfig, locations.size());
+            if (numWorkers > 0 ) {
 
+                numWorkers = dcmConfig.getNumWorkers();
+                Gson gson = new Gson();
+                conf.set("split_tasks",gson.toJson(optimizeWorkload(locations,
+                        numWorkers)));
+                conf.set("input_map",gson.toJson(inputFileMap));
 
-            ConnectionConfig sinkConfig = dcmConfig.getSinkConfig().getConnectionConfig();
-            List<HostConfig> hostConfigList = sinkConfig.getHostConfigList();
-            Collections.sort(hostConfigList , new Comparator<HostConfig>() {
-                @Override
-                public int compare(HostConfig o1, HostConfig o2) {
-                    return o1.compareTo(o2);
+            } else {
+                for (OptimTuple stat : locations) {
+                    List<MirrorDCMImpl.FileTuple> tuple = new ArrayList<MirrorDCMImpl.FileTuple>();
+                    tuple.add(inputFileMap.get(stat.getJobKey()));
+                    splits.add(new MirrorInputSplit(tuple, stat.getJobSize()));
+                    totalBatchSize += stat.getJobSize();
                 }
-            });
-
-           List<HostConfig> reverseSortedHostConfgList = Lists.reverse(hostConfigList); //For giving highest priority to max space available disk
-
-            if ( sinkConfig.getConnectionParams().equals(DCMConstants.DIST_FTP_CONN_PARAM)) {
-
-                int numWorkers = reverseSortedHostConfgList.size();
-
-                if( numWorkers > locations.size() )
-                       numWorkers  = locations.size();
-
-                if (numWorkers > 0) {
-
-                    List<Set<IInputJob>> splitTasks = optimizeWorkload(locations,
-                            numWorkers);
-
-                    for( Set<IInputJob> stats : splitTasks ) {
-                        requiredSize = 0l;
-                        availableSize = reverseSortedHostConfgList
-                                            .get(index)
-                                                .getFreeSpaceInBytes();
-                        List<MirrorDCMImpl.FileTuple> tuple = new ArrayList<MirrorDCMImpl.FileTuple>();
-
-                        if ( stats.size() > 0 ) {
-                            for (IInputJob stat : stats) {
-                                tuple.add(inputFileMap.get(stat.getJobKey()));
-                                requiredSize += stat.getJobSize();
-                            }
-                            totalBatchSize += requiredSize;
-
-                            if (requiredSize > availableSize)
-                                throw new Exception("Total Files size is more than available space on disk! ");
-                            else
-                                splits.add(new DistFTPInputSplit(tuple, requiredSize, new HostConfig(reverseSortedHostConfgList.get(index++))));
-                        }
-                    }
-
-                }else
-                    throw  new Exception("No Host Config defined under Sink Connection config!");
             }
-
             if (splits.size() <= 0)
                 throw new Exception("No Inputs Identified for Processing.. ");
 
             sortSplits(splits);
-
             System.out.println("Total input paths to process: "
                     + locations.size() + ", Total input splits: "
                     + splits.size());
@@ -159,19 +117,7 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
 
         System.out.println("Done Calculating splits...");
         return splits;
-
     }
-
-    public static Set<String> getExclusionsFileList(Configuration conf) {
-
-        return MirrorUtils.getStringAsLists(conf.get(EXCLUDE_FILES));
-
-    }
-
-    public static Set<String> getInclusionFileList(Configuration conf) {
-        return MirrorUtils.getStringAsLists(conf.get(INCLUDE_FILES));
-    }
-
 
     private void sortSplits(List<InputSplit> splits) {
         Collections.sort(splits, new Comparator<InputSplit>() {
@@ -193,7 +139,6 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
     private boolean ignoreFile(MirrorDCMImpl.FileTuple fileStat, Set<String> excludeList,
                                Map<String, TransferStatus> previousState) {
 
-        boolean ignoreFile = false;
 
         // File Size Based Rules
         long fileSize = fileStat.size;
@@ -223,34 +168,20 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
 
         if (previousState.containsKey(path)) {
             TransferStatus details = previousState.get(path);
-            if (details.getStatus() == Status.COMPLETED
-                    && details.getTs() == fileStat.ts)
-                return true;
+            if (details.getStatus() == Status.COMPLETED) {
+                return !(dcmConfig.getSourceConfig().isIncludeUpdatedFiles()
+                        && details.getTs() < fileStat.ts);
+
+            }
         }
         return false;
     }
 
-    public List<Set<IInputJob>> optimizeWorkload(Set<OptimTuple> tasks,
-                                                 int numMappers) {
-
-        System.out.println("Total Tasks: " + tasks.size() + " Total Mappers: "
-                + numMappers);
-        JobLoadOptimizerFactory.Optimizer optimizer = JobLoadOptimizerFactory.Optimizer.PTASOPTMIZER;
-
-        System.out.println("Using Optimizer: " + optimizer.toString());
-        IJobLoadOptimizer iJobLoadOptimizer = JobLoadOptimizerFactory
-                .getJobLoadOptimizerFactory(optimizer);
-
-        return iJobLoadOptimizer
-                .getOptimizedLoadSets(tasks, numMappers);
-    }
-
-
     @Override
-    public RecordReader<Text, Text> createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
+    public RecordReader<Text, Text> createRecordReader(InputSplit arg0,
+                                                       TaskAttemptContext arg1) throws IOException, InterruptedException {
         return new DistFTPMirrorFileRecordReader();
     }
-
 
     public static void setExclusionsFileList(Configuration conf,
                                              Collection<String> files) {
@@ -265,5 +196,33 @@ public class DistFTPFileInputFormat extends InputFormat<Text, Text> {
                 MirrorUtils.getListAsString(files));
     }
 
+    public static Set<String> getExclusionsFileList(Configuration conf) {
+
+        return MirrorUtils.getStringAsLists(conf.get(EXCLUDE_FILES));
+
+    }
+
+    public static Set<String> getInclusionFileList(Configuration conf) {
+        return MirrorUtils.getStringAsLists(conf.get(INCLUDE_FILES));
+    }
+
+    public List<Set<IInputJob>> optimizeWorkload(Set<OptimTuple> tasks,
+                                                 int numMappers) {
+
+        System.out.println("Total Tasks: " + tasks.size() + " Total Mappers: "
+                + numMappers);
+        JobLoadOptimizerFactory.Optimizer optimizer;
+        if ( dcmConfig.getSinkConfig().getConnectionConfig().getConnectionParams().equals(DCMConstants.DIST_FTP_CONN_PARAM) )
+             optimizer = JobLoadOptimizerFactory.Optimizer.PTASOPTMIZER;
+        else
+            optimizer = JobLoadOptimizerFactory.Optimizer.PRIORITY_QUEUE_BASED;
+
+        System.out.println("Using Optimizer: " + optimizer.toString());
+        IJobLoadOptimizer iJobLoadOptimizer = JobLoadOptimizerFactory
+                .getJobLoadOptimizerFactory(optimizer);
+        List<Set<IInputJob>> optimizedLoadSets = iJobLoadOptimizer
+                .getOptimizedLoadSets(tasks, numMappers);
+        return optimizedLoadSets;
+    }
 
 }

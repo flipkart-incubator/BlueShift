@@ -24,10 +24,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
+import com.flipkart.fdp.migration.distcp.config.DCMConstants;
 import com.flipkart.fdp.migration.distftp.DistFTPClient;
 import com.google.common.primitives.Longs;
 import org.apache.hadoop.conf.Configuration;
@@ -36,6 +35,7 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.io.compress.Compressor;
 import org.apache.hadoop.io.compress.Decompressor;
+import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
@@ -70,6 +70,20 @@ public class MirrorUtils {
 			return codec.getDefaultExtension();
 	}
 
+    public static int getNumOfWorkers(DCMConfig dcmConfig, int size){
+        if( dcmConfig.getSinkConfig().getConnectionConfig().getConnectionParams().endsWith(DCMConstants.DIST_FTP_CONN_PARAM) ){
+            return dcmConfig
+                    .getSinkConfig()
+                        .getConnectionConfig()
+                            .getHostConfigList().size();
+        }
+        else if (dcmConfig.getNumWorkers() > 0
+                    && dcmConfig.getNumWorkers() < size)
+            return dcmConfig.getNumWorkers();
+
+        return  0;
+    }
+
 	public static OutputStream getCodecOutputStream(Configuration conf,
 			DCMConfig config, String outPath, OutputStream out)
 			throws IOException {
@@ -99,7 +113,7 @@ public class MirrorUtils {
 		return in;
 	}
 
-	public static MD5Digester copy(InputStream input, OutputStream result,
+	public static MD5Digester copy(InputStream input, List<OutputStream> result,
 			TaskAttemptContext context) throws IOException {
 
 		byte[] buffer = new byte[65536]; // 8K=8192 12K=12288 64K=65536
@@ -109,46 +123,49 @@ public class MirrorUtils {
 		long sts = System.currentTimeMillis();
 		MD5Digester digester = new MD5Digester();
 
-		while (-1 != (n = input.read(buffer))) {
+        for(OutputStream outputStream : result) {
 
-			result.write(buffer, 0, n);
+            while (-1 != (n = input.read(buffer))) {
 
-			digester.updateMd5digester(buffer, 0, n);
-			count += n;
+                outputStream.write(buffer, 0, n);
 
-			if (count % 67108864 == 0) {
-				System.out.println("Wrote 64M Data to Destination Total: "
-						+ count + ", Time Taken(ms): "
-						+ (System.currentTimeMillis() - sts));
+                digester.updateMd5digester(buffer, 0, n);
+                count += n;
 
-				sts = System.currentTimeMillis();
-				context.progress();
-			}
-		}
+                if (count % 67108864 == 0) {
+                    System.out.println("Wrote 64M Data to Destination Total: "
+                            + count + ", Time Taken(ms): "
+                            + (System.currentTimeMillis() - sts));
+
+                    sts = System.currentTimeMillis();
+                    context.progress();
+                }
+            }
+        }
 		System.out.println("Transfer Complete Total: " + count
 				+ ", Time Taken(ms): " + (System.currentTimeMillis() - sts));
 		return digester;
 	}
 
-    public static MD5Digester copy(String destPath,InputStream input,
-                                   TaskAttemptContext context,DistFTPClient ftpClient) throws Exception {
-        long size;
-        long sts = System.currentTimeMillis();
-        MD5Digester digester = new MD5Digester();
-
-        if ( ftpClient.transferFile(destPath, input)) {
-            size = ftpClient.getFileSize(destPath);
-            System.out.println("Transfer Complete Total: " + size + "Host : " + ftpClient.getHostName()
-                    + ", Time Taken(ms): " + (System.currentTimeMillis() - sts));
-        }else
-               throw new Exception("Transfer of "+ destPath +" ---> "+ftpClient.getHostName()+" was Un Sucessfull!!!");
-
-        context.progress();
-
-        digester.updateMd5digester(Longs.toByteArray(size));
-
-        return digester;
-    }
+//    public static MD5Digester copy(String destPath,InputStream input,
+//                                   TaskAttemptContext context,DistFTPClient ftpClient) throws Exception {
+//        long size;
+//        long sts = System.currentTimeMillis();
+//        MD5Digester digester = new MD5Digester();
+//
+//        if ( ftpClient.transferFile(destPath, input)) {
+//            size = ftpClient.getFileSize(destPath);
+//            System.out.println("Transfer Complete Total: " + size + "Host : " + ftpClient.getHostName()
+//                    + ", Time Taken(ms): " + (System.currentTimeMillis() - sts));
+//        }else
+//               throw new Exception("Transfer of "+ destPath +" ---> "+ftpClient.getHostName()+" was Un Sucessfull!!!");
+//
+//        context.progress();
+//
+//        digester.updateMd5digester(Longs.toByteArray(size));
+//
+//        return digester;
+//    }
 
 	public static Set<String> getFileAsLists(String fileName) {
 		Set<String> files = new HashSet<String>();

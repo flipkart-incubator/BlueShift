@@ -3,54 +3,38 @@ package com.flipkart.fdp.migration.distftp;
 import com.flipkart.fdp.migration.distcp.config.HostConfig;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.net.ftp.FTPClient;
-
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.ftp.FTPFileSystem;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.net.URL;
 
 /**
- * Created by sushil.s on 28/08/15.
- */
+* Created by sushil.s on 28/08/15.
+*/
 @Getter
 @Setter
-public class DistFTPClient {
+public class DistFTPClient extends FTPFileSystem{
 
-    private FTPClient ftpClient;
+    URL ftpURI = null;
 
-    public DistFTPClient(){
-        ftpClient = new FTPClient();
+    public DistFTPClient(URI uri, Configuration conf) throws IOException {
+        super.initialize(uri,conf);
+        ftpURI = uri.toURL();
     }
 
-    public boolean connect(HostConfig hostConfig){
-        try {
-            ftpClient.connect(hostConfig.getHost(),hostConfig.getPort());
-            ftpClient.login(hostConfig.getUserName(),hostConfig.getUserPassword());
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+    public String getHostAddress() {
+        return ftpURI.getHost();
     }
 
-    public boolean transferFile(String path,InputStream in) throws IOException {
-        return ftpClient.storeFile(path,in);
-    }
-
-    public void closeConnection() throws IOException {
-        if(ftpClient.isConnected()){
-            ftpClient.logout();
-            ftpClient.disconnect();
-        }
+    public OutputStream getOutputStream() throws IOException {
+        //"ftp://user:pass@ftp.something.com/file.txt;type=i";
+        System.out.println("FTP URL : "+ftpURI.toString());
+        return ftpURI
+                .openConnection()
+                .getOutputStream();
     }
 
 
-    public long getFileSize(String destPath) throws IOException {
-        return ftpClient.mlistFile(destPath).getSize();
-    }
-
-    public String getHostName() {
-        return ftpClient
-                  .getRemoteAddress()
-                    .toString();
-    }
 }

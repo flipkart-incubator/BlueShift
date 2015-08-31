@@ -1,20 +1,20 @@
 /*
- *
- *  Copyright 2015 Flipkart Internet Pvt. Ltd.
- *
- *     Licensed under the Apache License, Version 2.0 (the "License");
- *     you may not use this file except in compliance with the License.
- *     You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- *     Unless required by applicable law or agreed to in writing, software
- *     distributed under the License is distributed on an "AS IS" BASIS,
- *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *     See the License for the specific language governing permissions and
- *     limitations under the License.
- *
- */
+*
+*  Copyright 2015 Flipkart Internet Pvt. Ltd.
+*
+*     Licensed under the Apache License, Version 2.0 (the "License");
+*     you may not use this file except in compliance with the License.
+*     You may obtain a copy of the License at
+*
+*         http://www.apache.org/licenses/LICENSE-2.0
+*
+*     Unless required by applicable law or agreed to in writing, software
+*     distributed under the License is distributed on an "AS IS" BASIS,
+*     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*     See the License for the specific language governing permissions and
+*     limitations under the License.
+*
+*/
 
 package com.flipkart.fdp.migration.distcp.core;
 
@@ -65,7 +65,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	private FileTuple current = null;
 
 	private InputStream in = null;
-	private OutputStream out = null;
+	private List<OutputStream> out = null;
 
 	private DCMCodec inCodec = null;
 	private DCMCodec outCodec = null;
@@ -113,11 +113,11 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		System.out.println("Initializing transfer of : " + inputs.size()
 				+ " files, with a total Size of : " + fSplit.getLength());
 
-		inCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSourceConfig()
-				.getConnectionConfig());
+//		inCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSourceConfig()
+//				.getConnectionConfig());
 
-		outCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSinkConfig()
-				.getConnectionConfig());
+//		outCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSinkConfig()
+//				.getConnectionConfig());
 	}
 
 	@Override
@@ -259,8 +259,8 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 			out = outCodec.createOutputStream(conf, destPath, dcmConfig
 					.getSinkConfig().isAppend());
-			out = MirrorUtils.getCodecOutputStream(conf, dcmConfig, destPath,
-					out);
+//			out = MirrorUtils.getCodecOutputStream(conf, dcmConfig, destPath,
+//					out);
 		} else {
 			out = outCodec.createOutputStream(conf, destPath, dcmConfig
 					.getSinkConfig().isAppend());
@@ -274,7 +274,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	private void closeStreams() {
 
 		IOUtils.closeStream(in);
-		IOUtils.closeStream(out);
+		//IOUtils.closeStream(out);
 
 		if (status.getStatus() == Status.COMPLETED
 				&& dcmConfig.getSourceConfig().isDeleteSource()) {

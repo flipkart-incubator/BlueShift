@@ -67,6 +67,7 @@ public class DistFTPInputSplit extends InputSplit implements Writable {
         return new String[] {};
     }
 
+
     public void setLength(long length) {
         this.length = length;
     }

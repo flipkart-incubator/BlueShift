@@ -46,12 +46,12 @@ public class GenericHadoopCodec implements DCMCodec {
 		this.fs = fs;
 	}
 
-	public OutputStream createOutputStream(Configuration conf, String path,
+	public List<OutputStream> createOutputStream(Configuration conf, String path,
 			boolean append) throws IOException {
 		if (append)
-			return fs.append(new Path(path));
+			return (List<OutputStream>) fs.append(new Path(path));
 		else
-			return fs.create(new Path(path));
+			return (List<OutputStream>)fs.create(new Path(path));
 	}
 
 	public InputStream createInputStream(Configuration conf, String path)

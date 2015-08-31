@@ -31,7 +31,7 @@ import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 
 public interface DCMCodec extends Closeable {
 
-	public OutputStream createOutputStream(Configuration conf, String path,
+	public List<OutputStream> createOutputStream(Configuration conf, String path,
 			boolean append) throws IOException;
 
 	public InputStream createInputStream(Configuration conf, String path)
