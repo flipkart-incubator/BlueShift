@@ -18,11 +18,10 @@
 
 package com.flipkart.fdp.migration.distcp.state;
 
-import java.io.IOException;
-
+import com.flipkart.fdp.migration.distcp.config.DCMConfig;
 import org.apache.hadoop.conf.Configuration;
 
-import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import java.io.IOException;
 
 public class StateManagerFactory {
 
@@ -39,8 +38,11 @@ public class StateManagerFactory {
 			case DB:
 				stateManager = new MySqlStateManager(conf, config);
 				break;
+            case NONE:
+                stateManager = new DummyStatemanager(conf, config);
+                break;
 			default:
-				stateManager = new HDFSStateManager(conf, config);
+				stateManager = new DummyStatemanager(conf, config);
 				break;
 			}
 		}

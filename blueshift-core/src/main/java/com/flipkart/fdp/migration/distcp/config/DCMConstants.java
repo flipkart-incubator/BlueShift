@@ -18,11 +18,11 @@
 
 package com.flipkart.fdp.migration.distcp.config;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 public class DCMConstants {
 
@@ -94,6 +94,6 @@ public class DCMConstants {
     }
 
 	public static enum StateManagerImpl {
-		HDFS, DB
+		HDFS, DB,NONE
 	}
 }
