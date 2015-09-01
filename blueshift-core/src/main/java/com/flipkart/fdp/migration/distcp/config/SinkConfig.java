@@ -48,15 +48,15 @@ public class SinkConfig {
 		return customSinkImplClass;
 	}
 
-    public ConnectionConfig getConnectionConfig() {
-        return connectionConfig;
-    }
+	public ConnectionConfig getConnectionConfig() {
+		return connectionConfig;
+	}
 
-    public void setConnectionConfig(ConnectionConfig connectionConfig) {
-        this.connectionConfig = connectionConfig;
-    }
+	public void setConnectionConfig(ConnectionConfig connectionConfig) {
+		this.connectionConfig = connectionConfig;
+	}
 
-    public void setCustomSinkImplClass(String customSinkImplClass) {
+	public void setCustomSinkImplClass(String customSinkImplClass) {
 		this.customSinkImplClass = customSinkImplClass;
 	}
 
@@ -91,7 +91,6 @@ public class SinkConfig {
 	public void setAppend(boolean append) {
 		this.append = append;
 	}
-
 
 	@Override
 	public String toString() {

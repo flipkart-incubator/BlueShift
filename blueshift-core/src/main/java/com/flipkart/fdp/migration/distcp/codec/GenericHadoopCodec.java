@@ -27,8 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
-import com.flipkart.fdp.migration.distcp.config.DCMConstants;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -36,6 +34,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
 
+import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
 
@@ -43,16 +43,17 @@ public class GenericHadoopCodec implements DCMCodec {
 
 	private FileSystem fs = null;
 
-    public GenericHadoopCodec(Configuration conf, ConnectionConfig config) throws Exception {
-        this.fs = getHadoopFilesystem(conf,config);
-    }
+	public GenericHadoopCodec(Configuration conf, ConnectionConfig config)
+			throws Exception {
+		this.fs = getHadoopFilesystem(conf, config);
+	}
 
-    public OutputStream createOutputStream(Configuration conf, String path,
+	public OutputStream createOutputStream(Configuration conf, String path,
 			boolean append) throws IOException {
 		if (append)
-			return  fs.append(new Path(path));
+			return fs.append(new Path(path));
 		else
-			return  fs.create(new Path(path));
+			return fs.create(new Path(path));
 	}
 
 	public InputStream createInputStream(Configuration conf, String path)
@@ -114,22 +115,23 @@ public class GenericHadoopCodec implements DCMCodec {
 		return fileList;
 	}
 
-    public static FileSystem getHadoopFilesystem(
-            Configuration conf, ConnectionConfig config) throws Exception {
+	public static FileSystem getHadoopFilesystem(Configuration conf,
+			ConnectionConfig config) throws Exception {
 
-        String httpfsUrl = DCMConstants.HDFS_DEFAULT_PROTOCOL + config.getHostConfig().getHost() + ":" + config.getHostConfig().getPort();
+		String httpfsUrl = DCMConstants.HDFS_DEFAULT_PROTOCOL
+				+ config.getHostConfig().getHost() + ":"
+				+ config.getHostConfig().getPort();
 
-        if (config.getHostConfig().getSecurityType() == DCMConstants.SecurityType.KERBEROS)
-            return FileSystem.newInstance(new URI(httpfsUrl), conf);
-        else
-            return FileSystem.newInstance(new URI(httpfsUrl), conf,
-                    config.getHostConfig().getUserName());
-    }
+		if (config.getHostConfig().getSecurityType() == DCMConstants.SecurityType.KERBEROS)
+			return FileSystem.newInstance(new URI(httpfsUrl), conf);
+		else
+			return FileSystem.newInstance(new URI(httpfsUrl), conf, config
+					.getHostConfig().getUserName());
+	}
 
-
-    public List<FileTuple> getFileStatusRecursive(Path path,
+	public List<FileTuple> getFileStatusRecursive(Path path,
 			Collection<String> excludeList) throws IOException,
-                     AuthenticationException {
+			AuthenticationException {
 
 		List<FileTuple> response = new ArrayList<FileTuple>();
 

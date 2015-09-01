@@ -18,11 +18,11 @@
 
 package com.flipkart.fdp.migration.distcp.config;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 
 public class DCMConstants {
 
@@ -48,7 +48,7 @@ public class DCMConstants {
 	public static final String END_TIMESTAMP = "end_ts";
 	public static final String COMPRESSION_THRESHOLD = "compression_threshold";
 	public static final String INPLACE_TRANSFORM = "inplace_transform";
-    public static final String DIST_FTP_CONN_PARAM = "DistFTP";
+	public static final String DIST_FTP_CONN_PARAM = "DistFTP";
 
 	public static final String MAX_FILESIZE = "max_filesize";
 	public static final String MIN_FILESIZE = "min_filesize";
@@ -62,7 +62,7 @@ public class DCMConstants {
 	public static HashFunction hasher = Hashing.murmur3_32();
 
 	public static final String HTTP_DEFAULT_PROTOCOL = "http://";
-	public static final String  HDFS_DEFAULT_PROTOCOL = "hdfs://";
+	public static final String HDFS_DEFAULT_PROTOCOL = "hdfs://";
 	public static final String HFTP_DEFAULT_PROTOCOL = "hftp://";
 	public static final String FTP_DEFAULT_PROTOCOL = "ftp://";
 	public static final String HAR_DEFAULT_PROTOCOL = "har://";
@@ -81,19 +81,19 @@ public class DCMConstants {
 
 	public static enum FileSystemType {
 
-		WEBHDFS, HDFS, HFTP, FTP, HAR, LOCAL, TCP, HTTP, CUSTOM,MFTP
+		WEBHDFS, HDFS, HFTP, FTP, HAR, LOCAL, TCP, HTTP, CUSTOM, MFTP
 	}
 
-    public static enum ConnectionParamsType {
+	public static enum ConnectionParamsType {
 
-        MFTP,HDFS
-    }
+		MFTP, HDFS
+	}
 
 	public static enum SecurityType {
 		PSEUDO, KERBEROS, SIMPLE, NONE;
-    }
+	}
 
 	public static enum StateManagerImpl {
-		HDFS, DB,NONE
+		HDFS, DB, NONE
 	}
 }

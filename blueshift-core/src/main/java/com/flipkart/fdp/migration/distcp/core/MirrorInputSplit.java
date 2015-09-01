@@ -24,33 +24,38 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.flipkart.fdp.migration.distcp.config.HostConfig;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 
+import com.flipkart.fdp.migration.distcp.config.HostConfig;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 
 public class MirrorInputSplit extends InputSplit implements Writable {
 
 	private List<FileTuple> splits = null;
 	private long length = 0;
-    private HostConfig hostConfig= new HostConfig(); // this is required because it will be in a different JVM
+	private HostConfig srcHostConfig = null;
+	private HostConfig destHostConfig = null;
 
 	public MirrorInputSplit() {
 		splits = new ArrayList<FileTuple>();
 		length = 0;
+		srcHostConfig = new HostConfig();
+		destHostConfig = new HostConfig();
 	}
 
 	public MirrorInputSplit(List<FileTuple> splits, long size) {
+		this();
 		this.splits = splits;
 		this.length = size;
 	}
 
-    public MirrorInputSplit(List<FileTuple> splits, long size,HostConfig hostConfig) {
-        this.splits = splits;
-        this.length = size;
-        this.hostConfig = hostConfig;
-    }
+	public MirrorInputSplit(List<FileTuple> splits, long size,
+			HostConfig srcHostConfig, HostConfig destHostConfig) {
+		this(splits, size);
+		this.srcHostConfig = srcHostConfig;
+		this.destHostConfig = destHostConfig;
+	}
 
 	public void readFields(DataInput in) throws IOException {
 		int size = in.readInt();
@@ -61,19 +66,32 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 			splits.add(ft);
 		}
 		length = in.readLong();
-        if( hostConfig != null )
-            hostConfig.readFields(in);
+
+		boolean srcHostConfigExists = in.readBoolean();
+		if (srcHostConfigExists)
+			srcHostConfig.readFields(in);
+
+		boolean destHostConfigExists = in.readBoolean();
+		if (destHostConfigExists)
+			destHostConfig.readFields(in);
 	}
 
 	public void write(DataOutput out) throws IOException {
+
 		int size = splits.size();
 		out.writeInt(size);
 		for (FileTuple split : splits) {
 			split.write(out);
 		}
 		out.writeLong(length);
-        if( hostConfig != null )
-            hostConfig.write(out);
+
+		out.writeBoolean(srcHostConfig != null);
+		if (srcHostConfig != null)
+			srcHostConfig.write(out);
+
+		out.writeBoolean(destHostConfig != null);
+		if (destHostConfig != null)
+			destHostConfig.write(out);
 	}
 
 	@Override
@@ -98,11 +116,20 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 		this.splits = splits;
 	}
 
-    public HostConfig getHostConfig() {
-        return hostConfig;
-    }
+	public HostConfig getSrcHostConfig() {
+		return srcHostConfig;
+	}
 
-    public void setHostConfig(HostConfig hostConfig) {
-        this.hostConfig = hostConfig;
-    }
+	public void setSrcHostConfig(HostConfig srcHostConfig) {
+		this.srcHostConfig = srcHostConfig;
+	}
+
+	public HostConfig getDestHostConfig() {
+		return destHostConfig;
+	}
+
+	public void setDestHostConfig(HostConfig destHostConfig) {
+		this.destHostConfig = destHostConfig;
+	}
+
 }

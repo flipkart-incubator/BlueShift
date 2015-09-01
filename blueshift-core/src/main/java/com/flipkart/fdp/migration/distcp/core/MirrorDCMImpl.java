@@ -53,7 +53,7 @@ public class MirrorDCMImpl {
 		}
 	}
 
-    //Todo://Make a separate calss
+	// Todo://Make a separate calss
 	public static class FileTuple implements Writable {
 		public String fileName;
 		public long size;

@@ -18,68 +18,83 @@
 
 package com.flipkart.fdp.migration.distcp.state;
 
-import com.flipkart.fdp.migration.db.models.Status;
-import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+
+import com.flipkart.fdp.migration.db.models.Status;
+import com.flipkart.fdp.migration.distcp.config.DCMConfig;
 
 /**
  * Created by sushil.s on 01/09/15.
  */
 @Getter
 @Setter
-public class DummyStatemanager implements  StateManager {
-    private Configuration configuration = null;
-    private DCMConfig config = null;
+public class DummyStatemanager implements StateManager {
 
-    public DummyStatemanager(Configuration conf, DCMConfig config) {
-        this.configuration = conf;
-        this.config = config;
-    }
+	private Configuration configuration = null;
+	private DCMConfig dcmConfig = null;
+	private String runId = null;
+	private Path reportPath = null;
 
-    @Override
-    public void beginBatch() throws IOException {
-    }
+	public DummyStatemanager(Configuration conf, DCMConfig dcmConfig) {
+		this.configuration = conf;
+		this.dcmConfig = dcmConfig;
+		this.runId = "ID_" + System.currentTimeMillis();
 
-    @Override
-    public void completeBatch(Status status) throws IOException {
-    }
+		Path batchBasePath = new Path(dcmConfig.getStatusPath() + "/"
+				+ dcmConfig.getBatchName());
 
-    @Override
-    public void updateTransferStatus(TransferStatus status) throws IOException {
-    }
+		Path runPath = new Path(batchBasePath, runId);
+		reportPath = new Path(runPath, HDFSStateManager.REPORT_PATH);
+	}
 
-    @Override
-    public Map<String, TransferStatus> getTransferStatus(String taskId) throws IOException {
-        return new HashMap<String,TransferStatus>();
-    }
+	@Override
+	public void beginBatch() throws IOException {
+	}
 
-    @Override
-    public void savePreiviousTransferStatus(Map<String, TransferStatus> prevState) throws IOException {
-    }
+	@Override
+	public void completeBatch(Status status) throws IOException {
+	}
 
-    @Override
-    public Map<String, TransferStatus> getPreviousTransferStatus() throws IOException {
-        return new HashMap<String,TransferStatus>();
-    }
+	@Override
+	public void updateTransferStatus(TransferStatus status) throws IOException {
+	}
 
-    @Override
-    public Path getReportPath() {
-        return new Path("");
-    }
+	@Override
+	public Map<String, TransferStatus> getTransferStatus(String taskId)
+			throws IOException {
+		return new HashMap<String, TransferStatus>();
+	}
 
-    @Override
-    public String getRunId() {
-        return "";
-    }
+	@Override
+	public void savePreiviousTransferStatus(
+			Map<String, TransferStatus> prevState) throws IOException {
+	}
 
-    @Override
-    public void close() throws IOException {
-    }
+	@Override
+	public Map<String, TransferStatus> getPreviousTransferStatus()
+			throws IOException {
+		return new HashMap<String, TransferStatus>();
+	}
+
+	@Override
+	public Path getReportPath() {
+		return reportPath;
+	}
+
+	@Override
+	public String getRunId() {
+		return runId;
+	}
+
+	@Override
+	public void close() throws IOException {
+	}
 }

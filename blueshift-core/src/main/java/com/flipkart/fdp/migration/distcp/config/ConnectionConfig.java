@@ -18,48 +18,46 @@
 
 package com.flipkart.fdp.migration.distcp.config;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants.FileSystemType;
-import com.flipkart.fdp.migration.distcp.config.DCMConstants.SecurityType;
 import com.google.gson.Gson;
-
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConnectionConfig {
 
 	private FileSystemType type = null;
 	private HostConfig hostConfig = null;
-    private List<HostConfig> hostConfigList = null;
-    private DCMConstants.ConnectionParamsType connectionParams = null;
+	private List<HostConfig> hostConfigList = null;
+	private DCMConstants.ConnectionParamsType connectionParams = null;
 
-    public DCMConstants.ConnectionParamsType getConnectionParams() {
-        return connectionParams;
-    }
+	public DCMConstants.ConnectionParamsType getConnectionParams() {
+		return connectionParams;
+	}
 
-    public void setConnectionParams(DCMConstants.ConnectionParamsType connectionParams) {
-        this.connectionParams = connectionParams;
-    }
+	public void setConnectionParams(
+			DCMConstants.ConnectionParamsType connectionParams) {
+		this.connectionParams = connectionParams;
+	}
 
+	public HostConfig getHostConfig() {
+		return hostConfig;
+	}
 
-    public HostConfig getHostConfig() {
-        return hostConfig;
-    }
+	public void setHostConfig(HostConfig hostConfig) {
+		this.hostConfig = hostConfig;
+	}
 
-    public void setHostConfig(HostConfig hostConfig) {
-        this.hostConfig = hostConfig;
-    }
+	public List<HostConfig> getHostConfigList() {
+		return hostConfigList;
+	}
 
-    public List<HostConfig> getHostConfigList() {
-        return hostConfigList;
-    }
+	public void setHostConfigList(List<HostConfig> hostConfigList) {
+		this.hostConfigList = hostConfigList;
+	}
 
-    public void setHostConfigList(List<HostConfig> hostConfigList) {
-        this.hostConfigList = hostConfigList;
-    }
-
-    public FileSystemType getType() {
+	public FileSystemType getType() {
 		return type;
 	}
 
