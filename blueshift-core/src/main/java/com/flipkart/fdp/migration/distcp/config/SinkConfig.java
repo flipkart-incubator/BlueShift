@@ -20,8 +20,6 @@ package com.flipkart.fdp.migration.distcp.config;
 
 import com.google.gson.Gson;
 
-import java.util.List;
-
 public class SinkConfig {
 
 	private String path = null;
