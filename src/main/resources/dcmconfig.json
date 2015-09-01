@@ -1,64 +1,61 @@
 {
-  "batchName": "H3_Test_01",
-  "numWorkers": 10,
-  "ignoreException": true,
-  "statusPath": "/tmp/mdcp",
-  "stateManagerType": "HDFS",
-  
-  "sourceConfig": {
-    "path": "/tmp/raj",
-    "includeListFile": "/home/soundararajan.velu/includes.list",
-    "excludeListFile": "/home/soundararajan.velu/excludes.list",
-    "includeRegEx": "",
-    "excludeRegEx": "",
-    "startTS": 0,
-    "endTS": 0,
-    "minFilesize": 0,
-    "maxFilesize": -1,
-    "deleteSource": false,
-    "ignoreEmptyFiles": false,
-    "transformSource": false,
-    "includeUpdatedFiles": false,
-    "compressionThreshold": 0,
-    "customSourceImplClass": "",
-    
-    "connectionConfig": {
-      "type": "HDFS",
-      "securityType": "SIMPLE",
-      "host": "test.flipkart.com",
-      "port": 8020,
-      "connectionParams": "",
-      "userName": "test-user",
-      "userPassword": "test-user",
-      "keyFile": ""
+    "batchName": "H3_Test_01",
+    "numWorkers": 10,
+    "ignoreException": true,
+    "statusPath": "/tmp/mdcp",
+    "stateManagerType": "HDFS",
+
+    "sourceConfig": {
+        "path": "/tmp/raj",
+        "includeListFile": "/home/sushil.s/includes.list",
+        "excludeListFile": "/home/sushil.s/excludes.list",
+        "includeRegEx": "",
+        "excludeRegEx": "",
+        "startTS": 0,
+        "endTS": 0,
+        "minFilesize": 0,
+        "maxFilesize": -1,
+        "deleteSource": false,
+        "ignoreEmptyFiles": false,
+        "transformSource": false,
+        "includeUpdatedFiles": false,
+        "compressionThreshold": 0,
+        "customSourceImplClass": "",
+
+        "connectionConfig": {
+            "type": "HDFS",
+            "securityType": "SIMPLE",
+            "hostConfig": {
+                "host": "zsnn2.nm.flipkart.com",
+                "port": 8020,
+                "connectionParams": "",
+                "userName": "hdfs",
+                "userPassword": "",
+                "keyFile": ""
+            }
+        }
+    },
+
+    "sinkConfig": {
+        "path": "/tmp/sushil/bs",
+        "compressionCodec": "snappy",
+        "useCompression": false,
+        "overwriteFiles": true,
+        "append": false,
+        "customSinkImplClass": "",
+
+        "connectionConfig": {
+            "type": "HDFS",
+            "securityType": "SIMPLE",
+            "hostConfig": {
+                "host": "zsnn2.nm.flipkart.com",
+                "port": 8020,
+                "connectionParams": "",
+                "userName": "hdfs",
+                "userPassword": "",
+                "keyFile": ""
+            }
+        }
     }
-  },
-  
-  "sinkConfig": {
-    "path": "/tmp/raja",
-    "compressionCodec": "snappy",
-    "useCompression": false,
-    "overwriteFiles": true,
-    "append": false,
-    "customSinkImplClass": "",
-        
-    "connectionConfig": {
-      "type": "WEBHDFS",
-      "securityType": "SIMPLE",
-      "host": "test2.flipkart.com",
-      "port": 50070,
-      "connectionParams": "",
-      "userName": "test-user",
-      "userPassword": "test-user",
-      "keyFile": ""
-    }
-  },
-  
-  "dbConfig": {
-    "dbConnectionURL": "jdbc:mysql://testdb.flipkart.com:3306/dcm?autoReconnect=true",
-    "dbDriver": "com.mysql.jdbc.Driver",
-    "dbUserName": "dcm",
-    "dbUserPassword": "dcm",
-    "dbDialect": "org.hibernate.dialect.MySQL5Dialect"
-  }
+
 }

@@ -75,8 +75,8 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		conf = context.getConfiguration();
 		dcmConfig = MirrorUtils.getConfigFromConf(conf);
 
-//		dcmCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSourceConfig()
-//				.getConnectionConfig());
+		dcmCodec = DCMCodecFactory.getSourceCodec(conf, dcmConfig.getSourceConfig()
+				.getConnectionConfig());
 
 		excludeList = getExclusionsFileList(conf);
 		includeList = getInclusionFileList(conf);
@@ -112,31 +112,9 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 				}
 			}
 			System.out.println("Optimizing Splits...");
-			int numWorkers = locations.size();
-			if (dcmConfig.getNumWorkers() > 0
-					&& dcmConfig.getNumWorkers() < numWorkers) {
 
-				numWorkers = dcmConfig.getNumWorkers();
-				List<Set<IInputJob>> splitTasks = optimizeWorkload(locations,
-						numWorkers);
-				for (Set<IInputJob> stats : splitTasks) {
-					List<FileTuple> tuple = new ArrayList<FileTuple>();
-					long size = 0;
-					for (IInputJob stat : stats) {
-						tuple.add(inputFileMap.get(stat.getJobKey()));
-						size += stat.getJobSize();
-					}
-					totalBatchSize += size;
-					splits.add(new MirrorInputSplit(tuple, size));
-				}
-			} else {
-				for (OptimTuple stat : locations) {
-					List<FileTuple> tuple = new ArrayList<FileTuple>();
-					tuple.add(inputFileMap.get(stat.getJobKey()));
-					splits.add(new MirrorInputSplit(tuple, stat.getJobSize()));
-					totalBatchSize += stat.getJobSize();
-				}
-			}
+            splits.addAll(MirrorUtils.optimizeInputSplits(conf,dcmConfig,locations,inputFileMap));
+
 			if (splits.size() <= 0)
 				throw new Exception("No Inputs Identified for Processing.. ");
 
@@ -243,21 +221,6 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 	public static Set<String> getInclusionFileList(Configuration conf) {
 		return MirrorUtils.getStringAsLists(conf.get(INCLUDE_FILES));
-	}
-
-	public List<Set<IInputJob>> optimizeWorkload(Set<OptimTuple> tasks,
-			int numMappers) {
-
-		System.out.println("Total Tasks: " + tasks.size() + " Total Mappers: "
-				+ numMappers);
-		Optimizer optimizer = Optimizer.PRIORITY_QUEUE_BASED;
-
-		System.out.println("Using Optimizer: " + optimizer.toString());
-		IJobLoadOptimizer iJobLoadOptimizer = JobLoadOptimizerFactory
-				.getJobLoadOptimizerFactory(optimizer);
-		List<Set<IInputJob>> optimizedLoadSets = iJobLoadOptimizer
-				.getOptimizedLoadSets(tasks, numMappers);
-		return optimizedLoadSets;
 	}
 
 }

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.flipkart.fdp.migration.distcp.config.HostConfig;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 
@@ -33,6 +34,7 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 
 	private List<FileTuple> splits = null;
 	private long length = 0;
+    private HostConfig hostConfig= new HostConfig(); // this is required because it will be in a different JVM
 
 	public MirrorInputSplit() {
 		splits = new ArrayList<FileTuple>();
@@ -44,6 +46,12 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 		this.length = size;
 	}
 
+    public MirrorInputSplit(List<FileTuple> splits, long size,HostConfig hostConfig) {
+        this.splits = splits;
+        this.length = size;
+        this.hostConfig = hostConfig;
+    }
+
 	public void readFields(DataInput in) throws IOException {
 		int size = in.readInt();
 		splits = new ArrayList<FileTuple>(size);
@@ -53,6 +61,8 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 			splits.add(ft);
 		}
 		length = in.readLong();
+        if( hostConfig != null )
+            hostConfig.readFields(in);
 	}
 
 	public void write(DataOutput out) throws IOException {
@@ -62,6 +72,8 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 			split.write(out);
 		}
 		out.writeLong(length);
+        if( hostConfig != null )
+            hostConfig.write(out);
 	}
 
 	@Override
@@ -86,4 +98,11 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 		this.splits = splits;
 	}
 
+    public HostConfig getHostConfig() {
+        return hostConfig;
+    }
+
+    public void setHostConfig(HostConfig hostConfig) {
+        this.hostConfig = hostConfig;
+    }
 }

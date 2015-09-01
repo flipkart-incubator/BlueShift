@@ -19,28 +19,19 @@
 package com.flipkart.fdp.migration.distcp.codec;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import com.flipkart.fdp.migration.distcp.config.HostConfig;
-import com.flipkart.fdp.migration.distftp.DistFTPInputSplit;
+import com.flipkart.fdp.migration.distcp.core.MirrorInputSplit;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-
 import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants;
-import com.flipkart.fdp.migration.distcp.config.DCMConstants.SecurityType;
-import org.apache.hadoop.mapreduce.InputSplit;
 
 public class DCMCodecFactory {
+
+    //TODO://Have to combine these methods to getCodec(..) , currently having this as MFTP is not supported for source.
 
 	public static DCMCodec getSourceCodec(Configuration conf, ConnectionConfig config)
 			throws IOException {
 		try {
 			String scheme = null;
-			FileSystem fs = null;
 			switch (config.getType()) {
 
 			case WEBHDFS:
@@ -65,19 +56,16 @@ public class DCMCodecFactory {
 			if (scheme == null)
 				throw new Exception("Unknown Filesystem, " + config.getType());
 
-			if (fs == null)
-				fs = getHadoopFilesystem(scheme, conf, config);
-			return new GenericHadoopCodec(fs);
+			return new GenericHadoopCodec(conf, config);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
 	}
 
-    public static DCMCodec getDestinationCodec(Configuration conf, ConnectionConfig config,InputSplit inputSplit)
+    public static DCMCodec getDestinationCodec(Configuration conf, ConnectionConfig config,MirrorInputSplit inputSplit)
             throws IOException {
         try {
             String scheme = null;
-            FileSystem fs = null;
             switch (config.getType()) {
 
                 case WEBHDFS:
@@ -92,16 +80,8 @@ public class DCMCodecFactory {
                 case HAR:
                     scheme = DCMConstants.HAR_DEFAULT_PROTOCOL;
                     break;
-                case FTP:
-                    List<HostConfig> hostConfigList = config.getHostConfigList();
-                    Collections.sort(hostConfigList, new Comparator<HostConfig>() {
-                        @Override
-                        public int compare(HostConfig o1, HostConfig o2) {
-                            return o1.compareTo(o2);
-                        }
-                    });
-                    Collections.reverse(hostConfigList);
-                    return new GenericFTPCodec(conf,hostConfigList);
+                case MFTP:
+                    return new GenericFTPCodec(conf, inputSplit);
                 case CUSTOM:
 
                 default:
@@ -110,24 +90,12 @@ public class DCMCodecFactory {
             if (scheme == null)
                 throw new Exception("Unknown Filesystem, " + config.getType());
 
-            if (fs == null)
-                fs = getHadoopFilesystem(scheme, conf, config);
-            return new GenericHadoopCodec(fs);
+            return new GenericHadoopCodec(conf,config);
         } catch (Exception e) {
-            throw new IOException(e);
+            e.printStackTrace();
         }
+        return null;
     }
 
-	public static FileSystem getHadoopFilesystem(String scheme,
-			Configuration conf, ConnectionConfig config) throws Exception {
-
-		String httpfsUrl = scheme + config.getHostConfig().getHost() + ":" + config.getHostConfig().getPort();
-
-		if (config.getHostConfig().getSecurityType() == SecurityType.KERBEROS)
-			return FileSystem.newInstance(new URI(httpfsUrl), conf);
-		else
-			return FileSystem.newInstance(new URI(httpfsUrl), conf,
-					config.getHostConfig().getUserName());
-	}
 
 }

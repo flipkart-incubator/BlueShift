@@ -37,16 +37,15 @@
     },
 
     "sinkConfig": {
-        "path": "",
+        "path": "/2/migration/DistFTP/",
         "compressionCodec": "snappy",
         "useCompression": false,
         "overwriteFiles": true,
         "append": false,
         "customSinkImplClass": "",
-
         "connectionConfig": {
-            "type": "FTP",
-            "connectionParams": "DistFTP",
+            "type": "MFTP",
+            "connectionParams": "",
             "hostConfigList": [
                 {
                     "securityType": "SIMPLE",
@@ -57,6 +56,16 @@
                     "keyFile": "",
                     "freeSpaceInBytes": 88009099999,
                     "destPath": "/2/migration/DistFTP/"
+                },
+                {
+                    "securityType": "SIMPLE",
+                    "host": "h3-254-02.ch.flipkart.com",
+                    "port": 21,
+                    "userName": "ftp",
+                    "userPassword": "ftp",
+                    "keyFile": "",
+                    "freeSpaceInBytes": 88009099999,
+                    "destPath": "/3/migration/DistFTP/"
                 }
             ]
         }

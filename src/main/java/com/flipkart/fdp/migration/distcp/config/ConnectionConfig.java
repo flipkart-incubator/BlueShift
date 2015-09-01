@@ -30,18 +30,15 @@ import java.util.List;
 public class ConnectionConfig {
 
 	private FileSystemType type = null;
-
-
 	private HostConfig hostConfig = null;
-
     private List<HostConfig> hostConfigList = null;
-    private String connectionParams = null;
+    private DCMConstants.ConnectionParamsType connectionParams = null;
 
-    public String getConnectionParams() {
+    public DCMConstants.ConnectionParamsType getConnectionParams() {
         return connectionParams;
     }
 
-    public void setConnectionParams(String connectionParams) {
+    public void setConnectionParams(DCMConstants.ConnectionParamsType connectionParams) {
         this.connectionParams = connectionParams;
     }
 

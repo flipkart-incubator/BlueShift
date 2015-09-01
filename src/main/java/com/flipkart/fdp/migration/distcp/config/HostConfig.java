@@ -51,28 +51,27 @@ public class HostConfig implements Writable {
 
     @Override
     public void write(DataOutput out) throws IOException {
-        Text.writeString(out,getUserName());
-        Text.writeString(out,getUserPassword());
-        Text.writeString(out,getKeyFile());
-        Text.writeString(out,getHost());
+        Text.writeString(out, getUserName());
+        Text.writeString(out, getUserPassword());
+        Text.writeString(out, getKeyFile());
+        Text.writeString(out, getHost());
         out.writeInt(getPort());
-        //Text.writeString(out, String.valueOf(securityType));
+        //Text.writeString(out, String.valueOf(securityType)); //Todo:// Uncomment this after we enable Security
         out.writeLong(getFreeSpaceInBytes());
-        Text.writeString(out,getDestPath());
-
-
+        Text.writeString(out, getDestPath());
     }
 
     @Override
     public void readFields(DataInput in) throws IOException {
-        userName =Text.readString(in);
-        userPassword =Text.readString(in);
-        keyFile =Text.readString(in);
-        host =Text.readString(in);
-        port = in.readInt();
-        securityType = DCMConstants.SecurityType.SIMPLE;
-        freeSpaceInBytes = in.readLong();
-        destPath = Text.readString(in);
+            userName = Text.readString(in);
+            userPassword = Text.readString(in);
+            keyFile = Text.readString(in);
+            host = Text.readString(in);
+            port = in.readInt();
+            securityType = DCMConstants.SecurityType.SIMPLE;
+            freeSpaceInBytes = in.readLong();
+            destPath = Text.readString(in);
+
     }
 
     @Override

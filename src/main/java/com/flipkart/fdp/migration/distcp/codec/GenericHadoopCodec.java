@@ -22,11 +22,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -41,17 +44,16 @@ public class GenericHadoopCodec implements DCMCodec {
 
 	private FileSystem fs = null;
 
-	public GenericHadoopCodec(FileSystem fs) {
+    public GenericHadoopCodec(Configuration conf, ConnectionConfig config) throws Exception {
+        this.fs = getHadoopFilesystem(conf,config);
+    }
 
-		this.fs = fs;
-	}
-
-	public List<OutputStream> createOutputStream(Configuration conf, String path,
+    public OutputStream createOutputStream(Configuration conf, String path,
 			boolean append) throws IOException {
 		if (append)
-			return (List<OutputStream>) fs.append(new Path(path));
+			return  fs.append(new Path(path));
 		else
-			return (List<OutputStream>)fs.create(new Path(path));
+			return  fs.create(new Path(path));
 	}
 
 	public InputStream createInputStream(Configuration conf, String path)
@@ -113,9 +115,22 @@ public class GenericHadoopCodec implements DCMCodec {
 		return fileList;
 	}
 
-	public List<FileTuple> getFileStatusRecursive(Path path,
-			Collection<String> excludeList) throws MalformedURLException,
-			IOException, AuthenticationException {
+    public static FileSystem getHadoopFilesystem(
+            Configuration conf, ConnectionConfig config) throws Exception {
+
+        String httpfsUrl = DCMConstants.HDFS_DEFAULT_PROTOCOL + config.getHostConfig().getHost() + ":" + config.getHostConfig().getPort();
+
+        if (config.getHostConfig().getSecurityType() == DCMConstants.SecurityType.KERBEROS)
+            return FileSystem.newInstance(new URI(httpfsUrl), conf);
+        else
+            return FileSystem.newInstance(new URI(httpfsUrl), conf,
+                    config.getHostConfig().getUserName());
+    }
+
+
+    public List<FileTuple> getFileStatusRecursive(Path path,
+			Collection<String> excludeList) throws IOException,
+                     AuthenticationException {
 
 		List<FileTuple> response = new ArrayList<FileTuple>();
 

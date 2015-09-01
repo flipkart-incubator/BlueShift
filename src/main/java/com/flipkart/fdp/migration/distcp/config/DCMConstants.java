@@ -62,7 +62,7 @@ public class DCMConstants {
 	public static HashFunction hasher = Hashing.murmur3_32();
 
 	public static final String HTTP_DEFAULT_PROTOCOL = "http://";
-	public static final String HDFS_DEFAULT_PROTOCOL = "hdfs://";
+	public static final String  HDFS_DEFAULT_PROTOCOL = "hdfs://";
 	public static final String HFTP_DEFAULT_PROTOCOL = "hftp://";
 	public static final String FTP_DEFAULT_PROTOCOL = "ftp://";
 	public static final String HAR_DEFAULT_PROTOCOL = "har://";
@@ -81,19 +81,16 @@ public class DCMConstants {
 
 	public static enum FileSystemType {
 
-		WEBHDFS, HDFS, HFTP, FTP, HAR, LOCAL, TCP, HTTP, CUSTOM
+		WEBHDFS, HDFS, HFTP, FTP, HAR, LOCAL, TCP, HTTP, CUSTOM,MFTP
 	}
+
+    public static enum ConnectionParamsType {
+
+        MFTP,HDFS
+    }
 
 	public static enum SecurityType {
 		PSEUDO, KERBEROS, SIMPLE, NONE;
-
-        SecurityType(String s) {
-
-        }
-
-        SecurityType() {
-
-        }
     }
 
 	public static enum StateManagerImpl {

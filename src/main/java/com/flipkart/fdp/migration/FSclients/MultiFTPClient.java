@@ -1,6 +1,5 @@
-package com.flipkart.fdp.migration.distftp;
+package com.flipkart.fdp.migration.FSclients;
 
-import com.flipkart.fdp.migration.distcp.config.HostConfig;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hadoop.conf.Configuration;
@@ -15,11 +14,11 @@ import java.net.URL;
 */
 @Getter
 @Setter
-public class DistFTPClient extends FTPFileSystem{
+public class MultiFTPClient extends FTPFileSystem{
 
     URL ftpURI = null;
 
-    public DistFTPClient(URI uri, Configuration conf) throws IOException {
+    public MultiFTPClient(URI uri, Configuration conf) throws IOException {
         super.initialize(uri,conf);
         ftpURI = uri.toURL();
     }

@@ -3,14 +3,8 @@ package com.flipkart.fdp.migration.distcp.codec;
 import com.flipkart.fdp.migration.distcp.config.*;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl;
 import com.flipkart.fdp.migration.distcp.core.MirrorInputSplit;
-import com.flipkart.fdp.migration.distftp.DistFTPClient;
-import com.flipkart.fdp.migration.distftp.DistFTPInputSplit;
-import com.flipkart.fdp.optimizer.api.IInputJob;
-import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import org.apache.commons.net.ftp.FTPClient;
+import com.flipkart.fdp.migration.FSclients.MultiFTPClient;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.InputSplit;
 
 
 import java.io.IOException;
@@ -25,68 +19,38 @@ import java.util.*;
  */
 public class GenericFTPCodec implements  DCMCodec {
 
-   private List<DistFTPClient> distFTPClient = null;
+   private HostConfig hostConfig = null;
+   private MultiFTPClient multiFTPClient = null;
    private long totalBatchSize = 0l;
+   private Configuration conf = null;
 
+    public GenericFTPCodec(Configuration conf,MirrorInputSplit mirrorInputSplit) throws Exception {
+       this.conf = conf;
+       this.hostConfig = mirrorInputSplit.getHostConfig();
+    }
 
-    public GenericFTPCodec(Configuration conf,List<HostConfig> hostConfigList) throws Exception {
-        int index = 0;
-        long availableSize;
-        long requiredSize;
-
-        List<DistFTPInputSplit> splits = new ArrayList<DistFTPInputSplit>();
-        Gson gson = new Gson();
-        OptimizedWorkloadConfig optimizedWorkloadConfig = gson.fromJson(conf.get("split_tasks"), OptimizedWorkloadConfig.class);
-        InputFileMapConfig inputFileMapConfig = gson.fromJson("input_map",InputFileMapConfig.class);
-
-        for( Set<IInputJob> stats : optimizedWorkloadConfig.getSplitTasks() ) {
-            requiredSize = 0l;
-            availableSize = hostConfigList.get(index).getFreeSpaceInBytes();
-            List<MirrorDCMImpl.FileTuple> tuple = new ArrayList<MirrorDCMImpl.FileTuple>();
-            for (IInputJob stat : stats) {
-                tuple.add(inputFileMapConfig.getInputFileMap().get(stat.getJobKey()));
-                requiredSize += stat.getJobSize();
-            }
-            totalBatchSize += requiredSize;
-            if( requiredSize > availableSize )
-                throw new Exception("Total Files size is more than available space on disk! ");
-            else
-                splits.add(new DistFTPInputSplit(tuple,requiredSize, new HostConfig(hostConfigList.get(index++))));
-
-        }
-
-        distFTPClient = Lists.newArrayList();
-        for(DistFTPInputSplit distFTPInputSplit : splits) {
-            for (HostConfig hostConfig : hostConfigList) {
-                for (MirrorDCMImpl.FileTuple file : distFTPInputSplit.getSplits()) {
-                    String[] filePathTree = file.fileName.split("/");
-                    this.distFTPClient.add(new DistFTPClient(constructFtpURLString(hostConfig, filePathTree[filePathTree.length - 1]), conf));
-                }
-            }
-        }
-
-   }
-
-    private URI constructFtpURLString(HostConfig config,String destFileName) throws URISyntaxException {
-        System.out.println("URI : "+String.valueOf(
+    private URI constructFtpURLString(String destFileName) throws URISyntaxException {
+/*        System.out.println("URI : "+String.valueOf(
                 DCMConstants.FTP_DEFAULT_PROTOCOL
-                        + config.getUserName() + ":" + config.getUserPassword()
-                        + "@" + config.getHost() + config.getDestPath() + destFileName));
+                        + hostConfig.getUserName() + ":" + hostConfig.getUserPassword()
+                        + "@" + hostConfig.getHost() + hostConfig.getDestPath() + destFileName));*/
         return new URI( String.valueOf(
                             DCMConstants.FTP_DEFAULT_PROTOCOL
-                            + config.getUserName() + ":" + config.getUserPassword()
-                            + "@" + config.getHost() + config.getDestPath() + destFileName)
+                            + hostConfig.getUserName() + ":" + hostConfig.getUserPassword()
+                            + "@" + hostConfig.getHost() + hostConfig.getDestPath() + destFileName)
                         );
     }
 
 
     @Override
-    public List<OutputStream> createOutputStream(Configuration conf, String path, boolean append) throws IOException {
-        List<OutputStream> outputStreams = Lists.newArrayList();
-        for(DistFTPClient ftpClient : distFTPClient){
-            outputStreams.add(ftpClient.getOutputStream());
+    public OutputStream createOutputStream(Configuration conf, String path, boolean append) throws IOException {
+        try {
+            String[] pathTree = path.split("/");
+            multiFTPClient = new MultiFTPClient(constructFtpURLString(pathTree[pathTree.length-1]),conf);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
-        return outputStreams;
+        return multiFTPClient.getOutputStream();
     }
 
     @Override
@@ -121,17 +85,16 @@ public class GenericFTPCodec implements  DCMCodec {
 
     @Override
     public void close() throws IOException {
-        for (DistFTPClient ftpClient : distFTPClient)
-            ftpClient.close();
+
     }
 
 
-    public List<DistFTPClient> getDistFTPClient() {
-        return distFTPClient;
+    public MultiFTPClient getMultiFTPClient() {
+        return multiFTPClient;
     }
 
-    public void setDistFTPClient(List<DistFTPClient> distFTPClient) {
-        this.distFTPClient = distFTPClient;
+    public void setMultiFTPClient(MultiFTPClient multiFTPClient) {
+        this.multiFTPClient = multiFTPClient;
     }
 
     public long getTotalBatchSize() {
@@ -140,6 +103,23 @@ public class GenericFTPCodec implements  DCMCodec {
 
     public void setTotalBatchSize(long totalBatchSize) {
         this.totalBatchSize = totalBatchSize;
+    }
+
+
+    public HostConfig getHostConfig() {
+        return hostConfig;
+    }
+
+    public void setHostConfig(HostConfig hostConfig) {
+        this.hostConfig = hostConfig;
+    }
+
+    public Configuration getConf() {
+        return conf;
+    }
+
+    public void setConf(Configuration conf) {
+        this.conf = conf;
     }
 }
 

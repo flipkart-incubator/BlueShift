@@ -22,8 +22,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Set;
-
-import com.flipkart.fdp.migration.distftp.DistFTPFileInputFormat;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.OptionBuilder;
@@ -38,7 +36,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-
 import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.BLUESHIFT_COUNTER;
@@ -80,11 +77,11 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 		configuration = getConf();
 
-		DistFTPFileInputFormat.setExclusionsFileList(configuration, excludeList);
-        DistFTPFileInputFormat.setInclusionFileList(configuration, includeList);
+        MirrorFileInputFormat.setExclusionsFileList(configuration, excludeList);
+        MirrorFileInputFormat.setInclusionFileList(configuration, includeList);
 
 		System.out.println("Inclusion File List: "
-				+ DistFTPFileInputFormat.getInclusionFileList(configuration));
+				+ MirrorFileInputFormat.getInclusionFileList(configuration));
 		// Setting task timeout to 2 hrs
 		configuration.setLong("mapred.task.timeout", 1000 * 60 * 60 * 2);
 
@@ -169,7 +166,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		job.setMapperClass(MirrorMapper.class);
 		job.setReducerClass(MirrorReducer.class);
 
-		job.setInputFormatClass(DistFTPFileInputFormat.class);
+		job.setInputFormatClass(MirrorFileInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
 
 		FileOutputFormat.setOutputPath(job, stateManager.getReportPath());
@@ -184,7 +181,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 	private void populateConfFromDCMConfig() {
 
-		configuration.set(DistFTPFileInputFormat.DCM_CONFIG,
+		configuration.set(MirrorFileInputFormat.DCM_CONFIG,
 				dcmConfig.toString());
 	}
 
