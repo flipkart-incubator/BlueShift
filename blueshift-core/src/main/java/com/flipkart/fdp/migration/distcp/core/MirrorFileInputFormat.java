@@ -40,12 +40,12 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
+import com.flipkart.fdp.migration.distcp.codec.optimizer.WorkloadOptimizer;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 import com.flipkart.fdp.migration.distcp.state.StateManager;
 import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
 import com.flipkart.fdp.migration.distcp.state.TransferStatus;
-import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
 import com.flipkart.fdp.optimizer.OptimTuple;
 
 public class MirrorFileInputFormat extends InputFormat<Text, Text> {
@@ -54,7 +54,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 	public static final String INCLUDE_FILES = "include_files";
 	public static final String EXCLUDE_FILES = "exclude_files";
 
-	private DCMCodec dcmCodec = null;
+	private DCMCodec dcmInCodec = null;
 	private Configuration conf = null;
 	private DCMConfig dcmConfig = null;
 	private StateManager stateManager = null;
@@ -71,8 +71,8 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		conf = context.getConfiguration();
 		dcmConfig = MirrorUtils.getConfigFromConf(conf);
 
-		dcmCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSourceConfig()
-				.getConnectionConfig(), null);
+		dcmInCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSourceConfig()
+				.getDefaultConnectionConfig());
 
 		excludeList = getExclusionsFileList(conf);
 		includeList = getInclusionFileList(conf);
@@ -83,12 +83,13 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 		long totalBatchSize = 0;
 		try {
+
 			System.out.println("Scanning source location...");
 			List<FileTuple> fstats = null;
 			if (includeList != null && includeList.size() > 0)
-				fstats = dcmCodec.getInputPaths(includeList, excludeList);
+				fstats = dcmInCodec.getInputPaths(includeList, excludeList);
 			else
-				fstats = dcmCodec.getInputPaths(dcmConfig.getSourceConfig()
+				fstats = dcmInCodec.getInputPaths(dcmConfig.getSourceConfig()
 						.getPath(), excludeList);
 
 			stateManager = StateManagerFactory.getStateManager(conf, dcmConfig);
@@ -109,8 +110,11 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 			}
 			System.out.println("Optimizing Splits...");
 
-			splits.addAll(MirrorUtils.optimizeInputSplits(conf, dcmConfig,
-					locations, inputFileMap));
+			WorkloadOptimizer optimizer = DCMCodecFactory
+					.getCodecWorkloadOptimizer(dcmConfig.getSinkConfig()
+							.getDefaultConnectionConfig());
+			splits.addAll(optimizer.optimizeWorkload(dcmConfig, locations,
+					inputFileMap));
 
 			if (splits.size() <= 0)
 				throw new Exception("No Inputs Identified for Processing.. ");

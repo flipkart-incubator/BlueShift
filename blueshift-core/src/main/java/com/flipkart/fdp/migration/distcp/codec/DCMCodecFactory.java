@@ -19,50 +19,77 @@
 package com.flipkart.fdp.migration.distcp.codec;
 
 import java.io.IOException;
+import java.net.URI;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 
+import com.flipkart.fdp.migration.distcp.codec.optimizer.GenericOptimizer;
+import com.flipkart.fdp.migration.distcp.codec.optimizer.MultiOutputOptimizer;
+import com.flipkart.fdp.migration.distcp.codec.optimizer.WorkloadOptimizer;
 import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants;
-import com.flipkart.fdp.migration.distcp.config.HostConfig;
 
 public class DCMCodecFactory {
 
-	public static DCMCodec getCodec(Configuration conf,
-			ConnectionConfig config, HostConfig hostconfig) throws IOException {
+	public static DCMCodec getCodec(Configuration conf, ConnectionConfig config)
+			throws IOException {
+
+		FileSystem fs = null;
+
 		try {
-			String scheme = null;
-			switch (config.getType()) {
+			URI connectionURI = new URI(config.getConnectionURL());
+			String scheme = connectionURI.getScheme().toLowerCase();
+			switch (scheme) {
 
-			case WEBHDFS:
-				scheme = DCMConstants.WEBHDFS_DEFAULT_PROTOCOL;
+			case "webhdfs":
+			case "hdfs":
+			case "hftp":
+			case "har":
+			case "ftp":
+				fs = getFilesystem(conf, config, config.getConnectionURL());
 				break;
-			case HDFS:
-				scheme = DCMConstants.HDFS_DEFAULT_PROTOCOL;
+			case "mftp":
+				String uri = config.getConnectionURL().replaceFirst("mftp",
+						"ftp");
+				fs = getFilesystem(conf, config, uri);
 				break;
-			case HFTP:
-				scheme = DCMConstants.HFTP_DEFAULT_PROTOCOL;
-				break;
-			case HAR:
-				scheme = DCMConstants.HAR_DEFAULT_PROTOCOL;
-				break;
-			case FTP:
-				scheme = DCMConstants.FTP_DEFAULT_PROTOCOL;
-				break;
-			case MFTP:
-				return new GenericFTPCodec(conf, hostconfig);
-			case CUSTOM:
-
 			default:
-				break;
+				throw new Exception("Unknown Filesystem, " + scheme);
 			}
-			if (scheme == null)
-				throw new Exception("Unknown Filesystem, " + config.getType());
-
-			return new GenericHadoopCodec(conf, config);
+			return new GenericHadoopCodec(conf, fs);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
 	}
 
+	public static FileSystem getFilesystem(Configuration conf,
+			ConnectionConfig config, String fsURI) throws Exception {
+
+		if (config.getSecurityType() == DCMConstants.SecurityType.KERBEROS)
+			return FileSystem.newInstance(new URI(fsURI), conf);
+		else
+			return FileSystem.newInstance(new URI(fsURI), conf,
+					config.getUserName());
+	}
+
+	public static WorkloadOptimizer getCodecWorkloadOptimizer(
+			ConnectionConfig config) throws Exception {
+
+		URI connectionURI = new URI(config.getConnectionURL());
+		String scheme = connectionURI.getScheme().toLowerCase();
+		switch (scheme) {
+
+		case "webhdfs":
+		case "hdfs":
+		case "hftp":
+		case "har":
+		case "ftp":
+			return new GenericOptimizer();
+		case "mftp":
+			return new MultiOutputOptimizer();
+		default:
+			throw new Exception("Unknown Scheme: " + scheme);
+		}
+	}
 }

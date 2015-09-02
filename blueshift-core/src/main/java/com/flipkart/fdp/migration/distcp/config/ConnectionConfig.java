@@ -18,51 +18,85 @@
 
 package com.flipkart.fdp.migration.distcp.config;
 
-import java.util.List;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.flipkart.fdp.migration.distcp.config.DCMConstants.FileSystemType;
 import com.google.gson.Gson;
 
+/**
+ * Created by sushil.s on 28/08/15.
+ */
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ConnectionConfig {
+public class ConnectionConfig implements Writable {
 
-	private FileSystemType type = null;
-	private HostConfig hostConfig = null;
-	private List<HostConfig> hostConfigList = null;
-	private DCMConstants.ConnectionParamsType connectionParams = null;
+	private String connectionURL;
 
-	public DCMConstants.ConnectionParamsType getConnectionParams() {
-		return connectionParams;
+	private String path;
+
+	private String userName;
+	private String userPassword;
+	private String keyFile;
+
+	private DCMConstants.SecurityType securityType;
+	private long freeSpaceInBytes;
+
+	public ConnectionConfig(ConnectionConfig hostConfig) {
+		this.userName = hostConfig.getUserName();
+		this.userPassword = hostConfig.getUserPassword();
+		this.keyFile = hostConfig.getKeyFile();
+		this.securityType = hostConfig.getSecurityType();
+		this.freeSpaceInBytes = hostConfig.getFreeSpaceInBytes();
+		this.path = hostConfig.getPath();
+		this.connectionURL = hostConfig.getConnectionURL();
 	}
 
-	public void setConnectionParams(
-			DCMConstants.ConnectionParamsType connectionParams) {
-		this.connectionParams = connectionParams;
+	public int compareTo(ConnectionConfig o) {
+		Long l = getFreeSpaceInBytes();
+		if (o == null)
+			return l.compareTo(0L);
+		return l.compareTo(o.getFreeSpaceInBytes());
 	}
 
-	public HostConfig getHostConfig() {
-		return hostConfig;
+	@Override
+	public void write(DataOutput out) throws IOException {
+
+		Text.writeString(out, getUserName());
+		Text.writeString(out, getUserPassword());
+		Text.writeString(out, getKeyFile());
+		Text.writeString(out, getConnectionURL());
+
+		// Todo: Uncomment this after we enable Security
+		// Text.writeString(out, String.valueOf(securityType));
+
+		out.writeLong(getFreeSpaceInBytes());
+		Text.writeString(out, getPath());
 	}
 
-	public void setHostConfig(HostConfig hostConfig) {
-		this.hostConfig = hostConfig;
-	}
+	@Override
+	public void readFields(DataInput in) throws IOException {
+		userName = Text.readString(in);
+		userPassword = Text.readString(in);
+		keyFile = Text.readString(in);
+		connectionURL = Text.readString(in);
+		securityType = DCMConstants.SecurityType.SIMPLE;
+		freeSpaceInBytes = in.readLong();
+		path = Text.readString(in);
 
-	public List<HostConfig> getHostConfigList() {
-		return hostConfigList;
-	}
-
-	public void setHostConfigList(List<HostConfig> hostConfigList) {
-		this.hostConfigList = hostConfigList;
-	}
-
-	public FileSystemType getType() {
-		return type;
-	}
-
-	public void setType(FileSystemType type) {
-		this.type = type;
 	}
 
 	@Override

@@ -21,7 +21,6 @@ package com.flipkart.fdp.migration.distcp.codec;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,30 +33,30 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
 
-import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
-import com.flipkart.fdp.migration.distcp.config.DCMConstants;
+import com.flipkart.fdp.migration.distcp.core.MirrorUtils;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
-import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
 
 public class GenericHadoopCodec implements DCMCodec {
 
 	private FileSystem fs = null;
 
-	public GenericHadoopCodec(Configuration conf, ConnectionConfig config)
+	private Configuration conf = null;
+
+	public GenericHadoopCodec(Configuration conf, FileSystem fs)
 			throws Exception {
-		this.fs = getHadoopFilesystem(conf, config);
+		this.fs = fs;
+		this.conf = conf;
 	}
 
-	public OutputStream createOutputStream(Configuration conf, String path,
-			boolean append) throws IOException {
+	public OutputStream createOutputStream(String path, boolean append)
+			throws IOException {
 		if (append)
 			return fs.append(new Path(path));
 		else
 			return fs.create(new Path(path));
 	}
 
-	public InputStream createInputStream(Configuration conf, String path)
-			throws IOException {
+	public InputStream createInputStream(String path) throws IOException {
 
 		return fs.open(new Path(path));
 
@@ -115,20 +114,6 @@ public class GenericHadoopCodec implements DCMCodec {
 		return fileList;
 	}
 
-	public static FileSystem getHadoopFilesystem(Configuration conf,
-			ConnectionConfig config) throws Exception {
-
-		String httpfsUrl = DCMConstants.HDFS_DEFAULT_PROTOCOL
-				+ config.getHostConfig().getHost() + ":"
-				+ config.getHostConfig().getPort();
-
-		if (config.getHostConfig().getSecurityType() == DCMConstants.SecurityType.KERBEROS)
-			return FileSystem.newInstance(new URI(httpfsUrl), conf);
-		else
-			return FileSystem.newInstance(new URI(httpfsUrl), conf, config
-					.getHostConfig().getUserName());
-	}
-
 	public List<FileTuple> getFileStatusRecursive(Path path,
 			Collection<String> excludeList) throws IOException,
 			AuthenticationException {
@@ -175,4 +160,16 @@ public class GenericHadoopCodec implements DCMCodec {
 		IOUtils.closeStream(fs);
 
 	}
+
+	@Override
+	public void setConf(Configuration conf) {
+		this.conf = conf;
+
+	}
+
+	@Override
+	public Configuration getConf() {
+		return conf;
+	}
+
 }

@@ -26,7 +26,6 @@ import com.flipkart.fdp.migration.distcp.config.MD5Digester;
 import com.flipkart.fdp.migration.distcp.state.StateManager;
 import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
 import com.flipkart.fdp.migration.distcp.state.TransferStatus;
-import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileAlreadyExistsException;
 import org.apache.hadoop.fs.Path;
@@ -45,7 +44,7 @@ import java.util.Map;
 public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	private String srcPath = null;
-    private int progressCount = 0;
+	private int progressCount = 0;
 
 	private MirrorInputSplit fSplit = null;
 
@@ -92,11 +91,9 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		System.out.println("Initializing transfer of : " + inputs.size()
 				+ " files, with a total Size of : " + fSplit.getLength());
 
-		inCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSourceConfig()
-				.getConnectionConfig(), fSplit.getSrcHostConfig());
+		inCodec = DCMCodecFactory.getCodec(conf, fSplit.getSrcHostConfig());
 
-		outCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSinkConfig()
-				.getConnectionConfig(), fSplit.getDestHostConfig());
+		outCodec = DCMCodecFactory.getCodec(conf, fSplit.getDestHostConfig());
 
 	}
 
@@ -104,7 +101,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	public boolean nextKeyValue() throws IOException, InterruptedException {
 
 		if (!read) {
-            progressCount++;
+			progressCount++;
 			digest = null;
 			current = inputs.get(index);
 			srcPath = MirrorUtils.getSimplePath(new Path(current.fileName));
@@ -168,10 +165,10 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 			destPath = MirrorUtils.stripExtension(destPath);
 			status.setOutputPath(destPath);
 
-			in = inCodec.createInputStream(conf, srcPath);
+			in = inCodec.createInputStream(srcPath);
 			in = MirrorUtils.getCodecInputStream(conf, dcmConfig, srcPath, in);
 		} else {
-			in = inCodec.createInputStream(conf, srcPath);
+			in = inCodec.createInputStream(srcPath);
 		}
 
 		if (status.isOutputCompressed()) {
@@ -188,7 +185,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 			out = MirrorUtils.getCodecOutputStream(conf, dcmConfig, destPath,
 					out);
 		} else {
-			out = outCodec.createOutputStream(conf, destPath, dcmConfig
+			out = outCodec.createOutputStream(destPath, dcmConfig
 					.getSinkConfig().isAppend());
 		}
 

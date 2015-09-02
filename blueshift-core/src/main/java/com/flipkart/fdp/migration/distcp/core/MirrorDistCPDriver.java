@@ -45,7 +45,6 @@ import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorMapper;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorReducer;
 import com.flipkart.fdp.migration.distcp.state.StateManager;
 import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
-import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
 import com.google.gson.Gson;
 
 /**

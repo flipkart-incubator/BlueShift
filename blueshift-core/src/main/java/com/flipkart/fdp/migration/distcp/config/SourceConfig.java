@@ -18,6 +18,8 @@
 
 package com.flipkart.fdp.migration.distcp.config;
 
+import java.util.List;
+
 import com.google.gson.Gson;
 
 public class SourceConfig {
@@ -43,7 +45,7 @@ public class SourceConfig {
 	private boolean includeUpdatedFiles = false;
 	private long compressionThreshold = 0;
 
-	private ConnectionConfig connectionConfig = null;
+	private List<ConnectionConfig> connectionConfig = null;
 
 	public String getPath() {
 		return path;
@@ -149,11 +151,15 @@ public class SourceConfig {
 		this.compressionThreshold = compressionThreshold;
 	}
 
-	public ConnectionConfig getConnectionConfig() {
+	public ConnectionConfig getDefaultConnectionConfig() {
+		return connectionConfig.get(0);
+	}
+
+	public List<ConnectionConfig> getConnectionConfig() {
 		return connectionConfig;
 	}
 
-	public void setConnectionConfig(ConnectionConfig connectionConfig) {
+	public void setConnectionConfig(List<ConnectionConfig> connectionConfig) {
 		this.connectionConfig = connectionConfig;
 	}
 

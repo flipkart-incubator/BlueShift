@@ -25,17 +25,16 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configurable;
 
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 
-public interface DCMCodec extends Closeable {
+public interface DCMCodec extends Closeable, Configurable {
 
-	public OutputStream createOutputStream(Configuration conf, String path,
-			boolean append) throws IOException;
-
-	public InputStream createInputStream(Configuration conf, String path)
+	public OutputStream createOutputStream(String path, boolean append)
 			throws IOException;
+
+	public InputStream createInputStream(String path) throws IOException;
 
 	public boolean deleteSoureFile(String path) throws IOException;
 

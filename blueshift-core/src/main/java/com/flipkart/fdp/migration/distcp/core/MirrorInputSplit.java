@@ -27,21 +27,21 @@ import java.util.List;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 
-import com.flipkart.fdp.migration.distcp.config.HostConfig;
+import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 
 public class MirrorInputSplit extends InputSplit implements Writable {
 
 	private List<FileTuple> splits = null;
 	private long length = 0;
-	private HostConfig srcHostConfig = null;
-	private HostConfig destHostConfig = null;
+	private ConnectionConfig srcHostConfig = null;
+	private ConnectionConfig destHostConfig = null;
 
 	public MirrorInputSplit() {
 		splits = new ArrayList<FileTuple>();
 		length = 0;
-		srcHostConfig = new HostConfig();
-		destHostConfig = new HostConfig();
+		srcHostConfig = new ConnectionConfig();
+		destHostConfig = new ConnectionConfig();
 	}
 
 	public MirrorInputSplit(List<FileTuple> splits, long size) {
@@ -51,7 +51,7 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 	}
 
 	public MirrorInputSplit(List<FileTuple> splits, long size,
-			HostConfig srcHostConfig, HostConfig destHostConfig) {
+			ConnectionConfig srcHostConfig, ConnectionConfig destHostConfig) {
 		this(splits, size);
 		this.srcHostConfig = srcHostConfig;
 		this.destHostConfig = destHostConfig;
@@ -116,19 +116,19 @@ public class MirrorInputSplit extends InputSplit implements Writable {
 		this.splits = splits;
 	}
 
-	public HostConfig getSrcHostConfig() {
+	public ConnectionConfig getSrcHostConfig() {
 		return srcHostConfig;
 	}
 
-	public void setSrcHostConfig(HostConfig srcHostConfig) {
+	public void setSrcHostConfig(ConnectionConfig srcHostConfig) {
 		this.srcHostConfig = srcHostConfig;
 	}
 
-	public HostConfig getDestHostConfig() {
+	public ConnectionConfig getDestHostConfig() {
 		return destHostConfig;
 	}
 
-	public void setDestHostConfig(HostConfig destHostConfig) {
+	public void setDestHostConfig(ConnectionConfig destHostConfig) {
 		this.destHostConfig = destHostConfig;
 	}
 

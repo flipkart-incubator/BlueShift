@@ -63,6 +63,7 @@ atlassian-ide-plugin.xml
 .project
 .settings
 .metadata
+.pydevproject
 
 # NetBeans specific files/directories
 .nbattrs
