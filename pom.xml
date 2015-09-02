@@ -6,7 +6,7 @@
 	<groupId>com.flipkart.fdp</groupId>
 	<artifactId>blueshift</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>2.0.1-SNAPSHOT</version>
 
 	<prerequisites>
 		<maven>3.0.0</maven>

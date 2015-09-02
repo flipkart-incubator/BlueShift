@@ -18,13 +18,12 @@
 
 package com.flipkart.fdp.migration.distcp.core;
 
-import com.flipkart.fdp.migration.db.models.Status;
-import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
-import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
-import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import com.flipkart.fdp.migration.distcp.state.StateManager;
-import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
-import com.flipkart.fdp.migration.distcp.state.TransferStatus;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileAlreadyExistsException;
 import org.apache.hadoop.fs.Path;
@@ -34,11 +33,13 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
+import com.flipkart.fdp.migration.db.models.Status;
+import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
+import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
+import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.state.StateManager;
+import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
+import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 
 public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
@@ -218,6 +219,9 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	private void updateStatus() throws IOException {
 
+		key.set(status.getInputPath());
+		value.set(status.toString());
+
 		if (status.getStatus() == Status.COMPLETED) {
 			context.getCounter(MirrorDCMImpl.BLUESHIFT_COUNTER.SUCCESS_COUNT)
 					.increment(1);
@@ -250,17 +254,17 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	@Override
 	public void close() throws IOException {
+		
 		System.out.println("Transfer Complete...");
 		IOUtils.closeStream(inCodec);
 		IOUtils.closeStream(outCodec);
-
+		IOUtils.closeStream(stateManager);
 	}
 
 	public void closeStreams() throws IOException {
 
 		IOUtils.closeStream(in);
 		IOUtils.closeStream(out);
-		IOUtils.closeStream(stateManager);
 
 		if (status.getStatus() == Status.COMPLETED
 				&& dcmConfig.getSourceConfig().isDeleteSource()) {
