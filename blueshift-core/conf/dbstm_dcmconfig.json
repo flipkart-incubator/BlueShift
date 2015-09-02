@@ -4,8 +4,9 @@
   "ignoreException": true,
   "statusPath": "/tmp/mdcp",
   "stateManagerType": "HDFS",
+  
   "sourceConfig": {
-    "path": "/share",
+    "path": "/tmp/raj",
     "includeListFile": "/home/sushil.s/includes.list",
     "excludeListFile": "/home/sushil.s/excludes.list",
     "includeRegEx": "",
@@ -30,8 +31,9 @@
       }
     ]
   },
+  
   "sinkConfig": {
-    "path": "/tmp/",
+    "path": "/tmp/sushil/bs",
     "compressionCodec": "snappy",
     "useCompression": false,
     "overwriteFiles": true,
@@ -46,5 +48,13 @@
         "keyFile": ""
       }
     ]
+  },
+  
+  "dbConfig": {
+    "dbConnectionURL": "jdbc:mysql://testdb.flipkart.com:3306/dcm?autoReconnect=true",
+    "dbDriver": "com.mysql.jdbc.Driver",
+    "dbUserName": "dcm",
+    "dbUserPassword": "dcm",
+    "dbDialect": "org.hibernate.dialect.MySQL5Dialect"
   }
 }

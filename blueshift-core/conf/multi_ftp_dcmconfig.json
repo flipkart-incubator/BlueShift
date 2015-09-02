@@ -1,11 +1,11 @@
 {
-  "batchName": "H3_Test_01",
+  "batchName": "DistFTP_Test_00",
   "numWorkers": 10,
   "ignoreException": true,
-  "statusPath": "/tmp/mdcp",
+  "statusPath": "/tmp/mdcp_distFTP",
   "stateManagerType": "HDFS",
   "sourceConfig": {
-    "path": "/share",
+    "path": "/tmp/sushil/valueConvertor/001",
     "includeListFile": "/home/sushil.s/includes.list",
     "excludeListFile": "/home/sushil.s/excludes.list",
     "includeRegEx": "",
@@ -13,9 +13,9 @@
     "startTS": 0,
     "endTS": 0,
     "minFilesize": 0,
-    "maxFilesize": -1,
+    "maxFilesize": 854349,
     "deleteSource": false,
-    "ignoreEmptyFiles": false,
+    "ignoreEmptyFiles": true,
     "transformSource": false,
     "includeUpdatedFiles": false,
     "compressionThreshold": 0,
@@ -31,7 +31,7 @@
     ]
   },
   "sinkConfig": {
-    "path": "/tmp/",
+    "path": "",
     "compressionCodec": "snappy",
     "useCompression": false,
     "overwriteFiles": true,
@@ -40,10 +40,21 @@
     "connectionConfig": [
       {
         "securityType": "SIMPLE",
-        "connectionURL": "hdfs://zsnn1.nm.flipkart.com:8020",
-        "userName": "hdfs",
-        "userPassword": "hdfs",
-        "keyFile": ""
+        "connectionURL": "mftp://ftp:ftp@h3-254-02.ch.flipkart.com",
+        "userName": "ftp",
+        "userPassword": "ftp",
+        "keyFile": "",
+        "freeSpaceInBytes": 88009099999,
+        "path": "/2/migration/DistFTP/"
+      },
+      {
+        "securityType": "SIMPLE",
+        "connectionURL": "mftp://ftp:ftp@h3-254-02.ch.flipkart.com",
+        "userName": "ftp",
+        "userPassword": "ftp",
+        "keyFile": "",
+        "freeSpaceInBytes": 88009099999,
+        "path": "/3/migration/DistFTP/"
       }
     ]
   }
