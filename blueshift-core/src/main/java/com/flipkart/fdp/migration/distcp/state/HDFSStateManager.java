@@ -68,6 +68,7 @@ public class HDFSStateManager implements StateManager {
 	public HDFSStateManager(Configuration conf, DCMConfig config)
 			throws IOException {
 
+		System.out.println("Instantiating HDFS based Statemanager...");
 		this.configuration = conf;
 		this.dcmConfig = config;
 

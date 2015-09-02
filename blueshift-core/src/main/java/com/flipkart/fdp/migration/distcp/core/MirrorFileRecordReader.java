@@ -57,10 +57,10 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	private OutputStream out = null;
 
 	private DCMCodec inCodec = null;
+	private DCMCodec outCodec = null;
 
 	private String taskId = null;
 
-	private DCMCodec outCodec = null;
 	private StateManager stateManager = null;
 	private TransferStatus status = null;
 	private Map<String, TransferStatus> transferStatus = null;
@@ -77,15 +77,17 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	public void initialize(InputSplit inputSplit,
 			TaskAttemptContext taskAttemptContext) throws IOException,
 			InterruptedException {
+
 		this.context = taskAttemptContext;
 		this.conf = context.getConfiguration();
 		dcmConfig = MirrorUtils.getConfigFromConf(conf);
 		fSplit = (MirrorInputSplit) inputSplit;
 		inputs = fSplit.getSplits();
-		stateManager = StateManagerFactory.getStateManager(conf,
-				MirrorUtils.getConfigFromConf(conf));
-		transferStatus = stateManager.getTransferStatus(context
-				.getTaskAttemptID().getTaskID().toString());
+		taskId = context.getTaskAttemptID().getTaskID().toString();
+
+		stateManager = StateManagerFactory.getStateManager(conf, dcmConfig);
+
+		transferStatus = stateManager.getTransferStatus(taskId);
 
 		System.out.println("Initializing transfer of : " + inputs.size()
 				+ " files, with a total Size of : " + fSplit.getLength());
