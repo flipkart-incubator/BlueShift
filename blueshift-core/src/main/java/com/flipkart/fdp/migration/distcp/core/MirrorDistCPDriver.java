@@ -107,7 +107,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 			Job job = createJob(configuration);
 
-			System.out.println("Launching Job - Blueshift v 0.1 - "
+			System.out.println("Launching Job - Blueshift v 2.0 - "
 					+ dcmConfig.getBatchName());
 			jobReturnValue = job.waitForCompletion(true) ? 0 : 1;
 
@@ -150,10 +150,10 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 	private Job createJob(Configuration configuration) throws Exception {
 
-		System.out.println("Initializing BlueShift v 0.1...");
+		System.out.println("Initializing BlueShift v 2.0...");
 		System.out.println("Configuration: " + dcmConfig.toString());
 
-		Job job = Job.getInstance(configuration, "BlueShift v 0.1 - "
+		Job job = Job.getInstance(configuration, "BlueShift v 2.0 - "
 				+ dcmConfig.getBatchName());
 
 		job.setJarByClass(MirrorDistCPDriver.class);

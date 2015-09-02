@@ -44,13 +44,13 @@ import com.google.gson.Gson;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConnectionConfig implements Writable {
 
-	private String connectionURL;
+	private String connectionURL = "";
 
-	private String path;
+	private String path = "";
 
-	private String userName;
-	private String userPassword;
-	private String keyFile;
+	private String userName = "";
+	private String userPassword = "";
+	private String keyFile = "";
 
 	private DCMConstants.SecurityType securityType;
 	private long freeSpaceInBytes;
