@@ -44,7 +44,7 @@ import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	private String srcPath = null;
-	private int progressCount = 0;
+	private long progressByteCount = 0;
 
 	private MirrorInputSplit fSplit = null;
 
@@ -103,7 +103,6 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	public boolean nextKeyValue() throws IOException, InterruptedException {
 
 		if (!read) {
-			progressCount++;
 			digest = null;
 			current = inputs.get(index);
 			srcPath = MirrorUtils.getSimplePath(new Path(current.fileName));
@@ -125,7 +124,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 					initializeStreams();
 
-					digest = MirrorUtils.copy(in, out, context);
+					digest = copy(in, out);
 
 					status.setStatus(Status.COMPLETED);
 					status.setMd5Digest(digest.getDigest());
@@ -154,6 +153,39 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		} else {
 			return false;
 		}
+	}
+
+	public MD5Digester copy(InputStream input, OutputStream result)
+			throws IOException {
+
+		byte[] buffer = new byte[65536]; // 8K=8192 12K=12288 64K=65536
+		long count = 0L;
+		int n;
+
+		long sts = System.currentTimeMillis();
+		MD5Digester digester = new MD5Digester();
+
+		while (-1 != (n = input.read(buffer))) {
+
+			result.write(buffer, 0, n);
+
+			digester.updateMd5digester(buffer, 0, n);
+			count += n;
+
+			if (count % 67108864 == 0) {
+				System.out.println("Wrote 64M Data to Destination Total: "
+						+ count + ", Time Taken(ms): "
+						+ (System.currentTimeMillis() - sts));
+
+				sts = System.currentTimeMillis();
+				context.progress();
+			}
+			progressByteCount += count;
+		}
+
+		System.out.println("Transfer Complete Total: " + count
+				+ ", Time Taken(ms): " + (System.currentTimeMillis() - sts));
+		return digester;
 	}
 
 	private void initializeStreams() throws IOException {
@@ -249,12 +281,13 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	@Override
 	public float getProgress() throws IOException, InterruptedException {
-		return read ? 1 : (((float) progressCount / inputs.size()));
+		return read ? 1
+				: (((float) progressByteCount) / (fSplit.getLength() + 1));
 	}
 
 	@Override
 	public void close() throws IOException {
-		
+
 		System.out.println("Transfer Complete...");
 		IOUtils.closeStream(inCodec);
 		IOUtils.closeStream(outCodec);
