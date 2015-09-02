@@ -47,7 +47,7 @@ public class GenericFTPCodec implements DCMCodec {
 		this.hostConfig = hostConfig;
 	}
 
-	private URI constructFtpURLString(String destFileName)
+	private URI constructFtpURLString()
 			throws URISyntaxException {
 		/*
 		 * System.out.println("URI : "+String.valueOf(
@@ -65,13 +65,12 @@ public class GenericFTPCodec implements DCMCodec {
 	public OutputStream createOutputStream(Configuration conf, String path,
 			boolean append) throws IOException {
 		try {
-			String[] pathTree = path.split("/");
 			multiFTPClient = new MultiFTPClient(
-					constructFtpURLString(pathTree[pathTree.length - 1]), conf);
+					constructFtpURLString(), conf);
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
-		return multiFTPClient.getOutputStream(path);
+        return multiFTPClient.getOutputStream(hostConfig.getDestPath()+path);
 	}
 
 	@Override

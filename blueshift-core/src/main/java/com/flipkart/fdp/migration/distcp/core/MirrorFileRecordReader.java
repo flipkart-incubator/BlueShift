@@ -18,21 +18,6 @@
 
 package com.flipkart.fdp.migration.distcp.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileAlreadyExistsException;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-
 import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
@@ -42,10 +27,25 @@ import com.flipkart.fdp.migration.distcp.state.StateManager;
 import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
 import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 import com.flipkart.fdp.migration.distcp.utils.MirrorUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileAlreadyExistsException;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.RecordReader;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
 public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	private String srcPath = null;
+    private int progressCount = 0;
 
 	private MirrorInputSplit fSplit = null;
 
@@ -104,7 +104,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	public boolean nextKeyValue() throws IOException, InterruptedException {
 
 		if (!read) {
-
+            progressCount++;
 			digest = null;
 			current = inputs.get(index);
 			srcPath = MirrorUtils.getSimplePath(new Path(current.fileName));
@@ -235,7 +235,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	@Override
 	public float getProgress() throws IOException, InterruptedException {
-		return read ? 1 : (((float) inputs.size() / index));
+		return read ? 1 : (((float) progressCount / inputs.size()));
 	}
 
 	@Override
