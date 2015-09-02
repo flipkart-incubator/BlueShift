@@ -4,6 +4,7 @@
     <artifactId>blueshift</artifactId>
     <groupId>com.flipkart.fdp</groupId>
     <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../../BlueShift/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>blueshift-core</artifactId>

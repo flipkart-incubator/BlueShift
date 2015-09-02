@@ -17,16 +17,16 @@
  */
 package com.flipkart.fdp.migration.FSclients;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.ftp.FTPFileSystem;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
-
-import lombok.Getter;
-import lombok.Setter;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.ftp.FTPFileSystem;
 
 /**
  * Created by sushil.s on 28/08/15.
@@ -46,10 +46,14 @@ public class MultiFTPClient extends FTPFileSystem {
 		return ftpURI.getHost();
 	}
 
-	public OutputStream getOutputStream() throws IOException {
-		// "ftp://user:pass@ftp.something.com/file.txt";
-		System.out.println("FTP URL : " + ftpURI.toString());
-		return ftpURI.openConnection().getOutputStream();
-	}
+//	public OutputStream getOutputStream() throws IOException {
+//		// "ftp://user:pass@ftp.something.com/file.txt";
+//		System.out.println("FTP URL : " + ftpURI.toString());
+//		return ftpURI.openConnection().getOutputStream();
+//	}
+
+    public OutputStream getOutputStream(String destPath) throws IOException {
+        return create(new Path(destPath));
+    }
 
 }

@@ -17,6 +17,12 @@
  */
 package com.flipkart.fdp.migration.distcp.codec;
 
+import com.flipkart.fdp.migration.FSclients.MultiFTPClient;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants;
+import com.flipkart.fdp.migration.distcp.config.HostConfig;
+import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl;
+import org.apache.hadoop.conf.Configuration;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,13 +30,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.hadoop.conf.Configuration;
-
-import com.flipkart.fdp.migration.FSclients.MultiFTPClient;
-import com.flipkart.fdp.migration.distcp.config.DCMConstants;
-import com.flipkart.fdp.migration.distcp.config.HostConfig;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl;
 
 /**
  * Created by sushil.s on 31/08/15.
@@ -58,8 +57,8 @@ public class GenericFTPCodec implements DCMCodec {
 		 */
 		return new URI(String.valueOf(DCMConstants.FTP_DEFAULT_PROTOCOL
 				+ hostConfig.getUserName() + ":" + hostConfig.getUserPassword()
-				+ "@" + hostConfig.getHost() + hostConfig.getDestPath()
-				+ destFileName));
+				+ "@" + hostConfig.getHost()
+                ));
 	}
 
 	@Override
@@ -72,7 +71,7 @@ public class GenericFTPCodec implements DCMCodec {
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
-		return multiFTPClient.getOutputStream();
+		return multiFTPClient.getOutputStream(path);
 	}
 
 	@Override

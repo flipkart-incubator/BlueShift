@@ -27,7 +27,7 @@
             "hostConfig":
             {
                 "securityType": "SIMPLE",
-                "host": "zsnn2.nm.flipkart.com",
+                "host": "zsnn1.nm.flipkart.com",
                 "port": 8020,
                 "userName": "/",
                 "userPassword": "",
