@@ -19,7 +19,7 @@ import com.flipkart.fdp.optimizer.OptimTuple;
 import com.flipkart.fdp.optimizer.api.IInputJob;
 import com.flipkart.fdp.optimizer.api.JobLoadOptimizerFactory;
 
-public class MultiOutputOptimizer implements WorkloadOptimizer {
+public class MultiSinkOptimizer implements WorkloadOptimizer {
 
 	@Override
 	public List<InputSplit> optimizeWorkload(DCMConfig dcmConfig,

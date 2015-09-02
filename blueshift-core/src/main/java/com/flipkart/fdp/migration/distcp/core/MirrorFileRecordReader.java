@@ -22,7 +22,6 @@ import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import com.flipkart.fdp.migration.distcp.config.MD5Digester;
 import com.flipkart.fdp.migration.distcp.state.StateManager;
 import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
 import com.flipkart.fdp.migration.distcp.state.TransferStatus;
@@ -156,7 +155,14 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	private void initializeStreams() throws IOException {
 
-		String destPath = dcmConfig.getSinkConfig().getPath() + srcPath;
+		String basePath = dcmConfig.getSinkConfig().getPath();
+		if (basePath != null && basePath.trim().length() > 1) {
+			basePath = dcmConfig.getSinkConfig().getPath().trim() + srcPath;
+		} else {
+			basePath = srcPath;
+		}
+
+		String destPath = basePath;
 
 		status.setInputPath(srcPath);
 		status.setOutputPath(destPath);
@@ -185,6 +191,11 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 			out = MirrorUtils.getCodecOutputStream(conf, dcmConfig, destPath,
 					out);
 		} else {
+			if (!dcmConfig.getSinkConfig().isOverwriteFiles()) {
+				if (outCodec.isExistsPath(destPath)) {
+					throw new FileAlreadyExistsException(destPath);
+				}
+			}
 			out = outCodec.createOutputStream(destPath, dcmConfig
 					.getSinkConfig().isAppend());
 		}

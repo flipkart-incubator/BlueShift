@@ -24,8 +24,8 @@ import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 
-import com.flipkart.fdp.migration.distcp.codec.optimizer.GenericOptimizer;
-import com.flipkart.fdp.migration.distcp.codec.optimizer.MultiOutputOptimizer;
+import com.flipkart.fdp.migration.distcp.codec.optimizer.SingleSinkOptimizer;
+import com.flipkart.fdp.migration.distcp.codec.optimizer.MultiSinkOptimizer;
 import com.flipkart.fdp.migration.distcp.codec.optimizer.WorkloadOptimizer;
 import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants;
@@ -57,7 +57,7 @@ public class DCMCodecFactory {
 			default:
 				throw new Exception("Unknown Filesystem, " + scheme);
 			}
-			return new GenericHadoopCodec(conf, fs);
+			return new GenericHadoopCodec(conf, config, fs);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -85,9 +85,9 @@ public class DCMCodecFactory {
 		case "hftp":
 		case "har":
 		case "ftp":
-			return new GenericOptimizer();
+			return new SingleSinkOptimizer();
 		case "mftp":
-			return new MultiOutputOptimizer();
+			return new MultiSinkOptimizer();
 		default:
 			throw new Exception("Unknown Scheme: " + scheme);
 		}

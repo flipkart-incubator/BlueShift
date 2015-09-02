@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
@@ -37,11 +36,6 @@ import org.apache.hadoop.io.compress.Decompressor;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import com.flipkart.fdp.migration.distcp.config.MD5Digester;
-import com.flipkart.fdp.optimizer.OptimTuple;
-import com.flipkart.fdp.optimizer.api.IInputJob;
-import com.flipkart.fdp.optimizer.api.IJobLoadOptimizer;
-import com.flipkart.fdp.optimizer.api.JobLoadOptimizerFactory;
 import com.google.gson.Gson;
 
 public class MirrorUtils {

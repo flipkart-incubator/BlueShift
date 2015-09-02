@@ -16,7 +16,7 @@
  *
  */
 
-package com.flipkart.fdp.migration.distcp.config;
+package com.flipkart.fdp.migration.distcp.core;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;

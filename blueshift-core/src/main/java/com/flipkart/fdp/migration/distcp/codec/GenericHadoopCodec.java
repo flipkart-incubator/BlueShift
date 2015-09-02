@@ -33,6 +33,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
 
+import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
 import com.flipkart.fdp.migration.distcp.core.MirrorUtils;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 
@@ -42,14 +43,22 @@ public class GenericHadoopCodec implements DCMCodec {
 
 	private Configuration conf = null;
 
-	public GenericHadoopCodec(Configuration conf, FileSystem fs)
-			throws Exception {
+	private ConnectionConfig config = null;
+
+	public GenericHadoopCodec(Configuration conf, ConnectionConfig config,
+			FileSystem fs) throws Exception {
 		this.fs = fs;
+		this.config = config;
 		this.conf = conf;
 	}
 
 	public OutputStream createOutputStream(String path, boolean append)
 			throws IOException {
+		
+		String basePath = config.getPath();
+		if (basePath != null && basePath.trim().length() > 1) {
+			path = basePath + "/" + path;
+		}
 		if (append)
 			return fs.append(new Path(path));
 		else
