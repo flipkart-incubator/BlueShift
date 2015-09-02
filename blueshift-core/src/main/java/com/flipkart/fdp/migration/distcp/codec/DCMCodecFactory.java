@@ -40,22 +40,24 @@ public class DCMCodecFactory {
 		try {
 			URI connectionURI = new URI(config.getConnectionURL());
 			String scheme = connectionURI.getScheme().toLowerCase();
-			switch (scheme) {
 
-			case "webhdfs":
-			case "hdfs":
-			case "hftp":
-			case "har":
-			case "ftp":
+			if ("webhdfs".equals(scheme)) {
 				fs = getFilesystem(conf, config, config.getConnectionURL());
-				break;
-			case "mftp":
+			} else if ("hdfs".equals(scheme)) {
+				fs = getFilesystem(conf, config, config.getConnectionURL());
+			} else if ("har".equals(scheme)) {
+				fs = getFilesystem(conf, config, config.getConnectionURL());
+			} else if ("ftp".equals(scheme)) {
+				fs = getFilesystem(conf, config, config.getConnectionURL());
+			} else if ("hftp".equals(scheme)) {
+				fs = getFilesystem(conf, config, config.getConnectionURL());
+			} else if ("mftp".equals(scheme)) {
 				String uri = config.getConnectionURL().replaceFirst("mftp",
 						"ftp");
 				fs = getFilesystem(conf, config, uri);
-				break;
-			default:
-				throw new Exception("Unknown Filesystem, " + scheme);
+			} else {
+
+				throw new Exception("Unknown Filesystem scheme, " + scheme);
 			}
 			return new GenericHadoopCodec(conf, config, fs);
 		} catch (Exception e) {
@@ -78,18 +80,23 @@ public class DCMCodecFactory {
 
 		URI connectionURI = new URI(config.getConnectionURL());
 		String scheme = connectionURI.getScheme().toLowerCase();
-		switch (scheme) {
 
-		case "webhdfs":
-		case "hdfs":
-		case "hftp":
-		case "har":
-		case "ftp":
+		if ("webhdfs".equals(scheme)) {
 			return new SingleSinkOptimizer();
-		case "mftp":
+		} else if ("hdfs".equals(scheme)) {
+			return new SingleSinkOptimizer();
+		} else if ("har".equals(scheme)) {
+			return new SingleSinkOptimizer();
+		} else if ("ftp".equals(scheme)) {
+			return new SingleSinkOptimizer();
+		} else if ("hftp".equals(scheme)) {
+			return new SingleSinkOptimizer();
+		} else if ("mftp".equals(scheme)) {
 			return new MultiSinkOptimizer();
-		default:
-			throw new Exception("Unknown Scheme: " + scheme);
+		} else {
+
+			throw new Exception("Unknown Filesystem scheme, " + scheme);
 		}
+
 	}
 }
