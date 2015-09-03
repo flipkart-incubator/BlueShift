@@ -31,6 +31,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.SecurityType;
 import com.google.gson.Gson;
 
 /**
@@ -80,8 +81,7 @@ public class ConnectionConfig implements Writable {
 		Text.writeString(out, getKeyFile());
 		Text.writeString(out, getConnectionURL());
 
-		// Todo: Uncomment this after we enable Security
-		// Text.writeString(out, String.valueOf(securityType));
+		Text.writeString(out, String.valueOf(securityType));
 
 		out.writeLong(getFreeSpaceInBytes());
 		Text.writeString(out, getPath());
@@ -93,7 +93,7 @@ public class ConnectionConfig implements Writable {
 		userPassword = Text.readString(in);
 		keyFile = Text.readString(in);
 		connectionURL = Text.readString(in);
-		securityType = DCMConstants.SecurityType.SIMPLE;
+		securityType = SecurityType.valueOf(Text.readString(in));
 		freeSpaceInBytes = in.readLong();
 		path = Text.readString(in);
 
