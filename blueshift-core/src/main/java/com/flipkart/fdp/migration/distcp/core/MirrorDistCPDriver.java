@@ -21,6 +21,8 @@ package com.flipkart.fdp.migration.distcp.core;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
@@ -194,6 +196,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		options.addOption("p", true, "properties filename from the classpath");
 		options.addOption("P", true, "external properties filename");
 		options.addOption("D", true, "JVM and Hadoop Configuration Override");
+		options.addOption("V", true, "Custom runtime config variables");
 		options.addOption("libjars", true,
 				"JVM and Hadoop Configuration Override");
 
@@ -210,11 +213,27 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		} else if (cmd.hasOption('P')) {
 			path = cmd.getOptionValue('P');
 		}
+		HashMap<String, String> varMap = new HashMap<String, String>();
+		if (cmd.hasOption('V')) {
+			String runtimeVars[] = cmd.getOptionValues('V');
+			for (String var : runtimeVars) {
+				String kv[] = var.split("=");
+				varMap.put(kv[0], kv[1]);
+			}
+		}
 		if (path == null || !new File(path).exists()) {
 			throw new Exception("Unable to load Config File...");
 		}
+		String configString = MirrorUtils.getFileAsString(path);
+
+		if (varMap.size() > 0) {
+
+			for (Entry<String, String> kv : varMap.entrySet()) {
+				configString.replace("#" + kv.getKey(), kv.getValue());
+			}
+		}
 		Gson gson = new Gson();
-		return gson.fromJson(new FileReader(path), DCMConfig.class);
+		return gson.fromJson(configString, DCMConfig.class);
 	}
 
 	private static void printUsageAndExit() {

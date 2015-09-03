@@ -170,6 +170,26 @@ public class MirrorUtils {
 		return files;
 	}
 
+	public static String getFileAsString(String fileName) {
+		StringBuilder builder = new StringBuilder();
+		if (fileName != null && fileName.trim().length() > 1) {
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(
+						fileName));
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					builder.append(line);
+					builder.append("\n");
+				}
+				reader.close();
+			} catch (Exception e) {
+				System.out.println("Ignoring FileSet from: " + fileName);
+				System.out.println("Excpetion: " + e.getMessage());
+			}
+		}
+		return builder.toString();
+	}
+
 	public static Set<String> getStringAsLists(String flist) {
 		Set<String> files = new HashSet<String>();
 		if (flist == null || flist.trim().length() <= 0)
