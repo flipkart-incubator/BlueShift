@@ -18,12 +18,13 @@
 
 package com.flipkart.fdp.migration.distcp.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
-
+import com.flipkart.fdp.migration.db.models.Status;
+import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
+import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
+import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.state.StateManager;
+import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
+import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileAlreadyExistsException;
 import org.apache.hadoop.fs.Path;
@@ -33,13 +34,11 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.flipkart.fdp.migration.db.models.Status;
-import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
-import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
-import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import com.flipkart.fdp.migration.distcp.state.StateManager;
-import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
-import com.flipkart.fdp.migration.distcp.state.TransferStatus;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
 public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
@@ -282,7 +281,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	@Override
 	public float getProgress() throws IOException, InterruptedException {
 		return read ? 1
-				: (((float) progressByteCount) / (fSplit.getLength() + 1));
+				: (((float) progressByteCount) / dcmConfig.getNumWorkers());
 	}
 
 	@Override
