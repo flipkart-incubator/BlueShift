@@ -62,7 +62,8 @@ public class MultiSinkOptimizer implements WorkloadOptimizer {
 				throw new IOException(
 						"Total Files size is more than available space on disk! ");
 			else
-				splits.add(new MirrorInputSplit(tuple, requiredSize, null,
+				splits.add(new MirrorInputSplit(tuple, requiredSize, dcmConfig
+						.getSourceConfig().getDefaultConnectionConfig(),
 						hostConfigList.get(index++)));
 
 		}
