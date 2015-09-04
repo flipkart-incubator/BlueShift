@@ -18,14 +18,9 @@
 
 package com.flipkart.fdp.migration.distcp.codec;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
+import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
+import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
+import com.flipkart.fdp.migration.distcp.core.MirrorUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -33,9 +28,13 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
 
-import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
-import com.flipkart.fdp.migration.distcp.core.MirrorUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class GenericHadoopCodec implements DCMCodec {
 
@@ -191,7 +190,10 @@ public class GenericHadoopCodec implements DCMCodec {
 	@Override
 	public boolean renameFile(String srcPath, String destPath)
 			throws IOException {
-		return fs.rename(new Path(srcPath), new Path(destPath));
+        Path destFSPath = new Path(destPath);
+        if( fs.exists(destFSPath))
+            fs.delete(destFSPath,true);
+		return fs.rename(new Path(srcPath), destFSPath);
 	}
 
 }
