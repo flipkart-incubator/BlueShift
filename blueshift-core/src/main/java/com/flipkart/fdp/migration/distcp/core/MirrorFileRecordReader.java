@@ -270,15 +270,6 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 				.getNumWorkers());
 	}
 
-	@Override
-	public void close() throws IOException {
-
-		System.out.println("Transfer Complete...");
-		IOUtils.closeStream(inCodec);
-		IOUtils.closeStream(outCodec);
-		IOUtils.closeStream(stateManager);
-	}
-
 	public void closeStreams() throws IOException {
 
 		IOUtils.closeStream(in);
@@ -286,8 +277,8 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 		if (status.getStatus() == Status.COMPLETED) {
 
-			outCodec.renameFile(status.getOutputPath(),
-					MirrorUtils.stripExtension(status.getOutputPath()));
+			outCodec.renameFile(status.getOutputPath()
+					+ DCMConstants.DCM_TEMP_EXTENSION, status.getOutputPath());
 
 			if (dcmConfig.getSourceConfig().isDeleteSource()) {
 				try {
@@ -320,6 +311,15 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 			System.err.println("Error Analyzing Transfer strategy: "
 					+ e.getMessage());
 		}
+	}
+
+	@Override
+	public void close() throws IOException {
+
+		System.out.println("Transfer Complete...");
+		IOUtils.closeStream(inCodec);
+		IOUtils.closeStream(outCodec);
+		IOUtils.closeStream(stateManager);
 	}
 
 }
