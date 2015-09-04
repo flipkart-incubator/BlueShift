@@ -20,6 +20,7 @@ package com.flipkart.fdp.migration.distcp.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -61,10 +62,33 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 	private StateManager stateManager = null;
 
+	private boolean localmode = false;
+
 	public MirrorDistCPDriver(DCMConfig config) throws IOException {
 
 		this.dcmConfig = config;
+		checkIfLocalMode();
 		formatSourceConfig();
+	}
+
+	private void checkIfLocalMode() throws IOException {
+		try {
+			String srcURL = dcmConfig.getSourceConfig()
+					.getDefaultConnectionConfig().getConnectionURL();
+			String destURL = dcmConfig.getSinkConfig()
+					.getDefaultConnectionConfig().getConnectionURL();
+			String srcScheme = new URI(srcURL).getScheme().toLowerCase();
+			String destScheme = new URI(destURL).getScheme().toLowerCase();
+
+			if ("file".equalsIgnoreCase(srcScheme)
+					|| "file".equalsIgnoreCase(destScheme)) {
+				localmode = true;
+			}
+			if (dcmConfig.isLocalModeExecution())
+				localmode = true;
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
 	}
 
 	private void formatSourceConfig() {
@@ -105,7 +129,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		}
 
 		try {
-			if (dcmConfig.isLocalModeExecution()) {
+			if (localmode) {
 				System.out.println("Running Blueshift in Local Mode...");
 				configuration.set("mapreduce.framework.name", "local");
 			} else {
@@ -130,28 +154,6 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 		return jobReturnValue;
 
-	}
-
-	private void processJobCounters(Job job) {
-		try {
-			Counters counters = job.getCounters();
-
-			long failedCount = counters.findCounter(
-					BLUESHIFT_COUNTER.FAILED_COUNT).getValue();
-
-			long successCount = counters.findCounter(
-					BLUESHIFT_COUNTER.SUCCESS_COUNT).getValue();
-
-			System.out.println("Total Success Transfers: " + successCount
-					+ ", Total Failed Transfers: " + failedCount);
-			if (failedCount > 0) {
-				System.err.println("There are " + failedCount
-						+ " transfers, Please re-run the job...");
-			}
-		} catch (Exception e) {
-			System.out.println("Error processing job counters: "
-					+ e.getMessage());
-		}
 	}
 
 	private Job createJob(Configuration configuration) throws Exception {
@@ -184,6 +186,28 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 				.println("Job Initialization Complete, The status of the Mirror job will be written to: "
 						+ stateManager.getReportPath());
 		return job;
+	}
+
+	private void processJobCounters(Job job) {
+		try {
+			Counters counters = job.getCounters();
+
+			long failedCount = counters.findCounter(
+					BLUESHIFT_COUNTER.FAILED_COUNT).getValue();
+
+			long successCount = counters.findCounter(
+					BLUESHIFT_COUNTER.SUCCESS_COUNT).getValue();
+
+			System.out.println("Total Success Transfers: " + successCount
+					+ ", Total Failed Transfers: " + failedCount);
+			if (failedCount > 0) {
+				System.err.println("There are " + failedCount
+						+ " transfers, Please re-run the job...");
+			}
+		} catch (Exception e) {
+			System.out.println("Error processing job counters: "
+					+ e.getMessage());
+		}
 	}
 
 	private void populateConfFromDCMConfig() {

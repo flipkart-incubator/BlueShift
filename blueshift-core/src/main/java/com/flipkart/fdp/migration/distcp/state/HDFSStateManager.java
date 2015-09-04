@@ -74,7 +74,14 @@ public class HDFSStateManager implements StateManager {
 
 		batchBasePath = new Path(dcmConfig.getStatusPath() + "/"
 				+ dcmConfig.getBatchName());
-		fs = FileSystem.get(configuration);
+
+		if (dcmConfig.getStatusPath().startsWith("file://")) {
+			// local state manager
+			fs = FileSystem.get(batchBasePath.toUri(), configuration);
+		} else {
+			// hdfs state manager
+			fs = FileSystem.get(configuration);
+		}
 
 		runId = configuration.get(RUN_ID);
 

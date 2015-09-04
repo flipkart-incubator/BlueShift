@@ -54,6 +54,10 @@ public class DCMCodecFactory {
 				fs = getFilesystem(conf, config, config.getConnectionURL());
 			} else if ("hftp".equals(scheme)) {
 				fs = getFilesystem(conf, config, config.getConnectionURL());
+			} else if ("s3".equals(scheme)) {
+				fs = getFilesystem(conf, config, config.getConnectionURL());
+			} else if ("file".equals(scheme)) {
+				fs = getFilesystem(conf, config, config.getConnectionURL());
 			} else if ("mftp".equals(scheme)) {
 				String uri = config.getConnectionURL().replaceFirst("mftp",
 						"ftp");
@@ -93,6 +97,10 @@ public class DCMCodecFactory {
 		} else if ("ftp".equals(scheme)) {
 			return new SingleSinkOptimizer();
 		} else if ("hftp".equals(scheme)) {
+			return new SingleSinkOptimizer();
+		} else if ("s3".equals(scheme)) {
+			return new SingleSinkOptimizer();
+		} else if ("file".equals(scheme)) {
 			return new SingleSinkOptimizer();
 		} else if ("mftp".equals(scheme)) {
 			return new MultiSinkOptimizer();
