@@ -2,6 +2,8 @@
   "batchName": "H3_Test_01",
   "numWorkers": 10,
   "ignoreException": true,
+  "localModeExecution" : false,
+  "maxRetries" :  0,
   "statusPath": "/tmp/mdcp",
   "stateManagerType": "HDFS",
   

@@ -2,8 +2,11 @@
   "batchName": "DistFTP_Test_00",
   "numWorkers": 10,
   "ignoreException": true,
+  "localModeExecution" : false,
+  "maxRetries" :  0,
   "statusPath": "/tmp/mdcp_distFTP",
   "stateManagerType": "HDFS",
+  
   "sourceConfig": {
     "path": "/tmp/sushil/valueConvertor/001",
     "includeListFile": "/home/sushil.s/includes.list",

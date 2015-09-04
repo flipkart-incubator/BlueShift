@@ -29,6 +29,10 @@ public class DCMConfig {
 
 	private boolean ignoreException = false;
 
+	private boolean localModeExecution = false;
+
+	private int maxRetries = 0;
+
 	private String statusPath = null;
 
 	private StateManagerImpl stateManagerType = null;
@@ -109,9 +113,26 @@ public class DCMConfig {
 		this.stateManagerType = stateManagerType;
 	}
 
+	public boolean isLocalModeExecution() {
+		return localModeExecution;
+	}
+
+	public void setLocalModeExecution(boolean localModeExecution) {
+		this.localModeExecution = localModeExecution;
+	}
+
+	public int getMaxRetries() {
+		return maxRetries;
+	}
+
+	public void setMaxRetries(int maxRetries) {
+		this.maxRetries = maxRetries;
+	}
+
 	@Override
 	public String toString() {
 		Gson gson = new Gson();
 		return gson.toJson(this);
 	}
+
 }

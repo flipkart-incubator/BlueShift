@@ -105,7 +105,12 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		}
 
 		try {
-
+			if (dcmConfig.isLocalModeExecution()) {
+				System.out.println("Running Blueshift in Local Mode...");
+				configuration.set("mapreduce.framework.name", "local");
+			} else {
+				System.out.println("Running Blueshift in Distributed Mode...");
+			}
 			Job job = createJob(configuration);
 
 			System.out.println("Launching Job - Blueshift v 2.0 - "
