@@ -203,7 +203,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 					+ dcmConfig.getSinkConfig().getCompressionCodec();
 		}
 
-		status.setOutputPath(destPath);
+		status.setInputPath(srcPath);
 		status.setOutputPath(destPath);
 
 		if (!dcmConfig.getSinkConfig().isOverwriteFiles()) {
@@ -235,6 +235,9 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	private void updateStatus() throws IOException {
 
+		status.setOutputPath(fSplit.getDestHostConfig().getConnectionURL()
+				+ "/" + status.getOutputPath());
+
 		key.set(status.getInputPath());
 		value.set(status.toString());
 
@@ -244,8 +247,6 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 			context.getCounter(BLUESHIFT_COUNTER.FAILED_COUNT).increment(1);
 		}
 		try {
-			status.setOutputPath(fSplit.getDestHostConfig().getConnectionURL()
-					+ "/" + status.getOutputPath());
 
 			stateManager.updateTransferStatus(status);
 		} catch (Exception e) {
