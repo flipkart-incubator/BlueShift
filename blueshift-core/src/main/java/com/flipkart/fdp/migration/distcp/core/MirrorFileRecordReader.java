@@ -18,13 +18,12 @@
 
 package com.flipkart.fdp.migration.distcp.core;
 
-import com.flipkart.fdp.migration.db.models.Status;
-import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
-import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
-import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import com.flipkart.fdp.migration.distcp.state.StateManager;
-import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
-import com.flipkart.fdp.migration.distcp.state.TransferStatus;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileAlreadyExistsException;
 import org.apache.hadoop.fs.Path;
@@ -34,11 +33,15 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
+import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
+import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
+import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.BLUESHIFT_COUNTER;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
+import com.flipkart.fdp.migration.distcp.state.StateManager;
+import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
+import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 
 public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
@@ -128,6 +131,8 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 					status.setStatus(Status.COMPLETED);
 					status.setMd5Digest(digest.getDigest());
 					status.setOutputSize(digest.getByteCount());
+
+					closeStreams();
 				} catch (Exception e) {
 
 					System.err.println("Error processing input: "
@@ -138,8 +143,6 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 						throw new IOException(e);
 					}
 				}
-				closeStreams();
-
 			}
 			updateStatus();
 			index++;
@@ -189,50 +192,32 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	private void initializeStreams() throws IOException {
 
-		String basePath = dcmConfig.getSinkConfig().getPath();
-		if (basePath != null && basePath.trim().length() > 1) {
-			basePath = dcmConfig.getSinkConfig().getPath().trim() + srcPath;
-		} else {
-			basePath = srcPath;
-		}
-
-		String destPath = basePath;
-
-		status.setInputPath(srcPath);
-		status.setOutputPath(destPath);
+		String destPath = srcPath;
 
 		if (status.isInputTransformed()) {
 			destPath = MirrorUtils.stripExtension(destPath);
-			status.setOutputPath(destPath);
-
-			in = inCodec.createInputStream(srcPath);
-			in = MirrorUtils.getCodecInputStream(conf, dcmConfig, srcPath, in);
-		} else {
-			in = inCodec.createInputStream(srcPath);
 		}
 
 		if (status.isOutputCompressed()) {
 			destPath = destPath + "."
 					+ dcmConfig.getSinkConfig().getCompressionCodec();
-			status.setOutputPath(destPath);
-
-			if (!dcmConfig.getSinkConfig().isOverwriteFiles()) {
-				if (outCodec.isExistsPath(destPath)) {
-					throw new FileAlreadyExistsException(destPath);
-				}
-			}
-
-			out = MirrorUtils.getCodecOutputStream(conf, dcmConfig, destPath,
-					out);
-		} else {
-			if (!dcmConfig.getSinkConfig().isOverwriteFiles()) {
-				if (outCodec.isExistsPath(destPath)) {
-					throw new FileAlreadyExistsException(destPath);
-				}
-			}
-			out = outCodec.createOutputStream(destPath, dcmConfig
-					.getSinkConfig().isAppend());
 		}
+
+		status.setOutputPath(destPath);
+		status.setOutputPath(destPath);
+
+		if (!dcmConfig.getSinkConfig().isOverwriteFiles()) {
+			if (outCodec.isExistsPath(destPath)) {
+				throw new FileAlreadyExistsException(destPath);
+			}
+		}
+
+		in = inCodec.createInputStream(srcPath, status.isInputTransformed());
+		out = outCodec.createOutputStream(dcmConfig.getSinkConfig().getPath(),
+				destPath + DCMConstants.DCM_TEMP_EXTENSION, status
+						.isOutputCompressed(), dcmConfig.getSinkConfig()
+						.getCompressionCodec(), dcmConfig.getSinkConfig()
+						.isAppend());
 
 		String statusMesg = "Processing: " + srcPath + " -> " + destPath;
 		context.setStatus(statusMesg);
@@ -254,13 +239,14 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		value.set(status.toString());
 
 		if (status.getStatus() == Status.COMPLETED) {
-			context.getCounter(MirrorDCMImpl.BLUESHIFT_COUNTER.SUCCESS_COUNT)
-					.increment(1);
+			context.getCounter(BLUESHIFT_COUNTER.SUCCESS_COUNT).increment(1);
 		} else {
-			context.getCounter(MirrorDCMImpl.BLUESHIFT_COUNTER.FAILED_COUNT)
-					.increment(1);
+			context.getCounter(BLUESHIFT_COUNTER.FAILED_COUNT).increment(1);
 		}
 		try {
+			status.setOutputPath(fSplit.getDestHostConfig().getConnectionURL()
+					+ "/" + status.getOutputPath());
+
 			stateManager.updateTransferStatus(status);
 		} catch (Exception e) {
 			System.err.println("Caught exception persisting state: "
@@ -280,8 +266,8 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	@Override
 	public float getProgress() throws IOException, InterruptedException {
-		return read ? 1
-				: (((float) progressByteCount) / dcmConfig.getNumWorkers());
+		return read ? 1 : (((float) progressByteCount) / dcmConfig
+				.getNumWorkers());
 	}
 
 	@Override
@@ -298,13 +284,18 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		IOUtils.closeStream(in);
 		IOUtils.closeStream(out);
 
-		if (status.getStatus() == Status.COMPLETED
-				&& dcmConfig.getSourceConfig().isDeleteSource()) {
-			try {
-				inCodec.deleteSoureFile(srcPath);
-			} catch (Exception e) {
-				System.err.println("Failed Deleting file: " + srcPath
-						+ ", Exception: " + e.getMessage());
+		if (status.getStatus() == Status.COMPLETED) {
+
+			outCodec.renameFile(status.getOutputPath(),
+					MirrorUtils.stripExtension(status.getOutputPath()));
+
+			if (dcmConfig.getSourceConfig().isDeleteSource()) {
+				try {
+					inCodec.deleteSoureFile(srcPath);
+				} catch (Exception e) {
+					System.err.println("Failed Deleting file: " + srcPath
+							+ ", Exception: " + e.getMessage());
+				}
 			}
 		}
 	}

@@ -39,9 +39,9 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.BLUESHIFT_COUNTER;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.BLUESHIFT_COUNTER;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorMapper;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorReducer;
 import com.flipkart.fdp.migration.distcp.state.StateManager;

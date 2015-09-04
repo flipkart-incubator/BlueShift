@@ -66,26 +66,21 @@ public class MirrorUtils {
 	}
 
 	public static OutputStream getCodecOutputStream(Configuration conf,
-			DCMConfig config, String outPath, OutputStream out)
-			throws IOException {
-		if (config.getSinkConfig().isUseCompression()) {
-
-			CompressionCodecFactory compressionCodecs = new CompressionCodecFactory(
-					conf);
-			CompressionCodec codec = compressionCodecs.getCodecByName(config
-					.getSinkConfig().getCompressionCodec());
-			Compressor compressor = codec.createCompressor();
-			out = codec.createOutputStream(out, compressor);
-		}
-		return out;
+			String codecName, OutputStream out) throws IOException {
+		CompressionCodecFactory compressionCodecs = new CompressionCodecFactory(
+				conf);
+		CompressionCodec codec = compressionCodecs.getCodecByName(codecName);
+		Compressor compressor = codec.createCompressor();
+		return codec.createOutputStream(out, compressor);
 	}
 
 	public static InputStream getCodecInputStream(Configuration conf,
-			DCMConfig config, String inPath, InputStream in) throws IOException {
+			String codecName, InputStream in) throws IOException {
 
 		CompressionCodecFactory compressionCodecs = new CompressionCodecFactory(
 				conf);
-		CompressionCodec codec = compressionCodecs.getCodec(new Path(inPath));
+		CompressionCodec codec = compressionCodecs
+				.getCodec(new Path(codecName));
 		if (codec == null)
 			return in;
 		Decompressor compressor = codec.createDecompressor();

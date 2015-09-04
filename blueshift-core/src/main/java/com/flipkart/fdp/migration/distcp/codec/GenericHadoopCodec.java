@@ -34,8 +34,8 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
 
 import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
-import com.flipkart.fdp.migration.distcp.core.MirrorUtils;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
+import com.flipkart.fdp.migration.distcp.core.MirrorUtils;
 
 public class GenericHadoopCodec implements DCMCodec {
 
@@ -52,22 +52,38 @@ public class GenericHadoopCodec implements DCMCodec {
 		this.conf = conf;
 	}
 
-	public OutputStream createOutputStream(String path, boolean append)
+	public OutputStream createOutputStream(String rootPath, String path,
+			boolean useCompression, String codecName, boolean append)
 			throws IOException {
-		
+
 		String basePath = config.getPath();
 		if (basePath != null && basePath.trim().length() > 1) {
 			path = basePath + "/" + path;
 		}
+		if (rootPath != null && rootPath.trim().length() > 1) {
+			path = rootPath + "/" + path;
+		}
+
+		OutputStream out = null;
 		if (append)
-			return fs.append(new Path(path));
+			out = fs.append(new Path(path));
 		else
-			return fs.create(new Path(path));
+			out = fs.create(new Path(path));
+
+		if (useCompression)
+			out = MirrorUtils.getCodecOutputStream(conf, codecName, out);
+
+		return out;
 	}
 
-	public InputStream createInputStream(String path) throws IOException {
+	public InputStream createInputStream(String path, boolean useDeCompression)
+			throws IOException {
 
-		return fs.open(new Path(path));
+		InputStream in = fs.open(new Path(path));
+
+		if (useDeCompression)
+			in = MirrorUtils.getCodecInputStream(conf, path, in);
+		return in;
 
 	}
 
@@ -179,6 +195,12 @@ public class GenericHadoopCodec implements DCMCodec {
 	@Override
 	public Configuration getConf() {
 		return conf;
+	}
+
+	@Override
+	public boolean renameFile(String srcPath, String destPath)
+			throws IOException {
+		return fs.rename(new Path(srcPath), new Path(destPath));
 	}
 
 }

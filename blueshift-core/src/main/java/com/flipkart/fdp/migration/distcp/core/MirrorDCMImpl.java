@@ -85,10 +85,6 @@ public class MirrorDCMImpl {
 
 	}
 
-	public static enum BLUESHIFT_COUNTER {
-		SUCCESS_COUNT, FAILED_COUNT
-	};
-
 	public static class FileTupleComparator implements Comparator<FileTuple> {
 
 		// @Override

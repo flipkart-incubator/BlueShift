@@ -23,8 +23,8 @@ import java.util.List;
 import com.flipkart.fdp.migration.db.DBInitializer;
 import com.flipkart.fdp.migration.db.core.IBatchDao;
 import com.flipkart.fdp.migration.db.models.Batch;
-import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.db.utils.EBase;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 
 public class CBatchApi implements IBatchApi {
 	private IBatchDao batchDao;

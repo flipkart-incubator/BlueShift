@@ -36,6 +36,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Getter;
 
 import com.flipkart.fdp.migration.db.utils.DBUtils;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 
 @Entity
 @Table(name = TAB_BATCH_RUNS)

@@ -22,7 +22,7 @@ import java.util.List;
 
 import com.google.gson.Gson;
 
-public class SourceConfig {
+public class SourceConfig implements ConnectableConfig {
 
 	private String path = null;
 	private String includeListFile = null;

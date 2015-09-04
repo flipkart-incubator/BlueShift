@@ -27,8 +27,11 @@ import org.apache.hadoop.fs.FileSystem;
 import com.flipkart.fdp.migration.distcp.codec.optimizer.SingleSinkOptimizer;
 import com.flipkart.fdp.migration.distcp.codec.optimizer.MultiSinkOptimizer;
 import com.flipkart.fdp.migration.distcp.codec.optimizer.WorkloadOptimizer;
+import com.flipkart.fdp.migration.distcp.config.ConnectableConfig;
 import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants;
+import com.flipkart.fdp.migration.distcp.config.SinkConfig;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.DCMCodecType;
 
 public class DCMCodecFactory {
 
@@ -97,6 +100,21 @@ public class DCMCodecFactory {
 
 			throw new Exception("Unknown Filesystem scheme, " + scheme);
 		}
+	}
+
+	public static WorkloadOptimizer getSinkCodecWorkloadOptimizer(
+			SinkConfig config) throws Exception {
+
+		return null;
+
+	}
+
+	public DCMCodecType getCodecType(ConnectableConfig config) {
+
+		if (config.getConnectionConfig().size() > 1)
+			return DCMCodecType.MULTI;
+		else
+			return DCMCodecType.SINGLE;
 
 	}
 }

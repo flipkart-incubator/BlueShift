@@ -23,9 +23,9 @@ import java.util.List;
 import com.flipkart.fdp.migration.db.DBInitializer;
 import com.flipkart.fdp.migration.db.core.IBatchRunsDao;
 import com.flipkart.fdp.migration.db.models.BatchRun;
-import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.db.utils.EBase;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 
 public class CBatchRunsApi implements IBatchRunsApi {
 

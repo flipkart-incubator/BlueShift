@@ -22,7 +22,7 @@ import java.util.List;
 
 import com.google.gson.Gson;
 
-public class SinkConfig {
+public class SinkConfig implements ConnectableConfig {
 
 	private String path = null;
 

@@ -18,7 +18,7 @@
 
 package com.flipkart.fdp.migration.distcp.state;
 
-import com.flipkart.fdp.migration.db.models.Status;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 import com.google.gson.Gson;
 
 public class TransferStatus {

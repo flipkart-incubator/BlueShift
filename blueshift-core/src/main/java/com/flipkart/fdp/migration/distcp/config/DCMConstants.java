@@ -49,6 +49,7 @@ public class DCMConstants {
 	public static final String COMPRESSION_THRESHOLD = "compression_threshold";
 	public static final String INPLACE_TRANSFORM = "inplace_transform";
 	public static final String DIST_FTP_CONN_PARAM = "DistFTP";
+	public static final String DCM_TEMP_EXTENSION = ".dcmcopy";
 
 	public static final String MAX_FILESIZE = "max_filesize";
 	public static final String MIN_FILESIZE = "min_filesize";
@@ -79,18 +80,25 @@ public class DCMConstants {
 		field.set(null, newValue);
 	}
 
+	public static enum BLUESHIFT_COUNTER {
+		SUCCESS_COUNT, FAILED_COUNT
+	};
+
 	public static enum FileSystemType {
 
-		WEBHDFS, HDFS, HFTP, FTP, HAR, LOCAL, TCP, HTTP, CUSTOM, MFTP
+		WEBHDFS, HDFS, HFTP, FTP, HAR, LOCAL, TCP, HTTP, CUSTOM, MFTP, S3, JDBC, CASSANDRA, KAFKA
 	}
 
-	public static enum ConnectionParamsType {
-
-		MFTP, HDFS
+	public enum Status {
+		NEW, STARTED, COMPLETED, FAILED
 	}
 
 	public static enum SecurityType {
 		PSEUDO, KERBEROS, SIMPLE, NONE;
+	}
+
+	public static enum DCMCodecType {
+		SINGLE, MULTI
 	}
 
 	public static enum StateManagerImpl {

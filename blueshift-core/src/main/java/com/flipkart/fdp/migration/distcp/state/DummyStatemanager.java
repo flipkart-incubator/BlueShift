@@ -28,8 +28,8 @@ import lombok.Setter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
-import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 
 /**
  * Created by sushil.s on 01/09/15.

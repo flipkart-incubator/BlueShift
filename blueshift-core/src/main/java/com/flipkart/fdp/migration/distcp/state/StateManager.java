@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.apache.hadoop.fs.Path;
 
-import com.flipkart.fdp.migration.db.models.Status;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 
 public interface StateManager extends Closeable {
 

@@ -35,6 +35,7 @@ import javax.persistence.Table;
 import lombok.Getter;
 
 import com.flipkart.fdp.migration.db.utils.DBUtils;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 import com.flipkart.fdp.migration.distcp.state.TransferStatus;
 
 @Entity

@@ -32,8 +32,8 @@ import com.flipkart.fdp.migration.db.api.CBatchRunsApi;
 import com.flipkart.fdp.migration.db.api.CMapperDetailsApi;
 import com.flipkart.fdp.migration.db.models.Batch;
 import com.flipkart.fdp.migration.db.models.MapperDetails;
-import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 
 public class MySqlStateManager implements StateManager {
 

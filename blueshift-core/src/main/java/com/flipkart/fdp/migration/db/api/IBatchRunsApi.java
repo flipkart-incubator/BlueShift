@@ -21,9 +21,9 @@ package com.flipkart.fdp.migration.db.api;
 import java.util.List;
 
 import com.flipkart.fdp.migration.db.models.BatchRun;
-import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.db.utils.EBase;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 
 public interface IBatchRunsApi {
 	public BatchRun createBatchRun(long batchId, String jobId,

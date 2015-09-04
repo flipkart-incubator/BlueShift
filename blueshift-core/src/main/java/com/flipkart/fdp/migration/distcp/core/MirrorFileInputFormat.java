@@ -37,11 +37,11 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.flipkart.fdp.migration.db.models.Status;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodec;
 import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
 import com.flipkart.fdp.migration.distcp.codec.optimizer.WorkloadOptimizer;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 import com.flipkart.fdp.migration.distcp.state.StateManager;
 import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
@@ -63,29 +63,30 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 	public List<InputSplit> getSplits(JobContext context) throws IOException,
 			InterruptedException {
 
-		Set<String> excludeList = null;
-		Set<String> includeList = null;
-		Map<String, TransferStatus> previousState = null;
-
 		System.out.println("Calculating Job Splits...");
+
 		conf = context.getConfiguration();
 		dcmConfig = MirrorUtils.getConfigFromConf(conf);
 
-		dcmInCodec = DCMCodecFactory.getCodec(conf, dcmConfig.getSourceConfig()
-				.getDefaultConnectionConfig());
+		Set<String> excludeList = getExclusionsFileList(conf);
+		Set<String> includeList = getInclusionFileList(conf);
 
-		excludeList = getExclusionsFileList(conf);
-		includeList = getInclusionFileList(conf);
 		HashMap<String, FileTuple> inputFileMap = new HashMap<String, FileTuple>();
+		Map<String, TransferStatus> previousState = null;
 
+		List<FileTuple> fstats = null;
 		List<InputSplit> splits = new ArrayList<InputSplit>();
 		Set<OptimTuple> locations = new HashSet<OptimTuple>();
 
 		long totalBatchSize = 0;
+
 		try {
 
 			System.out.println("Scanning source location...");
-			List<FileTuple> fstats = null;
+
+			dcmInCodec = DCMCodecFactory.getCodec(conf, dcmConfig
+					.getSourceConfig().getDefaultConnectionConfig());
+
 			if (includeList != null && includeList.size() > 0)
 				fstats = dcmInCodec.getInputPaths(includeList, excludeList);
 			else
