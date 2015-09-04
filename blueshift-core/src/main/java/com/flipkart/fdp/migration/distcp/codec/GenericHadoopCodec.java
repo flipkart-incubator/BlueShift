@@ -52,17 +52,8 @@ public class GenericHadoopCodec implements DCMCodec {
 		this.conf = conf;
 	}
 
-	public OutputStream createOutputStream(String rootPath, String path,
-			boolean useCompression, String codecName, boolean append)
-			throws IOException {
-
-		String basePath = config.getPath();
-		if (basePath != null && basePath.trim().length() > 1) {
-			path = basePath + "/" + path;
-		}
-		if (rootPath != null && rootPath.trim().length() > 1) {
-			path = rootPath + "/" + path;
-		}
+	public OutputStream createOutputStream(String path, boolean useCompression,
+			String codecName, boolean append) throws IOException {
 
 		OutputStream out = null;
 		if (append)

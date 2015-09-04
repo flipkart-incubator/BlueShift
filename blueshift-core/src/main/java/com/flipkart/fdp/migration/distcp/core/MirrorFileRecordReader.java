@@ -203,6 +203,16 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 					+ dcmConfig.getSinkConfig().getCompressionCodec();
 		}
 
+		String basePath = fSplit.getDestHostConfig().getPath();
+		if (basePath != null && basePath.trim().length() > 1) {
+			destPath = basePath + "/" + destPath;
+		}
+		basePath = dcmConfig.getSinkConfig().getPath();
+
+		if (basePath != null && basePath.trim().length() > 1) {
+			destPath = basePath + "/" + destPath;
+		}
+
 		status.setInputPath(srcPath);
 		status.setOutputPath(destPath);
 
@@ -213,11 +223,10 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		}
 
 		in = inCodec.createInputStream(srcPath, status.isInputTransformed());
-		out = outCodec.createOutputStream(dcmConfig.getSinkConfig().getPath(),
-				destPath + DCMConstants.DCM_TEMP_EXTENSION, status
-						.isOutputCompressed(), dcmConfig.getSinkConfig()
-						.getCompressionCodec(), dcmConfig.getSinkConfig()
-						.isAppend());
+		out = outCodec.createOutputStream(destPath
+				+ DCMConstants.DCM_TEMP_EXTENSION, status.isOutputCompressed(),
+				dcmConfig.getSinkConfig().getCompressionCodec(), dcmConfig
+						.getSinkConfig().isAppend());
 
 		String statusMesg = "Processing: " + srcPath + " -> " + destPath;
 		context.setStatus(statusMesg);

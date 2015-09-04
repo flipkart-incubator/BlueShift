@@ -31,9 +31,8 @@ import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 
 public interface DCMCodec extends Closeable, Configurable {
 
-	public OutputStream createOutputStream(String rootPath, String path,
-			boolean useCompression, String codecName, boolean append)
-			throws IOException;
+	public OutputStream createOutputStream(String path, boolean useCompression,
+			String codecName, boolean append) throws IOException;
 
 	public InputStream createInputStream(String path, boolean useDeCompression)
 			throws IOException;
