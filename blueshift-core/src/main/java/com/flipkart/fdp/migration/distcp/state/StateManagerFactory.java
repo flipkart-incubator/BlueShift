@@ -33,6 +33,7 @@ public class StateManagerFactory {
 
 		if (stateManager == null) {
 			switch (config.getStateManagerType()) {
+			case LOCAL:
 			case HDFS:
 				stateManager = new HDFSStateManager(conf, config);
 				break;

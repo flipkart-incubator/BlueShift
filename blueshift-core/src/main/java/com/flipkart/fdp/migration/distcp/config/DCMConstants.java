@@ -102,6 +102,6 @@ public class DCMConstants {
 	}
 
 	public static enum StateManagerImpl {
-		HDFS, DB, NONE
+		HDFS, DB, LOCAL, NONE
 	}
 }

@@ -36,6 +36,7 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RawLocalFileSystem;
 import org.apache.hadoop.io.IOUtils;
 
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
@@ -77,7 +78,8 @@ public class HDFSStateManager implements StateManager {
 
 		if (dcmConfig.getStatusPath().startsWith("file://")) {
 			// local state manager
-			fs = FileSystem.get(batchBasePath.toUri(), configuration);
+			fs = new RawLocalFileSystem();
+
 		} else {
 			// hdfs state manager
 			fs = FileSystem.get(configuration);
