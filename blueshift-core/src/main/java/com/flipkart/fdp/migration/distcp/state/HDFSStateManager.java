@@ -78,7 +78,7 @@ public class HDFSStateManager implements StateManager {
 
 		if (dcmConfig.getStatusPath().startsWith("file://")) {
 			// local state manager
-			fs = new RawLocalFileSystem();
+			fs = RawLocalFileSystem.get(batchBasePath.toUri(), configuration);
 
 		} else {
 			// hdfs state manager

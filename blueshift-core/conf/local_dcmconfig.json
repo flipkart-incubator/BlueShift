@@ -1,0 +1,54 @@
+{
+  "batchName": "Local_Test_01",
+  "numWorkers": 10,
+  "ignoreException": true,
+  "localModeExecution" : false,
+  "maxRetries" :  0,
+  "statusPath": "/tmp/mdcp",
+  "stateManagerType": "HDFS",
+  
+  "sourceConfig": {
+    "path": "/share",
+    "includeListFile": "/home/sushil.s/includes.list",
+    "excludeListFile": "/home/sushil.s/excludes.list",
+    "includeRegEx": "",
+    "excludeRegEx": "",
+    "startTS": 0,
+    "endTS": 0,
+    "minFilesize": 0,
+    "maxFilesize": -1,
+    "deleteSource": false,
+    "ignoreEmptyFiles": false,
+    "transformSource": false,
+    "includeUpdatedFiles": false,
+    "compressionThreshold": 0,
+    "customSourceImplClass": "",
+    "connectionConfig": [
+      {
+        "securityType": "SIMPLE",
+        "connectionURL": "file://d:/share",
+        "userName": "grey",
+        "userPassword": "grey",
+        "keyFile": ""
+      }
+    ]
+  },
+  
+  "sinkConfig": {
+    "path": "file://e:/share",
+    "compressionCodec": "snappy",
+    "useCompression": false,
+    "overwriteFiles": true,
+    "append": false,
+    "customSinkImplClass": "",
+    "connectionConfig": [
+      {
+        "securityType": "SIMPLE",
+        "connectionURL": "file://e:/share",
+        "userName": "hdfs",
+        "userPassword": "hdfs",
+        "keyFile": ""
+      }
+    ]
+  }
+}
