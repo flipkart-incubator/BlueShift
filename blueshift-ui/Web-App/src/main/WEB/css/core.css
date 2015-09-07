@@ -15,13 +15,17 @@ Author: Ganapati V S (@Ganapativs)
 .padding0 {
   padding: 0;
 }
+
 label {
   text-align: left !important;
   margin-bottom: 0;
   font-size: 15px;
+  font-family: "glyphicons halflings",sans-serif;
+  font-weight: 600;
 }
 body {
   padding-bottom: 70px;
+  background-color: #EBEB99;
 }
 @media screen and (min-width: 768px) {
   .left_col {
@@ -38,6 +42,7 @@ input.text{
 input.form-control,
 select.form-control {
   margin-bottom: 30px;
+    background-color: #B8FFDB;
 }
 .radio,
 .checkbox {
