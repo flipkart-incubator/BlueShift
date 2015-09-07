@@ -1,0 +1,30 @@
+appName: BlueShift-REST
+
+server:
+  applicationConnectors:
+    - type: http
+      port: 9001
+  adminConnectors:
+    - type: http
+      port: 9002
+  requestLog:
+    timeZone: IST
+    appenders:
+      - type: console
+        threshold: OFF
+        timeZone: IST
+        target: stdout
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
+    - type: file
+      threshold: DEBUG
+      logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
+      currentLogFilename: /tmp/blueshift.log
+      archivedLogFilenamePattern: /tmp/blueshift-%d{yyyy-MM-dd}-%i.log.gz
+      archivedFileCount: 7
+      timeZone: UTC
+      threshold: ALL
+      timeZone: IST

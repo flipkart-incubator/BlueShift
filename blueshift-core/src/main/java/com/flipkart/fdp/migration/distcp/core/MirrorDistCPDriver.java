@@ -18,18 +18,15 @@
 
 package com.flipkart.fdp.migration.distcp.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
+import com.flipkart.fdp.migration.distcp.config.DCMConfig;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.BLUESHIFT_COUNTER;
+import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
+import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorMapper;
+import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorReducer;
+import com.flipkart.fdp.migration.distcp.state.StateManager;
+import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
+import com.google.gson.Gson;
+import org.apache.commons.cli.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.Text;
@@ -40,14 +37,12 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import com.flipkart.fdp.migration.distcp.config.DCMConstants.BLUESHIFT_COUNTER;
-import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorMapper;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.MirrorReducer;
-import com.flipkart.fdp.migration.distcp.state.StateManager;
-import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
-import com.google.gson.Gson;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Created by raj velu
@@ -225,6 +220,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		options.addOption("P", true, "external properties filename");
 		options.addOption("D", true, "JVM and Hadoop Configuration Override");
 		options.addOption("V", true, "Custom runtime config variables");
+        options.addOption("J", true, "properties as JSON String");
 		options.addOption("libjars", true,
 				"JVM and Hadoop Configuration Override");
 
@@ -249,7 +245,13 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 				varMap.put(kv[0], kv[1]);
 			}
 		}
-		if (path == null || !new File(path).exists()) {
+        if (cmd.hasOption('J')) {
+            String configString = cmd.getOptionValue('J');
+            Gson gson = new Gson();
+            return gson.fromJson(configString, DCMConfig.class);
+        }
+
+        if (path == null || !new File(path).exists()) {
 			throw new Exception("Unable to load Config File...");
 		}
 		String configString = MirrorUtils.getFileAsString(path);
