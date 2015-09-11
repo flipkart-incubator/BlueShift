@@ -220,7 +220,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		options.addOption("P", true, "external properties filename");
 		options.addOption("D", true, "JVM and Hadoop Configuration Override");
 		options.addOption("V", true, "Custom runtime config variables");
-        options.addOption("J", true, "properties as JSON String");
+		options.addOption("J", true, "properties as JSON String");
 		options.addOption("libjars", true,
 				"JVM and Hadoop Configuration Override");
 
@@ -242,16 +242,16 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 			String runtimeVars[] = cmd.getOptionValues('V');
 			for (String var : runtimeVars) {
 				String kv[] = var.split("=");
-				varMap.put(kv[0], kv[1]);
+				varMap.put("#" + kv[0], kv[1]);
 			}
 		}
-        if (cmd.hasOption('J')) {
-            String configString = cmd.getOptionValue('J');
-            Gson gson = new Gson();
-            return gson.fromJson(configString, DCMConfig.class);
-        }
+		if (cmd.hasOption('J')) {
+			String configString = cmd.getOptionValue('J');
+			Gson gson = new Gson();
+			return gson.fromJson(configString, DCMConfig.class);
+		}
 
-        if (path == null || !new File(path).exists()) {
+		if (path == null || !new File(path).exists()) {
 			throw new Exception("Unable to load Config File...");
 		}
 		String configString = MirrorUtils.getFileAsString(path);
@@ -259,7 +259,9 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		if (varMap.size() > 0) {
 
 			for (Entry<String, String> kv : varMap.entrySet()) {
-				configString.replace("#" + kv.getKey(), kv.getValue());
+				System.out.println("Custom Config Replacer: " + kv.getKey()
+						+ ", with: " + kv.getValue());
+				configString.replace(kv.getKey(), kv.getValue());
 			}
 		}
 		Gson gson = new Gson();
