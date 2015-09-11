@@ -261,7 +261,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 			for (Entry<String, String> kv : varMap.entrySet()) {
 				System.out.println("Custom Config Replacer: " + kv.getKey()
 						+ ", with: " + kv.getValue());
-				configString.replace(kv.getKey(), kv.getValue());
+				configString = configString.replace(kv.getKey(), kv.getValue());
 			}
 		}
 		Gson gson = new Gson();
