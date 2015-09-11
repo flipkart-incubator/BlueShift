@@ -308,9 +308,31 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		if (dcmConfig.getSourceConfig().isTransformSource())
 			srcCodec = MirrorUtils.getCodecNameFromPath(conf, srcPath);
 
-		if (srcCodec != null)
+		if (srcCodec != null) {
 			status.setInputCompressed(false);
 
+			if (dcmConfig.getSinkConfig().isUseCompression()) {
+				if (srcCodec.equalsIgnoreCase(dcmConfig.getSinkConfig()
+						.getCompressionCodec())) {
+					status.setInputTransformed(false);
+					status.setOutputCompressed(false);
+				} else {
+					status.setInputTransformed(true);
+					status.setOutputCompressed(true);
+				}
+			} else {
+				status.setInputTransformed(true);
+				status.setOutputCompressed(false);
+			}
+		} else {
+			if (dcmConfig.getSinkConfig().isUseCompression()) {
+				status.setInputTransformed(false);
+				status.setOutputCompressed(true);
+			} else {
+				status.setInputTransformed(false);
+				status.setOutputCompressed(false);
+			}
+		}
 		try {
 			if (fSplit.getLength() < dcmConfig.getSourceConfig()
 					.getCompressionThreshold()) {
