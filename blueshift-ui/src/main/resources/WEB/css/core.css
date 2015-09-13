@@ -1,0 +1,105 @@
+/*
+Author: Ganapati V S (@Ganapativs)
+*/
+/*White variant colors*/
+/*absolute: top 150px left 5px*/
+/*fixed: top left*/
+/*vandor prefixes*/
+.navbar {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  -o-border-radius: 0;
+  -ms-border-radius: 0;
+  border-radius: 0;
+}
+.padding0 {
+  padding: 0;
+}
+
+label {
+  text-align: left !important;
+  margin-bottom: 0;
+  font-size: 15px;
+  font-family: "glyphicons halflings",sans-serif;
+  font-weight: 600;
+}
+body {
+  padding-bottom: 70px;
+  background-color: #EBEB99;
+}
+/*#EBEB99*/
+@media screen and (min-width: 768px) {
+  .left_col {
+    border-right: 1px solid #eee;
+  }
+}
+.submit_btn {
+  margin-top: 20px;
+}
+input.text{
+    background-color: #B2E0F0;
+}
+
+input.form-control,
+select.form-control {
+  margin-bottom: 30px;
+    background-color: #B8FFDB;
+}
+.radio,
+.checkbox {
+  margin-bottom: 30px;
+}
+
+/*add delete configs  stype*/
+fieldset{
+    background: #FCFCFC;
+    padding: 16px;
+    border: 1px solid #D5D5D5;
+}
+.addfields{
+    margin: 10px 0;
+}
+
+#choicesDisplay {
+    padding: 10px;
+    background: rgb(227, 250, 227);
+    border: 1px solid rgb(171, 239, 171);
+    color: rgb(9, 56, 9);
+}
+.remove{
+    background: #C76868;
+    color: #FFF;
+    font-weight: bold;
+    font-size: 21px;
+    border: 0;
+    cursor: pointer;
+    display: inline-block;
+    padding: 4px 9px;
+    vertical-align: top;
+    line-height: 100%;
+}
+input[type="text"],
+select{
+    padding:5px;
+}
+
+
+/*Animation*/
+.box { color: white; text-align: center; height: 100px; font-size: 86px; }
+/*.on  { background-color: green; }*/
+/*.off { background-color: red; }*/
+
+
+.box-show-setup, .box-hide-setup {
+    -webkit-transition:all linear 0.3s;
+    -moz-transition:all linear 0.3s;
+    -ms-transition:all linear 0.3s;
+    -o-transition:all linear 0.3s;
+    transition:all linear 0.3s;
+}
+
+.box-show-setup { opacity:0; height: 0; }
+.box-show-setup.box-show-start { opacity:1; height: 100px; }
+
+.box-hide-setup { opacity:1; height: 0; }
+.box-hide-setup.box-hide-start { opacity:0; height: 100px; }

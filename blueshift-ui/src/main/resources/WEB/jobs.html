@@ -1,0 +1,171 @@
+<html>
+<head>
+
+    <title>BlueShift - Running Jobs</title>
+    <link href="https://bootswatch.com/paper/bootstrap.min.css"  rel="stylesheet" type="text/css">
+    <link href="css/core.css"  rel="stylesheet" type="text/css">
+    <script data-require="angular.js@*" data-semver="1.3.0-beta.5" src="https://code.angularjs.org/1.3.0-beta.5/angular.js"></script>
+    <script data-require="jquery@*" data-semver="2.0.3" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+
+    
+</head>
+<body>
+    
+    <nav class="navbar navbar-inverse">
+                <div class="container-fluid">
+                  <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar-collapse">
+                      <span class="sr-only">Toggle navigation</span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">BlueShift</a>
+                  </div>
+
+                    <div class="collapse navbar-collapse" id="bs-navbar-collapse">
+                        <form class="navbar-form navbar-right hidden-xs" role="search">
+                          <button type="button" class="btn btn-default">View Running Jobs</button>
+                        </form>
+
+                        <ul class="nav navbar-nav navbar-right visible-xs">
+                          <li><a href="jobs.html">View Running Jobs</a></li>
+                        </ul>
+                    </div>
+                    
+                </div>
+              </nav>
+    
+    <div class="container">
+        <div class="row">
+            <div class="container">
+                <table class="table table-striped table-hover table-responsive">
+                  <thead>
+                    <tr>
+                      <th>NAMESPACE</th>
+                      <th>JOB NAME</th>
+                      <th>SCHEDULE EXP</th>
+                      <th>LAST RUN LOG</th>
+                      <th>ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+<!--                  ng-bind value to div with contenteditable and Set content editable true or false using angular depending on edit status, This will on/off editable property for that col and ng-repeat <tr> tag, so that its easy to perform delete etc-->
+                    <tr>
+                      <td>
+                          <div contenteditable="false">Column Content</div>
+                      </td>
+                      <td>
+                          <div contenteditable="false">Column Content</div>
+                      </td>
+                      <td>
+                          <div contenteditable="false">Column Content</div>
+                      </td>
+                      <td>
+                          <div contenteditable="false">Column Content</div>
+                      </td>
+                      <td>
+                          <div class="actions">
+                            <div class="btn btn-link">
+                               <span class="text-primary"><i class="glyphicon glyphicon-pencil"></i> Edit</span>
+                            </div>
+<!--                        Change pause/resume using angular interpolation-->
+                            <div class="btn btn-link">
+                               <span class="text-warning"><i class="glyphicon glyphicon-pause"></i> Pause</span>
+                            </div>
+                            <div class="btn btn-link">
+                               <span class="text-danger"><i class="glyphicon glyphicon-trash"></i> Delete</span>
+                            </div>
+                          </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                          <div contenteditable="false">Column Content</div>
+                      </td>
+                      <td>
+                          <div contenteditable="false">Column Content</div>
+                      </td>
+                      <td>
+                          <div contenteditable="false">Column Content</div>
+                      </td>
+                      <td>
+                          <div contenteditable="false">Column Content</div>
+                      </td>
+                      <td>
+                          <div class="actions">
+                            <a href="#" class="btn btn-link">
+                               <span class="text-primary"><i class="glyphicon glyphicon-pencil"></i> Edit</span>
+                            </a>
+<!--                        Change pause/resume using angular interpolation-->
+                            <a href="#" class="btn btn-link">
+                               <span class="text-success"><i class="glyphicon glyphicon-play"></i> Resume</span>
+                            </a>
+                            <a href="#" class="btn btn-link">
+                               <span class="text-danger"><i class="glyphicon glyphicon-trash"></i> Delete</span>
+                            </a>
+                          </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table> 
+            </div>
+        </div>
+    </div>
+
+
+    <div ng-app="mapp">
+
+    <div ng-controller="mctrl">
+        <h4>Please select an row to edit:</h4>
+        <div style="text-align:right">
+            <button class="btn btn-primary" ng-disabled="editmn" ng-hide="editmode" ng-click="edit()">Edit</button>
+        </div>
+        <form name="editform" role="form"  ng-show="editmode">
+            <div class="form-group">
+                <label for="nm">Name:</label>
+                <input name="nm" type="text" id="nm" ng-model="rowUnderEdit.name" />
+            </div>
+            <div class="form-group">
+                <label for="pnt">Points:</label>
+                <input name="pt" type="text" id="pnt" ng-model="rowUnderEdit.points" />
+
+
+            </div>
+
+            <div class="form-froup">
+                <button type="button" ng-disabled="editform.$pristine" class="btn btn-success" ng-click="save()">Save</button>
+                <button type="button" class="btn btn-warning" ng-click="cancel()">Cancel</button>
+            </div>
+        </form>
+        <br/>
+        <table class="table  table-striped" border="2">
+            <thead>
+            <th>Select for editing</th>
+            <th>Name</th>
+            <th>Points</th>
+            </thead>
+            <tbody>
+            <tr ng-repeat="nm in names"  ng-class="{mcls:nm.checked}">
+                <td>
+                    <input ng-disabled="editmode" type="radio" value="{{nm.name}}" name="ip" ng-model="nm.checked" ng-click="resetAll(nm)" />
+                </td>
+                <td>{{nm.name}}</td>
+                <td>{{nm.points}}</td>
+            </tr>
+            </tbody>
+        </table>
+        <span ng-class="{mcls:checked}">{{nm.name}}</span>
+
+
+
+
+
+    </div>
+    </div>
+    
+<script src="https://bootswatch.com/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="https://bootswatch.com/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="js/jobs.js"></script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<html>
+<head>
+
+    <title>BlueShift</title>
+    <link href="https://bootswatch.com/paper/bootstrap.min.css"  rel="stylesheet" type="text/css">
+    <link href="css/core.css"  rel="stylesheet" type="text/css">
+    
+</head>
+<body>
+    
+    <nav class="navbar navbar-inverse">
+                <div class="container-fluid">
+                  <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar-collapse">
+                      <span class="sr-only">Toggle navigation</span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="index.html">BlueShift</a>
+                  </div>
+
+                    <div class="collapse navbar-collapse" id="bs-navbar-collapse">
+                        <form action="jobs.html" class="navbar-form navbar-right hidden-xs" role="search">
+                          <button type="submit" class="btn btn-default">View Running Jobs</button>
+                        </form>
+
+                        <ul class="nav navbar-nav navbar-right visible-xs">
+                          <li><a href="jobs.html">View Running Jobs</a></li>
+                        </ul>
+                    </div>
+                    
+                </div>
+              </nav>
+    
+    <div class="container" ng-app="config-root" style="text-align: center">
+        <div class="row">
+            <div class="container">
+                <div class="col-sm-12">
+                    <div class="col-sm-12">
+                        <h4 class="text-primary">BlueShift a Job!</h4>
+                        <hr style="border-color: #0099CC;" />
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                          <label class="control-label">NAMESPACE</label>
+                          <input type="text" class="form-control" id="namespace">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">JOB NAME</label>
+                            <input type="text" class="form-control" id="jobName">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                          <label class="control-label">Workers</label>
+                          <input type="text" class="form-control" id="workers">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Status Path</label>
+                            <input type="text" class="form-control" autocomplete="off" id="statusPath">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                          <label class="control-label">State Manager</label>
+                           <select class="form-control" id="stateManager">
+                              <option>HDFS</option>
+                              <option>MySQL</option>
+                              <option>State Less Transfer</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="radio">
+                            <label>
+                                <input type="checkbox" name="exception" value="option1" style="margin-top: 30px;" id="ingnoreException">
+                                Ignore Exception
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="radio">
+                            <label>
+                                <input type="checkbox" name="exception" value="option1" style="margin-top: 30px;" id="localModeException">
+                                Local Mode Exception
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label  class="col-lg-4 control-label">Max Retries</label>
+                            <div class="col-lg-4">
+                                <input type="number" class="form-control" placeholder="0-10" min="0" max="10" autocomplete="off" style="margin-top:15px" id="maxRetries">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <hr style="border-color: #0099CC;" />
+            </div>
+            <div class="container">
+                <div class="col-sm-12">
+                    <div class="col-sm-6 left_col">
+                        <h5 class="text-primary">Source Config</h5>
+                        <hr />
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                              <label class="control-label">Path</label>
+                              <input type="text" class="form-control" autocomplete="off" id="path">
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="radio">
+                                <label>
+                                    <input type="checkbox" name="exception" value="option1" style="margin-top: 30px;" id="ingoreEmptyFiles">
+                                    Ingnore Empty Files
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-12" style="margin-top: 58px">
+                            <div  ng-controller="ToggleCtrl" style="text-align: center" >
+                                <button ng-click="toggle = !toggle;msg = 'Hide Options'"  ng-init="msg = 'More options'" class="btn btn-warning" name="options">{{ getMsg() }}</button>
+                                <div class="col-sm-6"  ng-show="toggle" ng-animate="box">
+                                    <div class="form-horizontal">
+                                        <div class="form-group">
+                                            <label  class="col-lg-6 control-label">Compression Threshold</label>
+                                            <div class="col-lg-4">
+                                                <input type="number" class="form-control" placeholder="0-10" min="0" max="10" autocomplete="off" size="6" style="margin-top:15px" id="compressionThreshold">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="col-sm-4" ng-show="toggle" ng-animate="box">
+                                        <div class="radio">
+                                            <label>
+                                                <input type="checkbox" name="exception" value="option1" id="deleteSource">
+                                                Delete Source
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4" ng-show="toggle" ng-animate="box">
+                                        <div class="radio">
+                                            <label>
+                                                <input type="checkbox" name="exception" value="option1" id="transformSource">
+                                                Transform Source
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4" ng-show="toggle" ng-animate="box">
+                                        <div class="radio">
+                                            <label>
+                                                <input type="checkbox" name="exception" value="option1" id="includeUpdatedFiles">
+                                                Include Updated Files
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6" ng-show="toggle" ng-animate="box">
+                                    <div class="form-group">
+                                        <label class="control-label">Include List File Path</label>
+                                        <input type="text" class="form-control" autocomplete="off" id="includeListFilePath">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6" ng-show="toggle" ng-animate="box">
+                                    <div class="form-group">
+                                        <label class="control-label">Exclude List File Path</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6" ng-show="toggle" ng-animate="box">
+                                    <div class="form-group">
+                                        <label class="control-label">Include List RegEX</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6" ng-show="toggle" ng-animate="box">
+                                    <div class="form-group">
+                                        <label class="control-label">Exclude List RegEX</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6" ng-show="toggle" ng-animate="box">
+                                    <div class="form-group">
+                                        <label class="control-label">Start Time Stamp</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6" ng-show="toggle" ng-animate="box">
+                                    <div class="form-group">
+                                        <label class="control-label">End Time Stamp</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6" ng-show="toggle" ng-animate="box">
+                                    <div class="form-group">
+                                        <label class="control-label">Min File Size in Bytes</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6" ng-show="toggle" ng-animate="box">
+                                    <div class="form-group">
+                                        <label class="control-label">Max File Size in Bytes</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <hr />
+                            </div>
+                        </div>
+                        <h5 class="text-primary">Connection Config</h5>
+                        <hr />
+                        <div ng-controller="SourceIDCtrl">
+                            <fieldset data-ng-repeat="sourceConfig in sourceConfigs" style="background-color:darkgreen;text-align: center;color:wheat; text-transform: uppercase;" >
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                      <label class="control-label" >Security Config</label>
+                                       <select class="form-control" id="sourceSecurityConfig">
+                                          <option>SIMPLE</option>
+                                          <option>KERBEROSE</option>x`
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                      <label class="control-label">Connection URL</label>
+                                      <input type="text" class="form-control" autocomplete="off" id="sourceConnectionURL">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                      <label class="control-label">User</label>
+                                      <input type="text" class="form-control" autocomplete="off" id="sourceUser">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                      <label class="control-label">Password</label>
+                                      <input type="password" class="form-control" autocomplete="off" id="sourcePassword">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                      <label class="control-label">Key File</label>
+                                      <input type="text" class="form-control" autocomplete="off" id="sourceKeyFile">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                      <label class="control-label">Free Bytes Space</label>
+                                      <input type="text" class="form-control" autocomplete="off" id="sourceFreeBytes">
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                      <label class="control-label">Destionation Path</label>
+                                      <input type="text" class="form-control" autocomplete="off" id ="sourceDestinationPath">
+                                    </div>
+                                </div>
+                                <button class="btn btn-danger" ng-show="$last" ng-click="removeSourceConfig()">Remove Config</button>
+                            </fieldset>
+                            <p align="left"><button class="btn btn-info"  ng-click="addNewSourceConfig()" >Add Config</button></p>
+                            <div>{{ printSourceConfig() }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <h5 class="text-primary">Sink Config</h5>
+                        <hr />
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                              <label class="control-label">Path</label>
+                              <input type="text" class="form-control" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                              <label class="control-label">Compression Codes</label>
+                              <input type="text" class="form-control" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="radio">
+                              <label>
+                                <input type="checkbox" name="exception" value="option1">
+                                    Use Compression
+                              </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="radio">
+                              <label>
+                                <input type="checkbox" name="exception" value="option1">
+                                    Overwrite
+                              </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="radio">
+                              <label>
+                                <input type="checkbox" name="exception" value="option1">
+                                    Append
+                              </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <hr />
+                            </div>
+                        </div>
+                        <h5 class="text-primary">Connection Config</h5>
+                        <hr />
+                        <div ng-controller="SinkIDCtrl">
+                            <fieldset data-ng-repeat="sinkConfig in sinkConfigs" style="background-color:darkgreen;text-align: center;color:wheat; text-transform: uppercase;"  >
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label" >Security Config</label>
+                                        <select class="form-control">
+                                            <option>SIMPLE</option>
+                                            <option>KERBEROSE</option>x`
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Connection URL</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">User</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Password</label>
+                                        <input type="password" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Key File</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">Free Bytes Space</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Destionation Path</label>
+                                        <input type="text" class="form-control" autocomplete="off">
+                                    </div>
+                                </div>
+                                <button class="btn btn-danger" ng-show="$last" ng-click="removeSinkConfig()">Remove Config</button>
+                            </fieldset>
+                            <p align="right"><button class="btn btn-info"  ng-click="addNewSinkConfig()">Add Config</button></p>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="form-group text-center" >
+                            <br>
+                          <a href="#" class="btn btn-primary submit_btn" style="font-size:24px">Submit Job</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<script src="https://bootswatch.com/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="https://bootswatch.com/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.7/angular.min.js"></script>
+<script src = "js/scripts.js"></script>
+</body>
+</html>
