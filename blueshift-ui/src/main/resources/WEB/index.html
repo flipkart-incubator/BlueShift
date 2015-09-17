@@ -11,18 +11,18 @@
     <nav class="navbar navbar-inverse">
                 <div class="container-fluid">
                   <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar-collapse">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" >
                       <span class="sr-only">Toggle navigation</span>
                       <span class="icon-bar"></span>
                       <span class="icon-bar"></span>
                       <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="index.html">BlueShift</a>
+                    <a class="navbar-brand" href="index.html">BlueShift</a> <img src="blueshift-elephant.png" width="100" height="70">
                   </div>
 
                     <div class="collapse navbar-collapse" id="bs-navbar-collapse">
                         <form action="jobs.html" class="navbar-form navbar-right hidden-xs" role="search">
-                          <button type="submit" class="btn btn-default">View Running Jobs</button>
+                          <button type="submit" class="btn btn-default" ng-click="sumitTransfer()">View Running Jobs</button>
                         </form>
 
                         <ul class="nav navbar-nav navbar-right visible-xs">
@@ -32,43 +32,44 @@
                     
                 </div>
               </nav>
-    
-    <div class="container" ng-app="config-root" style="text-align: center">
-        <div class="row">
-            <div class="container">
-                <div class="col-sm-12">
-                    <div class="col-sm-12">
-                        <h4 class="text-primary">BlueShift a Job!</h4>
+    <div ng-app="config-root" style="text-align: center" ng-controller="RootCtrl">>
+        <form name="configForm"  ng-submit="triggerTransfer()" novalidate>
+
+            <div class="col-sm-12">
+                        <h4 class="text-primary"><b>BlueShift a Job!</b></h4>
                         <hr style="border-color: #0099CC;" />
                     </div>
                     <div class="col-sm-3">
-                        <div class="form-group">
-                          <label class="control-label">NAMESPACE</label>
-                          <input type="text" class="form-control" id="namespace">
-                        </div>
+
+
+                    <label>Name</label>
+                    <div class="form-group" ng-class="{ 'has-error' : configForm.transferGroupName.$invalid && !configForm.transferGroupName.$pristine }">
+                    <input type="text" name="transferGroupName" class="form-control" ng-model="blueshiftConfig.transferGroupName" required>
                     </div>
-                    <div class="col-sm-3">
+
+                  </div>
+                    <div class="col-sm-3 " ng-class="{ 'has-error' : configForm.jobName.$invalid && !configForm.jobName.$pristine }">
                         <div class="form-group">
                             <label class="control-label">JOB NAME</label>
-                            <input type="text" class="form-control" id="jobName">
+                            <input type="text" class="form-control" ng-model="blueshiftConfig.dcmConfig.jobName" name="jobName" required>
                         </div>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-3" ng-class="{ 'has-error' : configForm.workers.$invalid && !configForm.workers.$pristine }">
                         <div class="form-group">
                           <label class="control-label">Workers</label>
-                          <input type="text" class="form-control" id="workers">
+                          <input type="text" class="form-control" ng-model="blueshiftConfig.dcmConfig.workers" name="workers" required>
                         </div>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-3" ng-class="{ 'has-error' : configForm.statusPath.$invalid && !configForm.statusPath.$pristine }">
                         <div class="form-group">
                             <label class="control-label">Status Path</label>
-                            <input type="text" class="form-control" autocomplete="off" id="statusPath">
+                            <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.statusPath" name="statusPath" required>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="form-group">
+                        <div class="form-group" ng-class="{ 'has-error' : configForm.stateManagerType.$invalid && !configForm.sat.$pristine }">
                           <label class="control-label">State Manager</label>
-                           <select class="form-control" id="stateManager">
+                           <select class="form-control" ng-model="blueshiftConfig.dcmConfig.stateManagerType" name="stateManagerType" required>
                               <option>HDFS</option>
                               <option>MySQL</option>
                               <option>State Less Transfer</option>
@@ -76,63 +77,74 @@
                         </div>
                     </div>
                     <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">BATCH NAME</label>
+                            <input type="text" class="form-control" ng-model="blueshiftConfig.dcmConfig.batchName" name="batchName" required>
+                        </div>
+                    </div>
+                    <div class="col-sm-3" style="text-align: left;">
                         <div class="radio">
                             <label>
-                                <input type="checkbox" name="exception" value="option1" style="margin-top: 30px;" id="ingnoreException">
+                                <input type="checkbox" name="exception" value="option1" style="margin-top: 30px;" ng-model="blueshiftConfig.dcmConfig.localModeExecution">
+                                Local Mode Exception
+                            </label>
+                            <label>
+                                <input type="checkbox" name="exception" value="option1" style="margin-top: 30px;" ng-model="blueshiftConfig.dcmConfig.ignoreException">
                                 Ignore Exception
                             </label>
                         </div>
                     </div>
                     <div class="col-sm-3">
-                        <div class="radio">
-                            <label>
-                                <input type="checkbox" name="exception" value="option1" style="margin-top: 30px;" id="localModeException">
-                                Local Mode Exception
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="form-group">
+                        <div class="form-group" ng-class="{ 'has-error' : configForm.maxRetries.$invalid && !configForm.maxRetries.$pristine }">
                             <label  class="col-lg-4 control-label">Max Retries</label>
                             <div class="col-lg-4">
-                                <input type="number" class="form-control" placeholder="0-10" min="0" max="10" autocomplete="off" style="margin-top:15px" id="maxRetries">
+                                <input type="number" class="form-control" placeholder="0-10" min="0" max="10" autocomplete="off" style="margin-top:15px" ng-model="blueshiftConfig.dcmConfig.maxRetries" name="maxRetries" required>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <button class="btn btn-warning">Cron Expression</button>
+                            <span style="display: none;">
+                                <label class="control-label" style=""><i>Don't know how to write cron expression?</i> <a href="http://www.cronmaker.com/" target="_blank">click here</a></label>
+                            </span>
+                            <span style="display: none;">
+                                <p align="center"> <input type="text" class="btn"  autocomplete="off" size=30 ng-model="blueshiftConfig.cronScheduleStr" style="margin-top: 10px;background-color: #B8FFDB;"></p>
+                            </span>
+                        </div>
+                    </div>
             <div class="container">
                 <hr style="border-color: #0099CC;" />
             </div>
-            <div class="container">
+            <div class="container" >
                 <div class="col-sm-12">
                     <div class="col-sm-6 left_col">
-                        <h5 class="text-primary">Source Config</h5>
-                        <hr />
+                        <h5 class="text-primary"><strong>SOURCE CONFIG</strong></h5>
+                        <hr style="border-color: #0099CC;"/>
                         <div class="col-sm-6">
-                            <div class="form-group">
+                            <div class="form-group" ng-class="{ 'has-error' : configForm.sourceConfigPath.$invalid && !configForm.sourceConfigPath.$pristine }">
                               <label class="control-label">Path</label>
-                              <input type="text" class="form-control" autocomplete="off" id="path">
+                              <input type="text" class="form-control" autocomplete="off" ng-mode="blueshiftConfig.dcmConfig.sourceConfig.path" name="sourceConfigPath">
                             </div>
                         </div>
 
                         <div class="col-sm-6">
                             <div class="radio">
                                 <label>
-                                    <input type="checkbox" name="exception" value="option1" style="margin-top: 30px;" id="ingoreEmptyFiles">
+                                    <input type="checkbox"  name="exception" value="option1" style="margin-top: 30px;" ng-model="blueshiftConfig.dcmConfig.sourceConfig.ignoreEmptyFiles">
                                     Ingnore Empty Files
                                 </label>
                             </div>
                         </div>
-                        <div class="col-sm-12" style="margin-top: 58px">
-                            <div  ng-controller="ToggleCtrl" style="text-align: center" >
+                        <div class="col-sm-12" >
+                            <div  ng-controller="ToggleCtrl" style="text-align: center;margin-top: 30px;margin-bottom: 29px;" >
                                 <button ng-click="toggle = !toggle;msg = 'Hide Options'"  ng-init="msg = 'More options'" class="btn btn-warning" name="options">{{ getMsg() }}</button>
                                 <div class="col-sm-6"  ng-show="toggle" ng-animate="box">
                                     <div class="form-horizontal">
                                         <div class="form-group">
                                             <label  class="col-lg-6 control-label">Compression Threshold</label>
                                             <div class="col-lg-4">
-                                                <input type="number" class="form-control" placeholder="0-10" min="0" max="10" autocomplete="off" size="6" style="margin-top:15px" id="compressionThreshold">
+                                                <input type="number" class="form-control" placeholder="0-10" min="0" max="10" autocomplete="off" size="6" style="margin-top:15px" ng-model="blueshiftConfig.dcmConfig.sourceConfig.compressionThreshold">
                                             </div>
                                         </div>
                                     </div>
@@ -141,7 +153,7 @@
                                     <div class="col-sm-4" ng-show="toggle" ng-animate="box">
                                         <div class="radio">
                                             <label>
-                                                <input type="checkbox" name="exception" value="option1" id="deleteSource">
+                                                <input type="checkbox" name="exception" value="option1" ng-model="blueshiftConfig.dcmConfig.sourceConfig.deleteSource">
                                                 Delete Source
                                             </label>
                                         </div>
@@ -149,7 +161,7 @@
                                     <div class="col-sm-4" ng-show="toggle" ng-animate="box">
                                         <div class="radio">
                                             <label>
-                                                <input type="checkbox" name="exception" value="option1" id="transformSource">
+                                                <input type="checkbox" name="exception" value="option1" ng-model="blueshiftConfig.dcmConfig.sourceConfig.transformSource">
                                                 Transform Source
                                             </label>
                                         </div>
@@ -157,7 +169,7 @@
                                     <div class="col-sm-4" ng-show="toggle" ng-animate="box">
                                         <div class="radio">
                                             <label>
-                                                <input type="checkbox" name="exception" value="option1" id="includeUpdatedFiles">
+                                                <input type="checkbox" name="exception" value="option1" ng-model="blueshiftConfig.dcmConfig.isourceConfig.ncludeUpdatedFiles">
                                                 Include Updated Files
                                             </label>
                                         </div>
@@ -166,132 +178,124 @@
                                 <div class="col-sm-6" ng-show="toggle" ng-animate="box">
                                     <div class="form-group">
                                         <label class="control-label">Include List File Path</label>
-                                        <input type="text" class="form-control" autocomplete="off" id="includeListFilePath">
+                                        <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.sourceConfig.includeListFile">
                                     </div>
                                 </div>
                                 <div class="col-sm-6" ng-show="toggle" ng-animate="box">
                                     <div class="form-group">
                                         <label class="control-label">Exclude List File Path</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                        <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.sourceConfig.excludeListFile">
                                     </div>
                                 </div>
                                 <div class="col-sm-6" ng-show="toggle" ng-animate="box">
                                     <div class="form-group">
                                         <label class="control-label">Include List RegEX</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                        <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.sourceConfig.includeRegEx">
                                     </div>
                                 </div>
                                 <div class="col-sm-6" ng-show="toggle" ng-animate="box">
                                     <div class="form-group">
                                         <label class="control-label">Exclude List RegEX</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                        <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.sourceConfig.excludeRegEx">
                                     </div>
                                 </div>
                                 <div class="col-sm-6" ng-show="toggle" ng-animate="box">
                                     <div class="form-group">
                                         <label class="control-label">Start Time Stamp</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                        <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.sourceConfig.startTS">
                                     </div>
                                 </div>
                                 <div class="col-sm-6" ng-show="toggle" ng-animate="box">
                                     <div class="form-group">
                                         <label class="control-label">End Time Stamp</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                        <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.sourceConfig.endTS">
                                     </div>
                                 </div>
                                 <div class="col-sm-6" ng-show="toggle" ng-animate="box">
                                     <div class="form-group">
                                         <label class="control-label">Min File Size in Bytes</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                        <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.sourceConfig.minFilesize">
                                     </div>
                                 </div>
                                 <div class="col-sm-6" ng-show="toggle" ng-animate="box">
                                     <div class="form-group">
                                         <label class="control-label">Max File Size in Bytes</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                        <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.sourceConfig.maxFilesize">
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-12">
-                                <hr />
+                                <hr style="border-color: #0099CC;"/>
                             </div>
                         </div>
-                        <h5 class="text-primary">Connection Config</h5>
-                        <hr />
-                        <div ng-controller="SourceIDCtrl">
-                            <fieldset data-ng-repeat="sourceConfig in sourceConfigs" style="background-color:darkgreen;text-align: center;color:wheat; text-transform: uppercase;" >
-                                <div class="col-sm-6">
-                                    <div class="form-group">
+                        <h5 class="text-primary"><strong>CONNECTION CONFIG</strong></h5>
+                        <hr style="border-color: #0099CC;"/>
+                        <div ng-controller="SourceIDCtrl" >
+                            <fieldset data-ng-repeat="config in configValues" style="text-align: center; text-transform: uppercase; border-color:#EBEB99;" >
+                                <div class="col-sm-6" >
+                                    <div class="form-group" ng-class="{ 'has-error' : configForm.sourceSecurityConfig.$invalid && !configForm.sourceSecurityConfig.$pristine }">
                                       <label class="control-label" >Security Config</label>
-                                       <select class="form-control" id="sourceSecurityConfig">
+                                       <select class="form-control" ng-model="config.securityConfig" name="sourceSecurityConfig" required>
                                           <option>SIMPLE</option>
                                           <option>KERBEROSE</option>x`
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
+                                    <div class="form-group" ng-class="{ 'has-error' : configForm.sourceConnectionURL.$invalid && !configForm.sourceConnectionURL.$pristine }">
                                       <label class="control-label">Connection URL</label>
-                                      <input type="text" class="form-control" autocomplete="off" id="sourceConnectionURL">
+                                      <input type="text" class="form-control" autocomplete="off" ng-model="config.connectionURL" name="sourceConnectionURL" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
+                                    <div class="form-group" ng-class="{ 'has-error' : configForm.sourceUser.$invalid && !configForm.sourceUser.$pristine }">
                                       <label class="control-label">User</label>
-                                      <input type="text" class="form-control" autocomplete="off" id="sourceUser">
+                                      <input type="text" class="form-control" autocomplete="off"  ng-model="config.user" name="sourceUser" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
+                                    <div class="form-group" ng-class="{ 'has-error' : configForm.sourcePassword.$invalid && !configForm.sourcePassword.$pristine }">
                                       <label class="control-label">Password</label>
-                                      <input type="password" class="form-control" autocomplete="off" id="sourcePassword">
+                                      <input type="password" class="form-control" autocomplete="off" id="sourcePassword" ng-model="config.password" name="sourcePassword" required>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12" >
+                                    <div class="form-group" >
+                                      <label class="control-label">Key File (optional)</label>
+                                      <input type="text" class="form-control" autocomplete="off" id="sourceKeyFile" ng-model="config.keyFile">
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
-                                      <label class="control-label">Key File</label>
-                                      <input type="text" class="form-control" autocomplete="off" id="sourceKeyFile">
-                                    </div>
+                                    <button class="btn btn-danger" ng-show="$last" ng-click="removeConfig()">Remove Config</button>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
-                                      <label class="control-label">Free Bytes Space</label>
-                                      <input type="text" class="form-control" autocomplete="off" id="sourceFreeBytes">
-                                    </div>
+                                    <button class="btn btn-info"  ng-show="$last" ng-click="addNewConfig()" >Add Config</button>
                                 </div>
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                      <label class="control-label">Destionation Path</label>
-                                      <input type="text" class="form-control" autocomplete="off" id ="sourceDestinationPath">
-                                    </div>
-                                </div>
-                                <button class="btn btn-danger" ng-show="$last" ng-click="removeSourceConfig()">Remove Config</button>
                             </fieldset>
-                            <p align="left"><button class="btn btn-info"  ng-click="addNewSourceConfig()" >Add Config</button></p>
-                            <div>{{ printSourceConfig() }}</div>
+                            <!--<div>{{ blueshiftConfig }}</div>-->
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <h5 class="text-primary">Sink Config</h5>
-                        <hr />
+                        <h5 class="text-primary"><strong>SINK CONFIG</strong></h5>
+                        <hr style="border-color: #0099CC;"/>
                         <div class="col-sm-6">
-                            <div class="form-group">
+                            <div class="form-group" ng-class="{ 'has-error' : configForm.sinkPath.$invalid && !configForm.sinkPath.$pristine }">
                               <label class="control-label">Path</label>
-                              <input type="text" class="form-control" autocomplete="off">
+                              <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.sinkConfig.path" name="sinkPath" required="">
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <div class="form-group">
-                              <label class="control-label">Compression Codes</label>
-                              <input type="text" class="form-control" autocomplete="off">
+                            <div class="form-group" ng-class="{ 'has-error' : configForm.sinkCompressionCodec.$invalid && !configForm.sinkCompressionCodec.$pristine }" >
+                              <label class="control-label">Compression Codec</label>
+                              <input type="text" class="form-control" autocomplete="off" ng-model="blueshiftConfig.dcmConfig.sinkConfig.compressionCodec" name="sinkCompressionCodec" required>
                             </div>
                         </div>
                         <div class="col-sm-4">
                             <div class="radio">
                               <label>
-                                <input type="checkbox" name="exception" value="option1">
+                                <input type="checkbox" name="exception" value="option1" ng-model="blueshiftConfig.dcmConfig.sinkConfig.useCompression">
                                     Use Compression
                               </label>
                             </div>
@@ -299,7 +303,7 @@
                         <div class="col-sm-4">
                             <div class="radio">
                               <label>
-                                <input type="checkbox" name="exception" value="option1">
+                                <input type="checkbox" name="exception" value="option1" ng-model="blueshiftConfig.dcmConfig.sinkConfig.overwriteFiles">
                                     Overwrite
                               </label>
                             </div>
@@ -307,83 +311,89 @@
                         <div class="col-sm-4">
                             <div class="radio">
                               <label>
-                                <input type="checkbox" name="exception" value="option1">
+                                <input type="checkbox" name="exception" value="option1" ng-model="blueshiftConfig.dcmConfig.sinkConfig.append">
                                     Append
                               </label>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-12">
-                                <hr />
+                                <hr style="border-color: #0099CC;" />
                             </div>
                         </div>
-                        <h5 class="text-primary">Connection Config</h5>
-                        <hr />
+                        <h5 class="text-primary"><strong>CONNECTION CONFIG</strong></h5>
+                        <hr style="border-color: #0099CC;"/>
                         <div ng-controller="SinkIDCtrl">
-                            <fieldset data-ng-repeat="sinkConfig in sinkConfigs" style="background-color:darkgreen;text-align: center;color:wheat; text-transform: uppercase;"  >
+                            <fieldset data-ng-repeat="config in configValues" style="text-align: center; text-transform: uppercase; border-color:#EBEB99;" >
                                 <div class="col-sm-6">
-                                    <div class="form-group">
+                                    <div class="form-group" ng-model="config.securityConfig" ng-class="{ 'has-error' : configForm.sinkSecurityConfig.$invalid && !configForm.sinkSecurityConfig.$pristine }">
                                         <label class="control-label" >Security Config</label>
-                                        <select class="form-control">
+                                        <select class="form-control" name="sinkSecurityConfig" required>
                                             <option>SIMPLE</option>
                                             <option>KERBEROSE</option>x`
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
+                                    <div class="form-group" ng-class="{ 'has-error' : configForm.jobName.$invalid && !configForm.jobName.$pristine }">
                                         <label class="control-label">Connection URL</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                        <input type="text" class="form-control" autocomplete="off" ng-model="config.connectionURL" ng-model-options="{allowInvalid: true}">
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
+                                    <div class="form-group" ng-class="{ 'has-error' : configForm.sinkUser.$invalid && !configForm.sinkUser.$pristine }">
                                         <label class="control-label">User</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                        <input type="text" class="form-control" autocomplete="off"  ng-model="config.user" name="sinkUser" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
+                                    <div class="form-group" ng-class="{ 'has-error' : configForm.sinkPassword.$invalid && !configForm.sinkPassword.$pristine }">
                                         <label class="control-label">Password</label>
-                                        <input type="password" class="form-control" autocomplete="off">
+                                        <input type="password" class="form-control" autocomplete="off"  ng-model="config.password" name="sinkPassword" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label class="control-label">Key File</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                    <div class="form-group" >
+                                        <label class="control-label">Key File (Optional)</label>
+                                        <input type="text" class="form-control" autocomplete="off"  ng-model="config.keyFile" >
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
+                                    <div class="form-group" ng-class="{ 'has-error' : configForm.freeBytes.$invalid && !configForm.freeBytes.$pristine }">
                                         <label class="control-label">Free Bytes Space</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                        <input   type="number" class="form-control" autocomplete="off"  ng-model="config.freeBytes" name="freeBytes" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <label class="control-label">Destionation Path</label>
-                                        <input type="text" class="form-control" autocomplete="off">
+                                    <div class="form-group" ng-class="{ 'has-error' : configForm.destinationPath.$invalid && !configForm.destinationPath.$pristine }">
+                                        <label class="control-label">Destination Path</label>
+                                        <input type="text" class="form-control" autocomplete="off"  ng-model="config.destinationPath" name="destinationPath" required>
                                     </div>
                                 </div>
-                                <button class="btn btn-danger" ng-show="$last" ng-click="removeSinkConfig()">Remove Config</button>
+                                <div class="col-sm-6">
+                                    <button class="btn btn-info"  ng-show="$last" ng-click="addNewConfig()" >Add Config</button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <button type="button" class="btn btn-danger" ng-show="$last" ng-click="removeConfig()">Remove Config</button>
+                                </div>
                             </fieldset>
-                            <p align="right"><button class="btn btn-info"  ng-click="addNewSinkConfig()">Add Config</button></p>
                         </div>
                     </div>
+<!--{{ blueshiftConfig }}-->
                     <div class="col-sm-12">
                         <div class="form-group text-center" >
                             <br>
-                          <a href="#" class="btn btn-primary submit_btn" style="font-size:24px">Submit Job</a>
+                          <!--<a href="#" class="btn btn-primary submit_btn" style="font-size:24px" ng-click="submitJob()">Submit Job</a>-->
+                            <button type="submit"  class="btn btn-primary" ng-disabled="configForm.$invalid" style="font-size: 18px;">Submit Job</button>
+                            <p ng-show="configForm.$invalid && !userForm.$pristine" class="help-block" style="font-size:12px;">All the fields except option are mandatory!!!!</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
-    
+
 <script src="https://bootswatch.com/bower_components/jquery/dist/jquery.min.js"></script>
-<script src="https://bootswatch.com/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.7/angular.min.js"></script>
 <script src = "js/scripts.js"></script>
 </body>

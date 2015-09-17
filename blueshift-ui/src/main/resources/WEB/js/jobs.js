@@ -1,62 +1,33 @@
-// Code goes here
-var myapp = angular.module('mapp', []);
-myapp.controller("mctrl", function($scope) {
-    $scope.check = "";
-    $scope.editmn = true;
-    $scope.showfrm = false;
-    $scope.edit = function() {
-        $scope.editmode = true;
-        $scope.rowUnderEdit = angular.copy($scope.currentrow);
+var app = angular.module("app", ["xeditable"]);
 
-    }
-    $scope.cancel = function() {
-        $scope.editmode = false;
-        $scope.rowUnderEdit = {};
-    }
-    $scope.save = function() {
-        $scope.currentrow.name = $scope.rowUnderEdit.name;
-        $scope.currentrow.points = $scope.rowUnderEdit.points;
-        $scope.editmode = false;
-        $scope.resetAll({});
-    }
-    $scope.names = [{
-        name: "John",
-        points: 35
-    }, {
-        name: "David",
-        points: 55
-    }, {
-        name: "Paul",
-        points: 12
-    },
-        {
-            name: "Allen",
-            points: 23
-        },
+app.run(function(editableOptions) {
+    editableOptions.theme = 'bs3';
+});
 
-        {
-            name: "Phill",
-            points: 44
+app.controller('Ctrl', function($scope, $filter, $http) {
+    $http.get('/blueshift/scheduler/status').success(function (data) {
+        $scope.rows = data;
+    });
+
+
+    $scope.checkField = function (data) {
+        if (data == null || data == '') {
+            return "Cannot be empty";
         }
+    };
 
-    ];
+    $scope.saveUser = function (data) {
+        var path = '/blueshift/scheduler/transfer/update/cron'
+        var parameter = JSON.stringify(data);
+        console.log(parameter);
+        return $http.post(path, parameter);
+    };
 
+    // remove user
+    $scope.deleteRow = function (index) {
+        var path = '/blueshift/scheduler/remove/' + $scope.rows[index].namespace + '/' + $scope.rows[index].jobName;
+        $scope.rows.splice(index, 1);
+        $http.get(path);
 
-    $scope.resetAll = function(currentRow) {
-        angular.forEach($scope.names, function(val) {
-
-
-            if (val.name !== currentRow.name) {
-                val.checked = false;
-
-            } else {
-                $scope.currentrow = val;
-            }
-            $scope.editmn = false;
-        });
-    }
-
-
-
-
+    };
 });

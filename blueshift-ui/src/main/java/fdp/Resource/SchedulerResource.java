@@ -7,13 +7,12 @@ import fdp.config.TransferScheduleConfig;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.quartz.impl.triggers.CronTriggerImpl;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -58,6 +57,20 @@ public class SchedulerResource {
 
     }
 
+    @Path("/transfer/once")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void scheduleTransferOnce(String jsonConfig) throws SchedulerException {
+        Gson gson = new GsonBuilder().create();
+        TransferScheduleConfig transferScheduleConfig = gson.fromJson(jsonConfig, TransferScheduleConfig.class);
+        transferScheduleConfig.initialize();
+        if (transferSchedulerMap.containsKey(transferScheduleConfig.getTransferGroupName()))
+            scheduleJob(transferScheduleConfig);
+        else
+            scheduleNewJob(transferScheduleConfig);
+
+    }
+
     private boolean scheduleNewJob(TransferScheduleConfig config)  {
         Scheduler scheduler = null;
         try {
@@ -82,6 +95,19 @@ public class SchedulerResource {
         if (!scheduler.isStarted())
             scheduler.start();
         return true;
+    }
+
+    @Path("/transfer/update/cron")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void updateCronStr(String jsonConfig) throws SchedulerException, ParseException {
+        Gson gson = new GsonBuilder().create();
+        UpdateCronScheduleBean cronScheduleBean = gson.fromJson(jsonConfig, UpdateCronScheduleBean.class);
+        Scheduler scheduler = transferSchedulerMap.get(cronScheduleBean.getNamespace());
+        TriggerKey triggerKey = new TriggerKey(cronScheduleBean.getJobName(),cronScheduleBean.getNamespace());
+        CronTriggerImpl trigger = (CronTriggerImpl) scheduler.getTrigger(triggerKey);
+        trigger.setCronExpression(cronScheduleBean.getCronExprStr());
+        scheduler.rescheduleJob(triggerKey, trigger);
     }
 
 
@@ -133,8 +159,9 @@ public class SchedulerResource {
     @Path("/status")
     @GET
     public String schedulerStatus() throws SchedulerException {
-        List<String> statusList = new ArrayList<String>();
+                        List<String> statusList = null;
         for (Scheduler scheduler : transferSchedulerMap.values()) {
+            statusList = new ArrayList<String>();
             if (scheduler.isStarted()) {
                 for (String groupName : scheduler.getJobGroupNames()) {
                     for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
@@ -223,14 +250,22 @@ public class SchedulerResource {
     @Path("/status/{transferJobGroup}/{transferJobName}")
     @GET
     public String jobStatus(@PathParam("transferJobGroup") String jobGroupName,
-                           @PathParam("transferJobName") String jobName) throws IOException {
+                           @PathParam("transferJobName") String jobName)  {
         StringBuilder output = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new FileReader(new File("/tmp/bs-"+new JobKey(jobName,jobGroupName).toString()+".log")));
-        String line;
-        while( (line = reader.readLine()) != null )
-            output.append(line);
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(new File("/tmp/bs-"+new JobKey(jobName,jobGroupName).toString()+".log")));
+            String line;
+            while( (line = reader.readLine()) != null )
+                output.append(line);
+            return output.toString();
 
-        return output.toString();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "Job has not yet triggered to fetch logs...";
     }
 
 

@@ -40,6 +40,9 @@ public class TransferScheduleConfig {
         jobDetail   = JobBuilder.newJob(TransferJob.class)
                      .withIdentity(jobKey)
                      .build();
+
+        if( cronScheduleStr.length() > 0 ){
+
         CronScheduleBuilder cronSchedule = CronScheduleBuilder
                                            .cronSchedule(getCronScheduleStr());
         trigger = TriggerBuilder
@@ -48,6 +51,13 @@ public class TransferScheduleConfig {
                 .usingJobData("dcmConfig", dcmConfig)
                 .withSchedule(cronSchedule)
                 .build();
+        }else{
+            trigger = TriggerBuilder
+                    .newTrigger()
+                    .withIdentity(getTransferJobName(), getTransferGroupName())
+                    .usingJobData("dcmConfig", dcmConfig)
+                    .build();
+        }
     }
 
 }

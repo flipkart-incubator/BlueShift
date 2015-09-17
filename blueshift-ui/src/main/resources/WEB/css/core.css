@@ -25,7 +25,7 @@ label {
 }
 body {
   padding-bottom: 70px;
-  background-color: #EBEB99;
+  /*background-color: #EBEB99;*/
 }
 /*#EBEB99*/
 @media screen and (min-width: 768px) {
@@ -84,6 +84,15 @@ select{
 }
 
 
+.show {
+    display: inline-block;
+}
+
+.help-block{
+    color: red;
+}
+
+
 /*Animation*/
 .box { color: white; text-align: center; height: 100px; font-size: 86px; }
 /*.on  { background-color: green; }*/
@@ -103,3 +112,11 @@ select{
 
 .box-hide-setup { opacity:1; height: 0; }
 .box-hide-setup.box-hide-start { opacity:0; height: 100px; }
+
+
+/*Jobs Page CSS*/
+
+div[ng-app] { margin: 10px; }
+.table {width: 100% }
+form[editable-form] > div {margin: 10px 0;}
+
