@@ -134,11 +134,11 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 			System.out.println("Launching Job - Blueshift v 2.0 - "
 					+ dcmConfig.getBatchName());
-			jobReturnValue = job.waitForCompletion(true) ? 0 : 1;
+			job.waitForCompletion(true);
 
 			System.out.println("Job Complete...");
 
-			processJobCounters(job);
+			jobReturnValue = processJobCounters(job);
 		} catch (Throwable t) {
 			jobReturnValue = 1;
 			System.out.println("Job Failed...");
@@ -183,27 +183,32 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		return job;
 	}
 
-	private void processJobCounters(Job job) {
-		try {
-			Counters counters = job.getCounters();
+    private int processJobCounters(Job job) {
+        int retVal = 0;
+        try {
 
-			long failedCount = counters.findCounter(
-					BLUESHIFT_COUNTER.FAILED_COUNT).getValue();
+            Counters counters = job.getCounters();
 
-			long successCount = counters.findCounter(
-					BLUESHIFT_COUNTER.SUCCESS_COUNT).getValue();
+            long failedCount = counters.findCounter(
+                    BLUESHIFT_COUNTER.FAILED_COUNT).getValue();
 
-			System.out.println("Total Success Transfers: " + successCount
-					+ ", Total Failed Transfers: " + failedCount);
-			if (failedCount > 0) {
-				System.err.println("There are " + failedCount
-						+ " transfers, Please re-run the job...");
-			}
-		} catch (Exception e) {
-			System.out.println("Error processing job counters: "
-					+ e.getMessage());
-		}
-	}
+            long successCount = counters.findCounter(
+                    BLUESHIFT_COUNTER.SUCCESS_COUNT).getValue();
+
+            System.out.println("Total Success Transfers: " + successCount
+                    + ", Total Failed Transfers: " + failedCount);
+            if (failedCount > 0) {
+                System.err.println("There are " + failedCount
+                        + " transfers, Please re-run the job...");
+                retVal = (int) failedCount;
+            }
+        } catch (Exception e) {
+            System.out.println("Error processing job counters: "
+                    + e.getMessage());
+            retVal = 1;
+        }
+        return retVal;
+    }
 
 	private void populateConfFromDCMConfig() {
 
