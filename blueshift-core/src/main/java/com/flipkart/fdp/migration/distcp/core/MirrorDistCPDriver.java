@@ -82,7 +82,8 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 			if (dcmConfig.isLocalModeExecution())
 				localmode = true;
 		} catch (Exception e) {
-			throw new IOException();
+			e.printStackTrace();
+			throw new IOException(e);
 		}
 	}
 

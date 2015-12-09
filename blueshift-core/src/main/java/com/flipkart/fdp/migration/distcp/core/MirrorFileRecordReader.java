@@ -309,6 +309,8 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 			srcCodec = MirrorUtils.getCodecNameFromPath(conf, srcPath);
 
 		if (srcCodec != null) {
+			
+			//TODO not used, can be removed
 			status.setInputCompressed(false);
 
 			if (dcmConfig.getSinkConfig().isUseCompression()) {
@@ -333,6 +335,8 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 				status.setOutputCompressed(false);
 			}
 		}
+		
+		//TODO remove try - catch
 		try {
 			if (fSplit.getLength() < dcmConfig.getSourceConfig()
 					.getCompressionThreshold()) {

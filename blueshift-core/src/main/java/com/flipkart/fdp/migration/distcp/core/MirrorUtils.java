@@ -70,6 +70,9 @@ public class MirrorUtils {
 		CompressionCodecFactory compressionCodecs = new CompressionCodecFactory(
 				conf);
 		CompressionCodec codec = compressionCodecs.getCodecByName(codecName);
+		if(codec == null) {
+			return out;
+		}
 		Compressor compressor = codec.createCompressor();
 		return codec.createOutputStream(out, compressor);
 	}
@@ -79,8 +82,7 @@ public class MirrorUtils {
 
 		CompressionCodecFactory compressionCodecs = new CompressionCodecFactory(
 				conf);
-		CompressionCodec codec = compressionCodecs
-				.getCodec(new Path(codecName));
+		CompressionCodec codec = compressionCodecs.getCodec(new Path(codecName));
 		if (codec == null)
 			return in;
 		Decompressor compressor = codec.createDecompressor();

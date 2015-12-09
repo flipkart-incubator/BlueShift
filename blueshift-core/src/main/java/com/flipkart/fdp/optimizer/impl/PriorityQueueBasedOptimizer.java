@@ -95,6 +95,7 @@ public class PriorityQueueBasedOptimizer implements IJobLoadOptimizer {
 	}
 
 	private static class JobSet implements Comparable<JobSet> {
+		//TODO hashcode and equals to be overridden?
 		private final Set<IInputJob> jobSet = new HashSet<IInputJob>();
 		private BigInteger currentJobSetSize = new BigInteger("0");
 

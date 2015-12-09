@@ -162,6 +162,7 @@ public class HDFSStateManager implements StateManager {
 		out.close();
 	}
 
+	//TODO need to check why this is not persisted while running sample job, need to check
 	public void savePreiviousTransferStatus(
 			Map<String, TransferStatus> prevState) throws IOException {
 

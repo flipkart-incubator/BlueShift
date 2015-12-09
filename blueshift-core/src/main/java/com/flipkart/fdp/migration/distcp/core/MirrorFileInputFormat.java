@@ -76,6 +76,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 		List<FileTuple> fstats = null;
 		List<InputSplit> splits = new ArrayList<InputSplit>();
+		//TODO Bug - hashcode and equals not overridden in OptimTuple. If not HashSet, then fine.
 		Set<OptimTuple> locations = new HashSet<OptimTuple>();
 
 		long totalBatchSize = 0;
@@ -86,7 +87,8 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 
 			dcmInCodec = DCMCodecFactory.getCodec(conf, dcmConfig
 					.getSourceConfig().getDefaultConnectionConfig());
-
+			
+			//If includeList is used, then path is not considered, in either way excludeList been considered.
 			if (includeList != null && includeList.size() > 0)
 				fstats = dcmInCodec.getInputPaths(includeList, excludeList);
 			else
@@ -152,6 +154,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		});
 	}
 
+	//TODO refactoring required
 	private boolean ignoreFile(FileTuple fileStat, Set<String> excludeList,
 			Map<String, TransferStatus> previousState) {
 

@@ -61,6 +61,7 @@ public class GenericHadoopCodec implements DCMCodec {
 		else
 			out = fs.create(new Path(path));
 
+		//TODO support to be added for 4mc and other supported compression formats
 		if (useCompression)
 			out = MirrorUtils.getCodecOutputStream(conf, codecName, out);
 
@@ -139,6 +140,7 @@ public class GenericHadoopCodec implements DCMCodec {
 		List<FileTuple> response = new ArrayList<FileTuple>();
 
 		FileStatus file = fs.getFileStatus(path);
+		//TODO excludeList to be checked if file (not folder) is mentioned in excludeList.
 		if (file != null && file.isFile()) {
 			response.add(new FileTuple(
 					MirrorUtils.getSimplePath(file.getPath()), file.getLen(),
@@ -159,6 +161,8 @@ public class GenericHadoopCodec implements DCMCodec {
 					response.addAll(getFileStatusRecursive(fstat.getPath(),
 							excludeList));
 				} else {
+					
+					//TODO excludeList to be checked if file (not folder) is mentioned in excludeList.
 
 					response.add(new FileTuple(MirrorUtils.getSimplePath(fstat
 							.getPath()), fstat.getLen(), fstat
