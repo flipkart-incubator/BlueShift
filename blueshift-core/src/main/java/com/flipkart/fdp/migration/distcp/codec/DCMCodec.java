@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configurable;
 
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
+import com.flipkart.fdp.migration.vo.FileTuple;
 
 public interface DCMCodec extends Closeable, Configurable {
 

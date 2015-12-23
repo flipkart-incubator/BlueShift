@@ -34,8 +34,8 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.security.authentication.client.AuthenticationException;
 
 import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 import com.flipkart.fdp.migration.distcp.core.MirrorUtils;
+import com.flipkart.fdp.migration.vo.FileTuple;
 
 public class GenericHadoopCodec implements DCMCodec {
 

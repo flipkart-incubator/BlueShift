@@ -42,10 +42,11 @@ import com.flipkart.fdp.migration.distcp.codec.DCMCodecFactory;
 import com.flipkart.fdp.migration.distcp.codec.optimizer.WorkloadOptimizer;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 import com.flipkart.fdp.migration.distcp.state.StateManager;
 import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
 import com.flipkart.fdp.migration.distcp.state.TransferStatus;
+import com.flipkart.fdp.migration.filter.FilterType;
+import com.flipkart.fdp.migration.vo.FileTuple;
 import com.flipkart.fdp.optimizer.OptimTuple;
 
 public class MirrorFileInputFormat extends InputFormat<Text, Text> {
@@ -74,7 +75,7 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		HashMap<String, FileTuple> inputFileMap = new HashMap<String, FileTuple>();
 		Map<String, TransferStatus> previousState = null;
 
-		List<FileTuple> fstats = null;
+		List<FileTuple> fileTuples = null;
 		List<InputSplit> splits = new ArrayList<InputSplit>();
 		//TODO Bug - hashcode and equals not overridden in OptimTuple. If not HashSet, then fine.
 		Set<OptimTuple> locations = new HashSet<OptimTuple>();
@@ -89,46 +90,43 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 					.getSourceConfig().getDefaultConnectionConfig());
 			
 			//If includeList is used, then path is not considered, in either way excludeList been considered.
-			if (includeList != null && includeList.size() > 0)
-				fstats = dcmInCodec.getInputPaths(includeList, excludeList);
-			else
-				fstats = dcmInCodec.getInputPaths(dcmConfig.getSourceConfig()
+			if (includeList != null && includeList.size() > 0) {
+				fileTuples = dcmInCodec.getInputPaths(includeList, excludeList);
+			} else {
+				fileTuples = dcmInCodec.getInputPaths(dcmConfig.getSourceConfig()
 						.getPath(), excludeList);
+			}
 
 			stateManager = StateManagerFactory.getStateManager(conf, dcmConfig);
 
-			System.out
-					.println("Fetching previous transfer states from StateManager...");
+			System.out.println("Fetching previous transfer states from StateManager...");
 			previousState = stateManager.getPreviousTransferStatus();
 
-			System.out
-					.println("Filtering Input File Set based on User defined filters.");
-			for (FileTuple fstat : fstats) {
+			System.out.println("Filtering Input File Set based on User defined filters.");
+			for (FileTuple fileTuple : fileTuples) {
+				
+				if (!ignoreFile(fileTuple, excludeList, previousState)) {
 
-				if (!ignoreFile(fstat, excludeList, previousState)) {
-
-					locations.add(new OptimTuple(fstat.fileName, fstat.size));
-					inputFileMap.put(fstat.fileName, fstat);
+					locations.add(new OptimTuple(fileTuple.getFileName(), fileTuple.getSize()));
+					inputFileMap.put(fileTuple.getFileName(), fileTuple);
 				}
 			}
+			
 			System.out.println("Optimizing Splits...");
 
-			WorkloadOptimizer optimizer = DCMCodecFactory
-					.getCodecWorkloadOptimizer(dcmConfig.getSinkConfig()
+			WorkloadOptimizer optimizer = DCMCodecFactory.getCodecWorkloadOptimizer(dcmConfig.getSinkConfig()
 							.getDefaultConnectionConfig());
-			splits.addAll(optimizer.optimizeWorkload(dcmConfig, locations,
-					inputFileMap));
+			splits.addAll(optimizer.optimizeWorkload(dcmConfig, locations, inputFileMap));
 
-			if (splits.size() <= 0)
+			if (splits.size() <= 0) {
 				throw new Exception("No Inputs Identified for Processing.. ");
+			}
 
 			sortSplits(splits);
-			System.out.println("Total input paths to process: "
-					+ locations.size() + ", Total input splits: "
-					+ splits.size());
+			System.out.println("Total input paths to process: " + locations.size() + ", Total input splits: " + splits.size());
 			System.out.println("Total Data to Transfer: " + totalBatchSize);
 
-			stateManager.savePreiviousTransferStatus(previousState);
+			stateManager.savePreviousTransferStatus(previousState);
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
@@ -154,45 +152,24 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 		});
 	}
 
-	//TODO refactoring required
-	private boolean ignoreFile(FileTuple fileStat, Set<String> excludeList,
+	private boolean ignoreFile(FileTuple fileTuple, Set<String> excludeList,
 			Map<String, TransferStatus> previousState) {
 
 		boolean ignoreFile = false;
 
-		// File Size Based Rules
-		long fileSize = fileStat.size;
-		if (fileSize <= 0 && dcmConfig.getSourceConfig().isIgnoreEmptyFiles())
-			return true;
+		for(FilterType filterType : FilterType.values()) {
+			if(filterType.getFilter().doFilter(dcmConfig, fileTuple)) {
+				return true;
+			}
+		}
 
-		if (fileSize < dcmConfig.getSourceConfig().getMinFilesize())
-			return true;
-
-		if (dcmConfig.getSourceConfig().getMaxFilesize() != -1
-				&& fileSize > dcmConfig.getSourceConfig().getMaxFilesize())
-			return true;
-
-		// File Time Based rules
-		long ts = dcmConfig.getSourceConfig().getStartTS();
-		if (ts > 0 && fileStat.ts < ts)
-			return true;
-
-		ts = dcmConfig.getSourceConfig().getEndTS();
-		if (ts > 0 && fileStat.ts > ts)
-			return true;
-
-		// File Name based rules
-		String path = fileStat.fileName;
-		if (excludeList.contains(path))
-			return true;
-
+		String path = fileTuple.getFileName();
 		if (previousState.containsKey(path)) {
 			TransferStatus details = previousState.get(path);
 			if (details.getStatus() == Status.COMPLETED) {
-				if (dcmConfig.getSourceConfig().isIncludeUpdatedFiles()
-						&& details.getTs() < fileStat.ts)
+				if (dcmConfig.getSourceConfig().isIncludeUpdatedFiles() && details.getTs() < fileTuple.getTs()) {
 					return false;
-
+				}
 				return true;
 			}
 		}

@@ -74,7 +74,7 @@ public class DummyStatemanager implements StateManager {
 	}
 
 	@Override
-	public void savePreiviousTransferStatus(
+	public void savePreviousTransferStatus(
 			Map<String, TransferStatus> prevState) throws IOException {
 	}
 

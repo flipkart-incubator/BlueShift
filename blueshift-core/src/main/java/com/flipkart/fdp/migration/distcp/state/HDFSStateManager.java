@@ -163,7 +163,7 @@ public class HDFSStateManager implements StateManager {
 	}
 
 	//TODO need to check why this is not persisted while running sample job, need to check
-	public void savePreiviousTransferStatus(
+	public void savePreviousTransferStatus(
 			Map<String, TransferStatus> prevState) throws IOException {
 
 		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(

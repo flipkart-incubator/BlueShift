@@ -42,6 +42,7 @@ import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 import com.flipkart.fdp.migration.distcp.state.StateManager;
 import com.flipkart.fdp.migration.distcp.state.StateManagerFactory;
 import com.flipkart.fdp.migration.distcp.state.TransferStatus;
+import com.flipkart.fdp.migration.vo.FileTuple;
 
 public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
@@ -53,7 +54,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	private DCMConfig dcmConfig = null;
 	private Configuration conf = null;
 
-	private List<MirrorDCMImpl.FileTuple> inputs = null;
+	private List<FileTuple> inputs = null;
 	private int index = 0;
 
 	private InputStream in = null;
@@ -69,7 +70,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 	private Map<String, TransferStatus> transferStatus = null;
 	private MD5Digester digest = null;
 
-	private MirrorDCMImpl.FileTuple current = null;
+	private FileTuple current = null;
 
 	private Text key = new Text();
 	private Text value = new Text();
@@ -107,7 +108,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		if (!read) {
 			digest = null;
 			current = inputs.get(index);
-			srcPath = MirrorUtils.getSimplePath(new Path(current.fileName));
+			srcPath = MirrorUtils.getSimplePath(new Path(current.getFileName()));
 			status = checkTransferStatus();
 
 			if (status == null) {
@@ -115,11 +116,11 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 				status = new TransferStatus();
 				status.setStatus(Status.NEW);
 
-				status.setInputSize(current.size);
-				status.setTs(current.ts);
+				status.setInputSize(current.getSize());
+				status.setTs(current.getTs());
 				status.setTaskID(taskId);
-				System.out.println("Transfering file: " + current.fileName
-						+ ", with size: " + current.size);
+				System.out.println("Transfering file: " + current.getFileName()
+						+ ", with size: " + current.getSize());
 
 				try {
 					analyzeStrategy();
@@ -194,15 +195,19 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 		String destPath = srcPath;
 
-		if (status.isInputTransformed()) {
-			destPath = MirrorUtils.stripExtension(destPath);
+		if(status.isInputTransformed()) {
+			if (status.isInputCompressed()) {
+				destPath = MirrorUtils.stripExtension(destPath);
+			}
+	
+			if (status.isOutputCompressed()) {
+				destPath = destPath + "."
+						+ dcmConfig.getSinkConfig().getCompressionCodec();
+			}
+		} else {
+			
 		}
-
-		if (status.isOutputCompressed()) {
-			destPath = destPath + "."
-					+ dcmConfig.getSinkConfig().getCompressionCodec();
-		}
-
+		
 		String basePath = fSplit.getDestHostConfig().getPath();
 		if (basePath != null && basePath.trim().length() > 1) {
 			destPath = basePath + "/" + destPath;
@@ -222,7 +227,7 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 			}
 		}
 
-		in = inCodec.createInputStream(srcPath, status.isInputTransformed());
+		in = inCodec.createInputStream(srcPath, status.isInputCompressed());
 		out = outCodec.createOutputStream(destPath
 				+ DCMConstants.DCM_TEMP_EXTENSION, status.isOutputCompressed(),
 				dcmConfig.getSinkConfig().getCompressionCodec(), dcmConfig
@@ -303,49 +308,19 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	private void analyzeStrategy() {
 
-		String srcCodec = null;
-
-		if (dcmConfig.getSourceConfig().isTransformSource())
-			srcCodec = MirrorUtils.getCodecNameFromPath(conf, srcPath);
-
+		String srcCodec = MirrorUtils.getCodecNameFromPath(conf, srcPath);
+		System.out.println("Source codec : " + srcCodec);
 		if (srcCodec != null) {
-			
-			//TODO not used, can be removed
-			status.setInputCompressed(false);
-
-			if (dcmConfig.getSinkConfig().isUseCompression()) {
-				if (srcCodec.equalsIgnoreCase(dcmConfig.getSinkConfig()
-						.getCompressionCodec())) {
-					status.setInputTransformed(false);
-					status.setOutputCompressed(false);
-				} else {
-					status.setInputTransformed(true);
-					status.setOutputCompressed(true);
-				}
-			} else {
-				status.setInputTransformed(true);
-				status.setOutputCompressed(false);
-			}
-		} else {
-			if (dcmConfig.getSinkConfig().isUseCompression()) {
-				status.setInputTransformed(false);
-				status.setOutputCompressed(true);
-			} else {
-				status.setInputTransformed(false);
-				status.setOutputCompressed(false);
-			}
+			status.setInputCompressed(true);
 		}
 		
-		//TODO remove try - catch
-		try {
-			if (fSplit.getLength() < dcmConfig.getSourceConfig()
-					.getCompressionThreshold()) {
-				status.setInputTransformed(false);
-				status.setOutputCompressed(false);
-			}
-		} catch (Exception e) {
-			System.err.println("Error Analyzing Transfer strategy: "
-					+ e.getMessage());
+		if (dcmConfig.getSinkConfig().isUseCompression()) {
+			status.setOutputCompressed(true);
+		}
+		
+		//transformSource will have higher precedence over useCompression
+		if(dcmConfig.getSourceConfig().isTransformSource()) {
+			status.setInputTransformed(true);
 		}
 	}
 

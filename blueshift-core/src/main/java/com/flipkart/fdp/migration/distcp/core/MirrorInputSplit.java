@@ -28,7 +28,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 
 import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
+import com.flipkart.fdp.migration.vo.FileTuple;
 
 public class MirrorInputSplit extends InputSplit implements Writable {
 

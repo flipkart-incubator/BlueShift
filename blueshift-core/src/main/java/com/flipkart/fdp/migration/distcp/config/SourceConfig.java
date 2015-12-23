@@ -35,6 +35,9 @@ public class SourceConfig implements ConnectableConfig {
 
 	private long startTS = 0;
 	private long endTS = 0;
+	
+	private String startTime = null;
+	private String endTime = null;
 
 	private long maxFilesize = 0;
 	private long minFilesize = 0;
@@ -106,6 +109,23 @@ public class SourceConfig implements ConnectableConfig {
 	public long getEndTS() {
 		return endTS;
 	}
+	
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
+
 
 	public void setEndTS(long endTS) {
 		this.endTS = endTS;

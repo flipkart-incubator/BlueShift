@@ -1,18 +1,23 @@
 package com.flipkart.fdp.migration.distcp.codec.optimizer;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.hadoop.mapreduce.InputSplit;
+
 import com.flipkart.fdp.migration.distcp.config.ConnectionConfig;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 import com.flipkart.fdp.migration.distcp.core.MirrorInputSplit;
+import com.flipkart.fdp.migration.vo.FileTuple;
 import com.flipkart.fdp.optimizer.OptimTuple;
 import com.flipkart.fdp.optimizer.api.IInputJob;
 import com.flipkart.fdp.optimizer.api.JobLoadOptimizerFactory;
 import com.google.common.collect.Lists;
-import org.apache.hadoop.mapreduce.InputSplit;
-
-import java.io.IOException;
-import java.util.*;
 
 public class MultiSinkOptimizer implements WorkloadOptimizer {
 
@@ -66,7 +71,7 @@ public class MultiSinkOptimizer implements WorkloadOptimizer {
             List<List<FileTuple>> parallelisedTuple = Lists.newArrayList();
 
             for( int j = 0 ; j < parallelismCount && (i+j) < optimizeWorkload.size(); j++ ){
-                List<MirrorDCMImpl.FileTuple> tuple = new ArrayList<MirrorDCMImpl.FileTuple>();
+                List<FileTuple> tuple = new ArrayList<FileTuple>();
                 Set<IInputJob> stats = optimizeWorkload.get(i+j);
                 for (IInputJob stat : stats) {
                     tuple.add(inputFileMap.get(stat.getJobKey()));

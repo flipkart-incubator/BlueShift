@@ -35,6 +35,7 @@ import org.apache.hadoop.io.compress.Compressor;
 import org.apache.hadoop.io.compress.Decompressor;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.flipkart.fdp.migration.distcp.codec.CodecType;
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
 import com.google.gson.Gson;
 
@@ -67,24 +68,34 @@ public class MirrorUtils {
 
 	public static OutputStream getCodecOutputStream(Configuration conf,
 			String codecName, OutputStream out) throws IOException {
-		CompressionCodecFactory compressionCodecs = new CompressionCodecFactory(
-				conf);
-		CompressionCodec codec = compressionCodecs.getCodecByName(codecName);
+		CompressionCodecFactory compressionCodecs = new CompressionCodecFactory(conf);
+		String codecClassName = codecName;
+		CodecType codecType = CodecType.getCodecType(codecName);
+		if(codecType != null) {
+			codecClassName = codecType.getIOCompressionCodecs();
+		}
+		System.out.println("codec class : "+ codecClassName);
+		CompressionCodec codec = compressionCodecs.getCodecByName(codecClassName);
+		
 		if(codec == null) {
 			return out;
 		}
+
+		System.out.println("Getting OutputStream : " + codec.getDefaultExtension());
+		System.out.println("Getting OutputStream : " + codec);
 		Compressor compressor = codec.createCompressor();
 		return codec.createOutputStream(out, compressor);
 	}
 
 	public static InputStream getCodecInputStream(Configuration conf,
-			String codecName, InputStream in) throws IOException {
+			String path, InputStream in) throws IOException {
 
-		CompressionCodecFactory compressionCodecs = new CompressionCodecFactory(
-				conf);
-		CompressionCodec codec = compressionCodecs.getCodec(new Path(codecName));
+		CompressionCodecFactory compressionCodecs = new CompressionCodecFactory(conf);
+		CompressionCodec codec = compressionCodecs.getCodec(new Path(path));
 		if (codec == null)
 			return in;
+		System.out.println("Getting InputStream : " + codec.getDefaultExtension());
+		System.out.println("Getting InputStream : " + codec);
 		Decompressor compressor = codec.createDecompressor();
 		in = codec.createInputStream(in, compressor);
 

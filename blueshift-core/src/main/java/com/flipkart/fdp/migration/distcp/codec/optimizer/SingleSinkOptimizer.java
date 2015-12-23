@@ -9,9 +9,8 @@ import java.util.Set;
 import org.apache.hadoop.mapreduce.InputSplit;
 
 import com.flipkart.fdp.migration.distcp.config.DCMConfig;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl;
-import com.flipkart.fdp.migration.distcp.core.MirrorDCMImpl.FileTuple;
 import com.flipkart.fdp.migration.distcp.core.MirrorInputSplit;
+import com.flipkart.fdp.migration.vo.FileTuple;
 import com.flipkart.fdp.optimizer.OptimTuple;
 import com.flipkart.fdp.optimizer.api.IInputJob;
 import com.flipkart.fdp.optimizer.api.JobLoadOptimizerFactory;
@@ -35,7 +34,7 @@ public class SingleSinkOptimizer implements WorkloadOptimizer {
 			for (Set<IInputJob> stats : OptimizerUtils.optimizeWorkload(
 					JobLoadOptimizerFactory.Optimizer.PRIORITY_QUEUE_BASED,
 					locations, numWorkers)) {
-				List<MirrorDCMImpl.FileTuple> tuple = new ArrayList<MirrorDCMImpl.FileTuple>();
+				List<FileTuple> tuple = new ArrayList<FileTuple>();
 				long size = 0;
 				for (IInputJob stat : stats) {
 					tuple.add(inputFileMap.get(stat.getJobKey()));
@@ -48,7 +47,7 @@ public class SingleSinkOptimizer implements WorkloadOptimizer {
 			}
 		} else {
 			for (OptimTuple stat : locations) {
-				List<MirrorDCMImpl.FileTuple> tuple = new ArrayList<MirrorDCMImpl.FileTuple>();
+				List<FileTuple> tuple = new ArrayList<FileTuple>();
 				tuple.add(inputFileMap.get(stat.getJobKey()));
 				splits.add(new MirrorInputSplit(tuple, stat.getJobSize(),
 						dcmConfig.getSourceConfig()

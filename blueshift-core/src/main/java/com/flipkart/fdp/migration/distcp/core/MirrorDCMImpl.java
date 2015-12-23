@@ -18,19 +18,17 @@
 
 package com.flipkart.fdp.migration.distcp.core;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Comparator;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import com.flipkart.fdp.migration.distcp.config.DCMConstants;
+import com.flipkart.fdp.migration.vo.FileTuple;
 
 public class MirrorDCMImpl {
 
@@ -53,46 +51,14 @@ public class MirrorDCMImpl {
 		}
 	}
 
-	// Todo://Make a separate calss
-	public static class FileTuple implements Writable {
-		public String fileName;
-		public long size;
-		public long ts;
-
-		public FileTuple() {
-
-		}
-
-		public FileTuple(String path, long len, long ts) {
-			this.fileName = path;
-			this.size = len;
-			this.ts = ts;
-		}
-
-		@Override
-		public void write(DataOutput out) throws IOException {
-			Text.writeString(out, fileName);
-			out.writeLong(size);
-			out.writeLong(ts);
-		}
-
-		@Override
-		public void readFields(DataInput in) throws IOException {
-			fileName = Text.readString(in);
-			size = in.readLong();
-			ts = in.readLong();
-		}
-
-	}
-
 	public static class FileTupleComparator implements Comparator<FileTuple> {
 
 		// @Override
 		public int compare(FileTuple f0, FileTuple f1) {
 
-			if (f1.size > f0.size)
+			if (f1.getSize() > f0.getSize())
 				return 1;
-			if (f1.size < f0.size)
+			if (f1.getSize() < f0.getSize())
 				return -1;
 			return 0;
 		}

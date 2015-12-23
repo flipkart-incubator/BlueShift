@@ -124,7 +124,7 @@ public class MySqlStateManager implements StateManager {
 	}
 
 	@Override
-	public void savePreiviousTransferStatus(
+	public void savePreviousTransferStatus(
 			Map<String, TransferStatus> prevState) throws IOException {
 		// TODO Auto-generated method stub
 

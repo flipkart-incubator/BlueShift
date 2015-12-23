@@ -37,7 +37,7 @@ public interface StateManager extends Closeable {
 	public Map<String, TransferStatus> getTransferStatus(String taskId)
 			throws IOException;
 
-	public void savePreiviousTransferStatus(
+	public void savePreviousTransferStatus(
 			Map<String, TransferStatus> prevState) throws IOException;
 
 	public Map<String, TransferStatus> getPreviousTransferStatus()
