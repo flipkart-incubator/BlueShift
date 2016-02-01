@@ -176,7 +176,7 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 		FileOutputFormat.setOutputPath(job, stateManager.getReportPath());
 
-		job.setNumReduceTasks(1);
+		job.setNumReduceTasks(configuration.getInt("mapreduce.reduce.tasks", 1));
 
 		System.out
 				.println("Job Initialization Complete, The status of the Mirror job will be written to: "
@@ -195,14 +195,25 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
             long successCount = counters.findCounter(
                     BLUESHIFT_COUNTER.SUCCESS_COUNT).getValue();
+            
+            long verifiedFailedCount = counters.findCounter(BLUESHIFT_COUNTER.VERIFIED_FAILED_COUNT).getValue();
 
             System.out.println("Total Success Transfers: " + successCount
                     + ", Total Failed Transfers: " + failedCount);
-            if (failedCount > 0) {
-                System.err.println("There are " + failedCount
-                        + " transfers, Please re-run the job...");
+            
+            if (failedCount > 0 || verifiedFailedCount > 0) {
+                System.err.println("There are failedCount[" + failedCount
+                        + "], verifiedFailedCount[" + verifiedFailedCount +"] transfers, Please re-run the job...");
                 retVal = (int) failedCount;
             }
+            
+            long verifiedSuccessCount = counters.findCounter(BLUESHIFT_COUNTER.VERIFIED_SUCCESS_COUNT).getValue();
+            if(successCount != verifiedSuccessCount) {
+            	System.err.println("Verification not done for all files : successCount[" + successCount
+            			+ "], verifiedSuccessCount[" + verifiedSuccessCount + "].");
+            	retVal =  (int) (successCount - verifiedSuccessCount);
+            }
+            
         } catch (Exception e) {
             System.out.println("Error processing job counters: "
                     + e.getMessage());

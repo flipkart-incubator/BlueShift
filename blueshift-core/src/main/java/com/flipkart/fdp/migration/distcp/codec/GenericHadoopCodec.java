@@ -39,16 +39,15 @@ import com.flipkart.fdp.migration.vo.FileTuple;
 
 public class GenericHadoopCodec implements DCMCodec {
 
+	private static final String _SEPARATOR = ",";
+
 	private FileSystem fs = null;
 
 	private Configuration conf = null;
 
-	private ConnectionConfig config = null;
-
 	public GenericHadoopCodec(Configuration conf, ConnectionConfig config,
 			FileSystem fs) throws Exception {
 		this.fs = fs;
-		this.config = config;
 		this.conf = conf;
 	}
 
@@ -91,7 +90,7 @@ public class GenericHadoopCodec implements DCMCodec {
 	public List<FileTuple> getInputPaths(String path,
 			Collection<String> excludeList) throws Exception {
 
-		return getInputPaths(Arrays.asList(new String[] { path }), excludeList);
+		return getInputPaths(Arrays.asList(path.split(_SEPARATOR)), excludeList);
 	}
 
 	public List<FileTuple> getInputPaths(Collection<String> paths,

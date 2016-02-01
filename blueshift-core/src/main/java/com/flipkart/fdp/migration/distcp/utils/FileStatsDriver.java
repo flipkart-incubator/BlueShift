@@ -34,9 +34,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-/**
- * Created by raj velu
- */
 public class FileStatsDriver extends Configured implements Tool {
 
 	private Configuration configuration;
@@ -70,12 +67,14 @@ public class FileStatsDriver extends Configured implements Tool {
 
 		filePaths = getAllPaths(path);
 
-		BufferedWriter writer = new BufferedWriter(new FileWriter(args[3]));
-		for (String file : filePaths) {
-			writer.write(file);
-			writer.newLine();
+		if(args.length > 3) {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(args[3]));
+			for (String file : filePaths) {
+				writer.write(file);
+				writer.newLine();
+			}
+			writer.close();
 		}
-		writer.close();
 		return 0;
 	}
 
@@ -114,16 +113,16 @@ public class FileStatsDriver extends Configured implements Tool {
 
 	private static void printUsageAndExit() {
 
-		System.out.println("Snapshot : Usage: hadoop jar filestats.jar "
+		System.out.println("Snapshot : Usage: yarn jar <jar location> "
 				+ "<basepath> <startts> <endts> <local reportpath>");
 		System.out
-				.println("Example : hadoop jar filestats.jar /projects 0 0 projects.fstat");
+				.println("Example : yarn jar <jar location> /projects 0 0 projects.fstat");
 		System.exit(1);
 	}
 
 	public static void main(String args[]) throws Exception {
 
-		if (args.length < 4) {
+		if (args.length < 3) {
 			printUsageAndExit();
 		}
 		int exitCode = ToolRunner.run(new FileStatsDriver(), args);

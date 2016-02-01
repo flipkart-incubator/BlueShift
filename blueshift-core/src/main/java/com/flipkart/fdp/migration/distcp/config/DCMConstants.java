@@ -81,8 +81,8 @@ public class DCMConstants {
 	}
 
 	public static enum BLUESHIFT_COUNTER {
-		SUCCESS_COUNT, FAILED_COUNT
-	};
+		SUCCESS_COUNT, FAILED_COUNT, VERIFIED_SUCCESS_COUNT, VERIFIED_FAILED_COUNT
+	}
 
 	public static enum FileSystemType {
 

@@ -32,6 +32,7 @@ public class TransferStatus {
 	private boolean inputTransformed = false;
 	private boolean outputCompressed = false;
 	private String md5Digest = null;
+	private String md5DigestOutput = null;
 	private String taskID = null;
 	private Status status = Status.NEW;
 
@@ -89,6 +90,14 @@ public class TransferStatus {
 
 	public void setMd5Digest(String md5Digest) {
 		this.md5Digest = md5Digest;
+	}
+
+	public String getMd5DigestOutput() {
+		return md5DigestOutput;
+	}
+	
+	public void setMd5DigestOutput(String md5DigestOutput) {
+		this.md5DigestOutput = md5DigestOutput;
 	}
 
 	public Status getStatus() {

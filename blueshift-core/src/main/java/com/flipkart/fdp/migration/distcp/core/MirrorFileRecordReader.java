@@ -249,8 +249,8 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 
 	private void updateStatus() throws IOException {
 
-		status.setOutputPath(fSplit.getDestHostConfig().getConnectionURL()
-				+ "/" + status.getOutputPath());
+		//status.setOutputPath(fSplit.getDestHostConfig().getConnectionURL()
+		//		+ "/" + status.getOutputPath());
 
 		key.set(status.getInputPath());
 		value.set(status.toString());
