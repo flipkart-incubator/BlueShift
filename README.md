@@ -1,7 +1,7 @@
 ![Alt text](blueshift.jpg?raw=true "Flipkart Blueshift")
 
 # Overview
-Flipkart Blueshift is a reliable data migration tool for Hadoop ecosystem, Comes packed with some elegant features missing in traditional migration tools like DistCP,
+Flipkart Blueshift is a reliable data migration tool for Hadoop ecosystem, Comes packed with some elegant features missing in traditional migration tools like DistCP.
 
 - Migration across clusters (secured and unsecured)
 - On the fly compression, where source data is compressed over the wire, (this can benefit only when the job is run from the source cluster)
@@ -23,7 +23,7 @@ Flipkart Blueshift is a reliable data migration tool for Hadoop ecosystem, Comes
 - Option to ignore exceptions and continue processing and report state to status file and the state db.
 - Support for various other filters like include/exclude file lists, include/exclude file patterns etc..
 
-Upcoming Features,
+*Upcoming Features:*
 
 - Support for other protocols like kafka, cassandra, Databases etc...
 - On the fly compression irrespective of job execution location.
@@ -40,10 +40,10 @@ Upcoming Features,
 
 Blueshift is configured via a configuration json file, There are 4 main sections that needs to be configured,
 
-- Batch Config - This defines the batch properties.
-- Source Config - This defines the Source configuration with connection and protocol details to access the source.
-- Sink Config - This defines the destination Sink configuration with connection properties to access the destination.
-- Statestore DB Config - This defines the database details that will be used as a statestore.
+- *Batch Config* - This defines the batch properties.
+- *Source Config* - This defines the Source configuration with connection and protocol details to access the source.
+- *Sink Config* - This defines the destination Sink configuration with connection properties to access the destination.
+- *Statestore DB Config* - This defines the database details that will be used as a statestore.
 
 Refer to the configuration page for details on the different config options available.
 
@@ -70,50 +70,39 @@ http://github.com/flipkart-incubator/blueshift
 
 ## **Build and Run**
 
-Step 1: Clone the project to your local,
+Step 1: Clone the project to your local:
 
-git clone https://github.com/flipkart-incubator/blueshift.git
+    git clone https://github.com/flipkart-incubator/blueshift.git
 
-Step 2: Build the project, switch to the cloned project directory and execute
+Step 2: Build the project, switch to the cloned project directory and execute:
 
-mvn clean install -DskipTests
+    mvn clean install -DskipTests
 
-Step 3: Copy the newly created jar to your gateways and run the below command, 
+Step 3: Copy the newly created jar to your gateways and run the below command:
 
-hadoop jar blueshift.jar -Pdriver.json
+    hadoop jar blueshift.jar -Pdriver.json
 
 ## **Contributors**
 
-Mukund Thakur
-
-Vishal Rajan
-
-Prathyush Babu
-
-Rahul Agarwal
-
-Kasinath
-
-Chetna Chaudhari
-
-Chackaravarthy E
-
-Sushil Kumar S
-
-Guruprasad GV
-
-Dhiraj Kumar
-
-Raj Velu - Architect
-
-Kurian Cheeramelil
+- Mukund Thakur
+- Vishal Rajan
+- Prathyush Babu
+- Rahul Agarwal
+- Kasinath
+- Chetna Chaudhari
+- Chackaravarthy E
+- Sushil Kumar S
+- Guruprasad GV
+- Dhiraj Kumar
+- Raj Velu - Architect
+- Kurian Cheeramelil
 
 ## **Contact**
 
-Blueshift is owned and maintained by Flipkart Data Platform Infra Team,
+Blueshift is owned and maintained by Flipkart Data Platform Infra Team.
 
 ## **FAQ**
 
-Refer to the FAQ page below,
+Refer to the FAQ page below:
 
 https://github.com/flipkart-incubator/blueshift/wiki/FAQ
