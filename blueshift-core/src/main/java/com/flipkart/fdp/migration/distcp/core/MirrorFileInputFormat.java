@@ -118,10 +118,6 @@ public class MirrorFileInputFormat extends InputFormat<Text, Text> {
 							.getDefaultConnectionConfig());
 			splits.addAll(optimizer.optimizeWorkload(dcmConfig, locations, inputFileMap));
 
-			if (splits.size() <= 0) {
-				throw new Exception("No Inputs Identified for Processing.. ");
-			}
-
 			sortSplits(splits);
 			System.out.println("Total input paths to process: " + locations.size() + ", Total input splits: " + splits.size());
 			System.out.println("Total Data to Transfer: " + totalBatchSize);

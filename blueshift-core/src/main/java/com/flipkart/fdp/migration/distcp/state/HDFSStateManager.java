@@ -216,7 +216,7 @@ public class HDFSStateManager implements StateManager {
 
 			Path spath = new Path(fstat.getPath(), PREVIOUS_STATE_FILE_NAME);
 			List<TransferStatus> stats = getAllStats(new Path(fstat.getPath(),
-					STATUS_PATH));
+					REPORT_PATH));
 			mergeStates(status, stats);
 			if (fs.exists(spath)) {
 				stats = getAllStats(spath);

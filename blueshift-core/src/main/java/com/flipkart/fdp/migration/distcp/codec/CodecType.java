@@ -7,7 +7,7 @@ public enum CodecType {
 	
 	FOUR_MC("4mc", "com.hadoop.compression.fourmc.FourMcCodec"),
 	SNAPPY("snappy", "org.apache.hadoop.io.compress.SnappyCodec"),
-	GZIP("gzip", "org.apache.hadoop.io.compress.GzipCodec"),
+	GZIP("gz", "org.apache.hadoop.io.compress.GzipCodec"),
 	BZIP2("bz2", "org.apache.hadoop.io.compress.BZip2Codec");
 	
 	private String name;

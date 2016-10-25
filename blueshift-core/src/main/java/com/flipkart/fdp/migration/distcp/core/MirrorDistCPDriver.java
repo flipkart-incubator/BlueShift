@@ -149,7 +149,6 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 				: Status.COMPLETED);
 
 		return jobReturnValue;
-
 	}
 
 	private Job createJob(Configuration configuration) throws Exception {

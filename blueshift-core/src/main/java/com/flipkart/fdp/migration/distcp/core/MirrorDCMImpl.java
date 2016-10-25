@@ -79,10 +79,11 @@ public class MirrorDCMImpl {
 					System.out.println("Verification failed for : " + fileName + ", md5DigestInput : [" + md5DigestInput
 							+ "], md5DigestOutput : [" + md5DigestOutput + "]");
 					context.getCounter(BLUESHIFT_COUNTER.VERIFIED_FAILED_COUNT).increment(1);
+					transferStatus.setStatus(DCMConstants.Status.FAILED);
 				}
-				output.set(transferStatus.toString());
 			} catch (Exception e) {
 				context.getCounter(BLUESHIFT_COUNTER.VERIFIED_FAILED_COUNT).increment(1);
+				transferStatus.setStatus(DCMConstants.Status.FAILED);
 				System.out.println("Caught Exception : " + e.getMessage());
 				e.printStackTrace();
 			} finally {
@@ -90,6 +91,7 @@ public class MirrorDCMImpl {
 					inputStream.close();
 				}
 			}
+			output.set(transferStatus.toString());
 			context.write(key, output);
 		}
 		
@@ -113,7 +115,7 @@ public class MirrorDCMImpl {
 		public void reduce(Text key, Iterable<Text> values, Context context)
 				throws IOException, InterruptedException {
 			for (Text value : values) {
-				context.write(key, value);
+				context.write(value,null);
 			}
 		}
 	}
