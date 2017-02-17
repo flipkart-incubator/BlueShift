@@ -32,9 +32,9 @@ import com.flipkart.fdp.migration.vo.FileTuple;
 public interface DCMCodec extends Closeable, Configurable {
 
 	public OutputStream createOutputStream(String path, boolean useCompression,
-			String codecName, boolean append) throws IOException;
+			String codecName, boolean append,boolean encrypt,byte[] encryptKey,byte[] encryptIV) throws IOException;
 
-	public InputStream createInputStream(String path, boolean useDeCompression)
+	public InputStream createInputStream(String path, boolean useDeCompression,boolean decrypt,byte[] decryptKey,byte[] decryptIV)
 			throws IOException;
 
 	public boolean deleteSoureFile(String path) throws IOException;

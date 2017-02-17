@@ -35,7 +35,7 @@ public class SourceConfig implements ConnectableConfig {
 
 	private long startTS = 0;
 	private long endTS = 0;
-	
+
 	private String startTime = null;
 	private String endTime = null;
 
@@ -47,8 +47,13 @@ public class SourceConfig implements ConnectableConfig {
 	private boolean transformSource = false;
 	private boolean includeUpdatedFiles = false;
 	private long compressionThreshold = 0;
-
 	private List<ConnectionConfig> connectionConfig = null;
+
+	private boolean decrypt = false;
+	private byte[] decryptKey;
+	private byte[] decryptIV;
+
+	private boolean validateTransfer = true;
 
 	public String getPath() {
 		return path;
@@ -109,7 +114,7 @@ public class SourceConfig implements ConnectableConfig {
 	public long getEndTS() {
 		return endTS;
 	}
-	
+
 	public String getStartTime() {
 		return startTime;
 	}
@@ -205,4 +210,35 @@ public class SourceConfig implements ConnectableConfig {
 		return gson.toJson(this);
 	}
 
+	public boolean isDecrypt() {
+		return decrypt;
+	}
+
+	public void setDecrypt(boolean decrypt) {
+		this.decrypt = decrypt;
+	}
+
+	public byte[] getDecryptKey() {
+		return decryptKey;
+	}
+
+	public void setDecryptKey(byte[] decryptKey) {
+		this.decryptKey = decryptKey;
+	}
+
+	public byte[] getDecryptIV() {
+		return decryptIV;
+	}
+
+	public void setDecryptIV(byte[] decryptIV) {
+		this.decryptIV = decryptIV;
+	}
+
+	public boolean isValidateTransfer() {
+		return validateTransfer;
+	}
+
+	public void setValidateTransfer(boolean validateTransfer) {
+		this.validateTransfer = validateTransfer;
+	}
 }

@@ -62,7 +62,10 @@ public class DCMCodecFactory {
 				String uri = config.getConnectionURL().replaceFirst("mftp",
 						"ftp");
 				fs = getFilesystem(conf, config, uri);
-			} else {
+			} else if ("wasb".equals(scheme)) {
+				fs = getFilesystem(conf, config, config.getConnectionURL());
+			}
+			else {
 
 				throw new Exception("Unknown Filesystem scheme, " + scheme);
 			}
@@ -104,7 +107,10 @@ public class DCMCodecFactory {
 			return new SingleSinkOptimizer();
 		} else if ("mftp".equals(scheme)) {
 			return new MultiSinkOptimizer();
-		} else {
+		} else if ("wasb".equals(scheme)) {
+			return new SingleSinkOptimizer();
+		}
+		else {
 
 			throw new Exception("Unknown Filesystem scheme, " + scheme);
 		}

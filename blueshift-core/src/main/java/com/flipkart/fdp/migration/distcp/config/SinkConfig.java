@@ -32,6 +32,10 @@ public class SinkConfig implements ConnectableConfig {
 
 	private boolean useCompression = false;
 
+	private boolean encrypt = false;
+	private byte[] encryptKey;
+	private byte[] encryptIV;
+
 	private boolean overwriteFiles = false;
 
 	private boolean append = false;
@@ -102,5 +106,29 @@ public class SinkConfig implements ConnectableConfig {
 	public String toString() {
 		Gson gson = new Gson();
 		return gson.toJson(this);
+	}
+
+	public boolean isEncrypt() {
+		return encrypt;
+	}
+
+	public void setEncrypt(boolean encrypt) {
+		this.encrypt = encrypt;
+	}
+
+	public byte[] getEncryptKey() {
+		return encryptKey;
+	}
+
+	public void setEncryptKey(byte[] encryptKey) {
+		this.encryptKey = encryptKey;
+	}
+
+	public byte[] getEncryptIV() {
+		return encryptIV;
+	}
+
+	public void setEncryptIV(byte[] encryptIV) {
+		this.encryptIV = encryptIV;
 	}
 }

@@ -226,12 +226,11 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 				throw new FileAlreadyExistsException(destPath);
 			}
 		}
-
-		in = inCodec.createInputStream(srcPath, status.isInputCompressed());
+		in = inCodec.createInputStream(srcPath, (status.isInputTransformed() && status.isInputCompressed()), status.isDecrypt(),status.getDecryptKey(),status.getDecryptIV());
 		out = outCodec.createOutputStream(destPath
-				+ DCMConstants.DCM_TEMP_EXTENSION, status.isOutputCompressed(),
+				+ DCMConstants.DCM_TEMP_EXTENSION, (status.isInputTransformed() && status.isOutputCompressed()),
 				dcmConfig.getSinkConfig().getCompressionCodec(), dcmConfig
-						.getSinkConfig().isAppend());
+						.getSinkConfig().isAppend(),status.isEncrypt(),status.getEncryptKey(),status.getEncryptIV());
 
 		String statusMesg = "Processing: " + srcPath + " -> " + destPath;
 		context.setStatus(statusMesg);
@@ -321,6 +320,19 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		//transformSource will have higher precedence over useCompression
 		if(dcmConfig.getSourceConfig().isTransformSource()) {
 			status.setInputTransformed(true);
+		}
+		if (dcmConfig.getSourceConfig().isDecrypt()) {
+			status.setDecrypt(true);
+			status.setDecryptKey(dcmConfig.getSourceConfig().getDecryptKey());
+			status.setDecryptIV(dcmConfig.getSourceConfig().getDecryptIV());
+		}
+		if (dcmConfig.getSinkConfig().isEncrypt()) {
+			status.setEncrypt(true);
+			status.setEncryptKey(dcmConfig.getSinkConfig().getEncryptKey());
+			status.setEncryptIV(dcmConfig.getSinkConfig().getEncryptIV());
+		}
+		if (!dcmConfig.getSourceConfig().isValidateTransfer()) {
+			status.setValidateTransfer(false);
 		}
 	}
 

@@ -65,31 +65,35 @@ public class MirrorDCMImpl {
 		@Override
 		public void map(Text key, Text value, Context context)
 				throws IOException, InterruptedException {
+
 			TransferStatus transferStatus = this.gson.fromJson(value.toString(), TransferStatus.class);
-			String fileName = transferStatus.getOutputPath();
-			String md5DigestInput = transferStatus.getMd5Digest();
-			InputStream inputStream = null;
-			try {
-				inputStream = codec.createInputStream(fileName,transferStatus.isOutputCompressed());
-				String md5DigestOutput = computeMd5(inputStream);
-				transferStatus.setMd5DigestOutput(md5DigestOutput);
-				if(md5DigestInput.equals(md5DigestOutput)) {
-					context.getCounter(BLUESHIFT_COUNTER.VERIFIED_SUCCESS_COUNT).increment(1);
-				} else {
-					System.out.println("Verification failed for : " + fileName + ", md5DigestInput : [" + md5DigestInput
-							+ "], md5DigestOutput : [" + md5DigestOutput + "]");
+			if (transferStatus.isValidateTransfer()) {
+				String fileName = transferStatus.getOutputPath();
+				String md5DigestInput = transferStatus.getMd5Digest();
+				InputStream inputStream = null;
+				try {
+					inputStream = codec.createInputStream(fileName, transferStatus.isOutputCompressed(), transferStatus.isDecrypt(), transferStatus.getDecryptKey(), transferStatus.getDecryptIV());
+					String md5DigestOutput = computeMd5(inputStream);
+					transferStatus.setMd5DigestOutput(md5DigestOutput);
+					if (md5DigestInput.equals(md5DigestOutput)) {
+						context.getCounter(BLUESHIFT_COUNTER.VERIFIED_SUCCESS_COUNT).increment(1);
+					} else {
+						System.out.println("Verification failed for : " + fileName + ", md5DigestInput : [" + md5DigestInput
+								+ "], md5DigestOutput : [" + md5DigestOutput + "]");
+						context.getCounter(BLUESHIFT_COUNTER.VERIFIED_FAILED_COUNT).increment(1);
+						transferStatus.setStatus(DCMConstants.Status.FAILED);
+					}
+				} catch (Exception e) {
 					context.getCounter(BLUESHIFT_COUNTER.VERIFIED_FAILED_COUNT).increment(1);
 					transferStatus.setStatus(DCMConstants.Status.FAILED);
+					System.out.println("Caught Exception : " + e.getMessage());
+					e.printStackTrace();
+				} finally {
+					if (inputStream != null) {
+						inputStream.close();
+					}
 				}
-			} catch (Exception e) {
-				context.getCounter(BLUESHIFT_COUNTER.VERIFIED_FAILED_COUNT).increment(1);
-				transferStatus.setStatus(DCMConstants.Status.FAILED);
-				System.out.println("Caught Exception : " + e.getMessage());
-				e.printStackTrace();
-			} finally {
-				if(inputStream != null) {
-					inputStream.close();
-				}
+
 			}
 			output.set(transferStatus.toString());
 			context.write(key, output);

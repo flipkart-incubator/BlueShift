@@ -21,6 +21,7 @@ package com.flipkart.fdp.migration.distcp.state;
 import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 import com.google.gson.Gson;
 
+
 public class TransferStatus {
 
 	private String inputPath = null;
@@ -35,7 +36,13 @@ public class TransferStatus {
 	private String md5DigestOutput = null;
 	private String taskID = null;
 	private Status status = Status.NEW;
-
+	private boolean encrypt = false;
+	private boolean decrypt = false;
+	private byte[] encryptKey;
+	private byte[] encryptIV;
+	private byte[] decryptKey;
+	private byte[] decryptIV;
+	private boolean validateTransfer = false;
 	public String getInputPath() {
 		return inputPath;
 	}
@@ -136,5 +143,61 @@ public class TransferStatus {
 	public String toString() {
 		Gson gson = new Gson();
 		return gson.toJson(this);
+	}
+
+	public byte[] getEncryptKey() {
+		return encryptKey;
+	}
+
+	public void setEncryptKey(byte[] encryptKey) {
+		this.encryptKey = encryptKey;
+	}
+
+	public byte[] getEncryptIV() {
+		return encryptIV;
+	}
+
+	public void setEncryptIV(byte[] encryptIV) {
+		this.encryptIV = encryptIV;
+	}
+
+	public boolean isEncrypt() {
+		return encrypt;
+	}
+
+	public void setEncrypt(boolean encrypt) {
+		this.encrypt = encrypt;
+	}
+
+	public boolean isDecrypt() {
+		return decrypt;
+	}
+
+	public void setDecrypt(boolean decrypt) {
+		this.decrypt = decrypt;
+	}
+
+	public byte[] getDecryptKey() {
+		return decryptKey;
+	}
+
+	public void setDecryptKey(byte[] decryptKey) {
+		this.decryptKey = decryptKey;
+	}
+
+	public byte[] getDecryptIV() {
+		return decryptIV;
+	}
+
+	public void setDecryptIV(byte[] decryptIV) {
+		this.decryptIV = decryptIV;
+	}
+
+	public boolean isValidateTransfer() {
+		return validateTransfer;
+	}
+
+	public void setValidateTransfer(boolean validateTransfer) {
+		this.validateTransfer = validateTransfer;
 	}
 }

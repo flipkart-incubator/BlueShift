@@ -4,7 +4,6 @@
     <artifactId>blueshift</artifactId>
     <groupId>com.flipkart.fdp</groupId>
     <version>2.0.1-SNAPSHOT</version>
-    <relativePath>../../BlueShift/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>blueshift-core</artifactId>
@@ -109,8 +108,8 @@
     <dart-version>0.1.3</dart-version>
     <apache-commons-version>1.3.2</apache-commons-version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <hdp-version>hdp2.2.0</hdp-version>
-    <hadoop-version>2.6.0</hadoop-version>
+    <hdp-version>hdp2.4.0</hdp-version>
+    <hadoop-version>2.7.1</hadoop-version>
     <jackson-version>2.4.1</jackson-version>
   </properties>
 </project>

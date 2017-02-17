@@ -27,6 +27,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.crypto.CryptoCodec;
+import org.apache.hadoop.crypto.CryptoInputStream;
+import org.apache.hadoop.crypto.CryptoOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -52,7 +55,7 @@ public class GenericHadoopCodec implements DCMCodec {
 	}
 
 	public OutputStream createOutputStream(String path, boolean useCompression,
-			String codecName, boolean append) throws IOException {
+			String codecName, boolean append,boolean encrypt,byte[] encryptKey,byte[] encryptIV) throws IOException {
 
 		OutputStream out = null;
 		if (append)
@@ -60,6 +63,10 @@ public class GenericHadoopCodec implements DCMCodec {
 		else
 			out = fs.create(new Path(path));
 
+		if (encrypt) {
+			CryptoCodec c = CryptoCodec.getInstance(conf);
+			out = new CryptoOutputStream(out,c,8192,encryptKey,encryptIV);
+		}
 		//TODO support to be added for 4mc and other supported compression formats
 		if (useCompression)
 			out = MirrorUtils.getCodecOutputStream(conf, codecName, out);
@@ -67,13 +74,20 @@ public class GenericHadoopCodec implements DCMCodec {
 		return out;
 	}
 
-	public InputStream createInputStream(String path, boolean useDeCompression)
+	public InputStream createInputStream(String path, boolean useDeCompression,boolean decrypt, byte[] decryptKey, byte[] decryptIV)
 			throws IOException {
 
 		InputStream in = fs.open(new Path(path));
 
+		if (decrypt) {
+			System.out.println("Creating decryption stream");
+			CryptoCodec c = CryptoCodec.getInstance(conf);
+			in = new CryptoInputStream(in,c,8192,decryptKey,decryptIV);
+		}
+
 		if (useDeCompression)
 			in = MirrorUtils.getCodecInputStream(conf, path, in);
+
 		return in;
 
 	}
