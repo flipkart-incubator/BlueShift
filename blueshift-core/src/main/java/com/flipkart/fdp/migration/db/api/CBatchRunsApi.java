@@ -37,20 +37,20 @@ public class CBatchRunsApi implements IBatchRunsApi {
 
 	@Override
 	public BatchRun createBatchRun(long batchId, String jobId,
-			DCMConfig batchConfig, long startTime, long endTime, Status status)
+			DCMConfig batchConfig, long startTime, long endTime, String trackingURL, Status status, String reason)
 			throws EBase {
 		BatchRun batchRun = new BatchRun(jobId, startTime, endTime, batchId,
-				batchConfig.toString(), status);
+				batchConfig.toString(), trackingURL, status, reason);
 		batchRunsDao.save(batchRun);
 		return batchRun;
 	}
 
 	@Override
 	public BatchRun updateBatchRun(long batchId, String jobId,
-			DCMConfig batchConfig, long startTime, long endTime, Status status)
+			DCMConfig batchConfig, long startTime, long endTime, String trackingURL,  Status status, String reason)
 			throws EBase {
 		BatchRun batchRun = new BatchRun(jobId, startTime, endTime, batchId,
-				batchConfig.toString(), status);
+				batchConfig.toString(), trackingURL, status, reason);
 		batchRunsDao.update(batchRun);
 		return batchRun;
 	}

@@ -30,6 +30,8 @@ public interface StateManager extends Closeable {
 
 	public void beginBatch() throws IOException;
 
+	public void saveBatchRun(Status status) throws IOException;
+
 	public void completeBatch(Status status) throws IOException;
 
 	public void updateTransferStatus(TransferStatus status) throws IOException;
@@ -46,4 +48,8 @@ public interface StateManager extends Closeable {
 	public Path getReportPath();
 
 	public String getRunId();
+
+	public void setRunId(String runId);
+	public void setTrackingURL(String url);
+	public void setFailureReason(String reason);
 }

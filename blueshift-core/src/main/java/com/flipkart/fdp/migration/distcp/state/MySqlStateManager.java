@@ -49,6 +49,8 @@ public class MySqlStateManager implements StateManager {
 	private Batch batch = null;
 
 	private String runId = null;
+	private String trackingURL = null;
+	private String failureReason = null;
 
 	private long startTime = 0, endTime = 0;
 
@@ -106,6 +108,16 @@ public class MySqlStateManager implements StateManager {
 		}
 	}
 
+	public void saveBatchRun(Status status) throws IOException{
+		endTime = System.currentTimeMillis();
+		try {
+			batchRunsAPI.createBatchRun(dcmConfig.getBatchID(), runId,
+					dcmConfig, startTime, endTime, trackingURL, status, failureReason);
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
+
 	@Override
 	public void completeBatch(Status status) throws IOException {
 
@@ -115,13 +127,17 @@ public class MySqlStateManager implements StateManager {
 					dcmConfig.getBatchName(), runId, batch.getDesc(), status,
 					false);
 
-			batchRunsAPI.createBatchRun(dcmConfig.getBatchID(), runId,
-					dcmConfig, startTime, endTime, status);
+			batchRunsAPI.updateBatchRun(dcmConfig.getBatchID(), runId,
+					dcmConfig, startTime, endTime, trackingURL, status, failureReason);
 		} catch (Exception e) {
+			System.out.println(e);
+			System.out.println(e.getStackTrace());
 			throw new IOException(e);
 		}
 
 	}
+
+
 
 	@Override
 	public void savePreviousTransferStatus(
@@ -209,5 +225,16 @@ public class MySqlStateManager implements StateManager {
 	@Override
 	public String getRunId() {
 		return runId;
+	}
+
+	public void setRunId(String runId) {
+		this.runId = runId;
+	}
+
+	public void setTrackingURL(String url){
+		this.trackingURL = url;
+	}
+	public void setFailureReason(String reason){
+		this.failureReason = reason;
 	}
 }

@@ -131,6 +131,9 @@ public class HDFSStateManager implements StateManager {
 		lockBatch();
 	}
 
+	public void saveBatchRun(Status status) throws IOException{
+	}
+
 	public void completeBatch(Status status) throws IOException {
 		unLockBatch();
 		FSDataOutputStream out = fs.create(new Path(statusPath, status
@@ -321,6 +324,16 @@ public class HDFSStateManager implements StateManager {
 	@Override
 	public String getRunId() {
 		return runId;
+	}
+
+	public void setRunId(String runId){
+		this.runId = runId;
+	}
+
+	public void setTrackingURL(String url){
+	}
+
+	public void setFailureReason(String reason){
 	}
 
 	@Override

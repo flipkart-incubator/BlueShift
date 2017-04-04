@@ -59,6 +59,8 @@ public class DummyStatemanager implements StateManager {
 	public void beginBatch() throws IOException {
 	}
 
+	public void saveBatchRun(Status status) throws IOException{
+	}
 	@Override
 	public void completeBatch(Status status) throws IOException {
 	}
@@ -96,5 +98,15 @@ public class DummyStatemanager implements StateManager {
 
 	@Override
 	public void close() throws IOException {
+	}
+
+	@Override
+	public void setRunId(String runId){
+	}
+
+	public void setTrackingURL(String url){
+	}
+
+	public void setFailureReason(String reason){
 	}
 }

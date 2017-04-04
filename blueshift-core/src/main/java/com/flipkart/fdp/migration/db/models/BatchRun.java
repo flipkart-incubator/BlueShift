@@ -18,10 +18,7 @@
 
 package com.flipkart.fdp.migration.db.models;
 
-import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_BATCH_CONFIG;
-import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_JOB_ID;
-import static com.flipkart.fdp.migration.db.utils.DBUtils.COL_STATUS;
-import static com.flipkart.fdp.migration.db.utils.DBUtils.TAB_BATCH_RUNS;
+import static com.flipkart.fdp.migration.db.utils.DBUtils.*;
 import static javax.persistence.EnumType.STRING;
 
 import java.io.Serializable;
@@ -66,18 +63,26 @@ public class BatchRun implements Serializable {
 	@Enumerated(STRING)
 	private Status status;
 
+	@Column(name = COL_TRACKING_URL)
+	private String trackingURL;
+
+	@Column(name = COL_FAILURE_REASON)
+	private String failureReason;
+
 	public BatchRun() {
 
 	}
 
 	public BatchRun(String jobId, long startTime, long endTime, long batchId,
-			String batchConfig, Status status) {
+			String batchConfig, String trackingURL, Status status, String reason) {
 		this.jobId = jobId;
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.batchId = batchId;
 		this.batchConfig = batchConfig;
 		this.status = status;
+		this.trackingURL = trackingURL;
+		this.failureReason = reason;
 	}
 
 }

@@ -27,11 +27,11 @@ import com.flipkart.fdp.migration.distcp.config.DCMConstants.Status;
 
 public interface IBatchRunsApi {
 	public BatchRun createBatchRun(long batchId, String jobId,
-			DCMConfig batchConfig, long startTime, long endTime, Status status)
+			DCMConfig batchConfig, long startTime, long endTime, String trackingURL, Status status, String reason)
 			throws EBase;
 
 	public BatchRun updateBatchRun(long batchId, String jobId,
-			DCMConfig batchConfig, long startTime, long endTime, Status status)
+			DCMConfig batchConfig, long startTime, long endTime, String trackingURL, Status status, String reason)
 			throws EBase;
 
 	public BatchRun getBatchRun(long batchId, String jobId) throws EBase;

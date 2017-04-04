@@ -135,6 +135,12 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 
 			System.out.println("Launching Job - Blueshift v 2.0 - "
 					+ dcmConfig.getBatchName());
+			job.submit();
+
+			stateManager.setRunId(job.getJobID().toString());
+			stateManager.setTrackingURL(job.getTrackingURL());
+			stateManager.saveBatchRun(Status.STARTED);
+
 			job.waitForCompletion(true);
 
 			System.out.println("Job Complete...");
@@ -143,6 +149,8 @@ public class MirrorDistCPDriver extends Configured implements Tool {
 		} catch (Throwable t) {
 			jobReturnValue = 1;
 			System.out.println("Job Failed...");
+			stateManager.saveBatchRun(Status.NEW);
+			stateManager.setFailureReason(t.getMessage());
 			t.printStackTrace();
 		}
 		stateManager.completeBatch(jobReturnValue != 0 ? Status.FAILED

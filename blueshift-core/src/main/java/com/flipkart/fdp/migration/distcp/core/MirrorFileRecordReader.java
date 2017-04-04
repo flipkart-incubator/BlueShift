@@ -207,7 +207,11 @@ public class MirrorFileRecordReader extends RecordReader<Text, Text> {
 		} else {
 			
 		}
-		
+
+		if(dcmConfig.getSinkConfig().isStripSrcBasePath()){
+			destPath = destPath.substring(dcmConfig.getSourceConfig().getPath().length());
+		}
+
 		String basePath = fSplit.getDestHostConfig().getPath();
 		if (basePath != null && basePath.trim().length() > 1) {
 			destPath = basePath + "/" + destPath;

@@ -38,6 +38,8 @@ public class SinkConfig implements ConnectableConfig {
 
 	private List<ConnectionConfig> connectionConfig = null;
 
+	private boolean stripSrcBasePath = false;
+
 	public String getPath() {
 		return path;
 	}
@@ -96,6 +98,14 @@ public class SinkConfig implements ConnectableConfig {
 
 	public void setAppend(boolean append) {
 		this.append = append;
+	}
+
+	public boolean isStripSrcBasePath() {
+		return stripSrcBasePath;
+	}
+
+	public void setStripSrcBasePath(boolean stripSrcBasePath) {
+		this.stripSrcBasePath = stripSrcBasePath;
 	}
 
 	@Override

@@ -41,4 +41,6 @@ public final class DBUtils {
 	public static final String COL_DIGEST = "digest";
 	public static final String COL_ID = "id";
 	public static final String COL_TS = "ts";
+	public static final String COL_TRACKING_URL = "tracking_url";
+	public static final String COL_FAILURE_REASON = "failure_reason";
 }

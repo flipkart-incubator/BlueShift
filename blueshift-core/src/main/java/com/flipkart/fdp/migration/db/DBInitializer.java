@@ -106,7 +106,7 @@ public class DBInitializer {
 
 		properties.put(POOL_SIZE, 10);
 		properties.put(org.hibernate.cfg.AvailableSettings.CONNECTION_PROVIDER,
-				"org.hibernate.connection.C3P0ConnectionProvider");
+				"org.hibernate.c3p0.internal.C3P0ConnectionProvider");
 		properties.put(org.hibernate.cfg.AvailableSettings.C3P0_MAX_SIZE, 100);
 		properties.put(org.hibernate.cfg.AvailableSettings.C3P0_MIN_SIZE, 5);
 		properties.put(org.hibernate.cfg.AvailableSettings.C3P0_MAX_STATEMENTS,
