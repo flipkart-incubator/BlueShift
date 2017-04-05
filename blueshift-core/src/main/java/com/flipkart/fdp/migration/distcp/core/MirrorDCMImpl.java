@@ -72,7 +72,7 @@ public class MirrorDCMImpl {
 				String md5DigestInput = transferStatus.getMd5Digest();
 				InputStream inputStream = null;
 				try {
-					inputStream = codec.createInputStream(fileName, transferStatus.isOutputCompressed(), transferStatus.isDecrypt(), transferStatus.getDecryptKey(), transferStatus.getDecryptIV());
+					inputStream = codec.createInputStream(fileName, (transferStatus.isInputTransformed() && transferStatus.isOutputCompressed()), transferStatus.isEncrypt(), transferStatus.getEncryptKey(), transferStatus.getEncryptIV());
 					String md5DigestOutput = computeMd5(inputStream);
 					transferStatus.setMd5DigestOutput(md5DigestOutput);
 					if (md5DigestInput.equals(md5DigestOutput)) {

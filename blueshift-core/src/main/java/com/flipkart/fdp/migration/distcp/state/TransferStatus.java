@@ -42,7 +42,7 @@ public class TransferStatus {
 	private byte[] encryptIV;
 	private byte[] decryptKey;
 	private byte[] decryptIV;
-	private boolean validateTransfer = false;
+	private boolean validateTransfer = true;
 	public String getInputPath() {
 		return inputPath;
 	}
