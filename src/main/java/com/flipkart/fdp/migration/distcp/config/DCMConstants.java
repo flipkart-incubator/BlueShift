@@ -66,6 +66,7 @@ public class DCMConstants {
 	public static final String FTP_DEFAULT_PROTOCOL = "ftp://";
 	public static final String HAR_DEFAULT_PROTOCOL = "har://";
 	public static final String WEBHDFS_DEFAULT_PROTOCOL = "webhdfs://";
+	public static final String GS_DEFAULT_PROTOCOL = "gs://";
 
 	public static void setFinalStatic(Field field, Object newValue)
 			throws Exception {
@@ -80,7 +81,7 @@ public class DCMConstants {
 
 	public static enum FileSystemType {
 
-		WEBHDFS, HDFS, HFTP, FTP, HAR, LOCAL, TCP, HTTP, CUSTOM
+		WEBHDFS, HDFS, HFTP, FTP, HAR, LOCAL, TCP, HTTP, GS, CUSTOM
 	}
 
 	public static enum SecurityType {

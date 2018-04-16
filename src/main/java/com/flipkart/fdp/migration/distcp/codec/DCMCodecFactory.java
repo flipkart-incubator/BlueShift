@@ -52,6 +52,9 @@ public class DCMCodecFactory {
 			case FTP:
 				scheme = DCMConstants.FTP_DEFAULT_PROTOCOL;
 				break;
+			case GS:
+				scheme = DCMConstants.GS_DEFAULT_PROTOCOL;
+				break;
 			case CUSTOM:
 
 			default:
@@ -71,7 +74,11 @@ public class DCMCodecFactory {
 	public static FileSystem getHadoopFilesystem(String scheme,
 			Configuration conf, ConnectionConfig config) throws Exception {
 
-		String httpfsUrl = scheme + config.getHost() + ":" + config.getPort();
+		String httpfsUrl = null;
+		if (config.getPort() > 0)
+			httpfsUrl = scheme + config.getHost() + ":" + config.getPort();
+		else
+			httpfsUrl = scheme + config.getHost();
 
 		if (config.getSecurityType() == SecurityType.KERBEROS)
 			return FileSystem.newInstance(new URI(httpfsUrl), conf);
