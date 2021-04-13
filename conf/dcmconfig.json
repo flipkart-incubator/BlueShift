@@ -2,13 +2,13 @@
   "batchName": "H3_Test_01",
   "numWorkers": 10,
   "ignoreException": true,
-  "statusPath": "/tmp/mdcp",
+  "statusPath": "/xxx",
   "stateManagerType": "HDFS",
   
   "sourceConfig": {
-    "path": "/tmp/raj",
-    "includeListFile": "/home/soundararajan.velu/includes.list",
-    "excludeListFile": "/home/soundararajan.velu/excludes.list",
+    "path": "/yyy",
+    "includeListFile": "/aaa/includes.list",
+    "excludeListFile": "/aaa/excludes.list",
     "includeRegEx": "",
     "excludeRegEx": "",
     "startTS": 0,
@@ -25,17 +25,17 @@
     "connectionConfig": {
       "type": "HDFS",
       "securityType": "SIMPLE",
-      "host": "test.flipkart.com",
+      "host": "test.abc.com",
       "port": 8020,
       "connectionParams": "",
-      "userName": "test-user",
-      "userPassword": "test-user",
+      "userName": "aa",
+      "userPassword": "bb",
       "keyFile": ""
     }
   },
   
   "sinkConfig": {
-    "path": "/tmp/raja",
+    "path": "/aaa",
     "compressionCodec": "snappy",
     "useCompression": false,
     "overwriteFiles": true,
@@ -45,20 +45,20 @@
     "connectionConfig": {
       "type": "WEBHDFS",
       "securityType": "SIMPLE",
-      "host": "test2.flipkart.com",
+      "host": "test2.abc.com",
       "port": 50070,
       "connectionParams": "",
-      "userName": "test-user",
-      "userPassword": "test-user",
+      "userName": "aa",
+      "userPassword": "bb",
       "keyFile": ""
     }
   },
   
   "dbConfig": {
-    "dbConnectionURL": "jdbc:mysql://testdb.flipkart.com:3306/dcm?autoReconnect=true",
+    "dbConnectionURL": "jdbc:mysql://testdb.abc.com:3306/dcm?autoReconnect=true",
     "dbDriver": "com.mysql.jdbc.Driver",
-    "dbUserName": "dcm",
-    "dbUserPassword": "dcm",
+    "dbUserName": "dd",
+    "dbUserPassword": "ee",
     "dbDialect": "org.hibernate.dialect.MySQL5Dialect"
   }
 }
